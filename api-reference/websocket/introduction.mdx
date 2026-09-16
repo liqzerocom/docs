@@ -1,0 +1,136 @@
+---
+title: 'LiqZero WebSocket API — Real-Time Data Streams'
+sidebarTitle: 'Introduction'
+description: 'Connect to LiqZero WebSocket endpoints to stream live orderbook snapshots, trade events, and private execution reports for your DEX.'
+---
+
+The LiqZero WebSocket API delivers low-latency, push-based market data and account event streams directly to your application. Instead of polling the REST API, you open a persistent WebSocket connection and subscribe to named topics — LiqZero pushes updates the moment they occur. Public topics (orderbook, trade) require no authentication. Private topics (execution reports, account events) require you to authenticate the connection using your ed25519 key before subscribing.
+
+## Base Endpoints
+
+Connect to the appropriate endpoint depending on whether you need public market data or private per-account event streams, and whether you are targeting Mainnet or Testnet.
+
+| Environment | Public Stream | Private Stream |
+|---|---|---|
+| **Mainnet** | `wss://ws.liqzero.com/ws/stream/public` | `wss://ws.liqzero.com/ws/stream/{account_id}` |
+| **Testnet** | `wss://testnet-ws.liqzero.com/ws/stream/public` | `wss://testnet-ws.liqzero.com/ws/stream/{account_id}` |
+
+Replace `{account_id}` in private stream URLs with your registered LiqZero account ID.
+
+<Note>
+Private stream connections are silently terminated if authentication fails or is not completed within the expected window. Always send the `auth` message immediately after connecting to a private endpoint.
+</Note>
+
+## Topic Naming Convention
+
+LiqZero topics follow a consistent naming pattern that combines the instrument symbol with the data type:
+
+- **Public market data:** `{symbol}@{dataType}` — for example, `PERP_ETH_USDC@orderbook` or `PERP_BTC_USDC@trade`
+- **Private account data:** bare topic names like `executionreport`, optionally filtered with a symbol parameter
+
+All symbols use the format `PERP_<TOKEN>_USDC` (e.g., `PERP_ETH_USDC`, `PERP_BTC_USDC`, `PERP_SOL_USDC`).
+
+## Subscribe to a Topic
+
+Send a JSON message over the WebSocket connection to subscribe. Use a unique `id` value per request so you can match acknowledgement responses to your original requests.
+
+```json Subscribe message
+{
+  "id": "unique_request_id",
+  "event": "subscribe",
+  "topic": "PERP_ETH_USDC@orderbook"
+}
+```
+
+LiqZero responds with a confirmation message:
+
+```json Subscription acknowledgement
+{
+  "id": "unique_request_id",
+  "event": "subscribe",
+  "success": true,
+  "ts": 1649920583000
+}
+```
+
+## Unsubscribe from a Topic
+
+Send an `unsubscribe` event with the same topic string to stop receiving messages for that stream.
+
+```json Unsubscribe message
+{
+  "id": "unique_request_id",
+  "event": "unsubscribe",
+  "topic": "PERP_ETH_USDC@orderbook"
+}
+```
+
+## Authenticating Private Streams
+
+Private endpoints require you to authenticate after connecting. Build the authentication message using your `perpo-key` (ed25519 public key) and a signature over a canonical message that includes your timestamp.
+
+```json Authentication message
+{
+  "id": "auth_req",
+  "event": "auth",
+  "params": {
+    "orderly_key": "your_perpo_key",
+    "sign": "base64url_ed25519_signature",
+    "timestamp": 1649920583000
+  }
+}
+```
+
+<Steps>
+  <Step title="Generate a timestamp">
+    Record the current Unix timestamp in milliseconds. This value must match the one you sign.
+  </Step>
+  <Step title="Sign the timestamp">
+    Create an ed25519 signature over the string representation of the timestamp using your `perpo-key` private key. Encode the signature as base64url.
+  </Step>
+  <Step title="Send the auth message">
+    Immediately after connecting to the private WebSocket endpoint, send the `auth` message. Proceed to subscribe to topics only after receiving a successful auth acknowledgement.
+  </Step>
+</Steps>
+
+<Warning>
+You will be disconnected from the private stream if you send a subscribe message before authentication succeeds. Always wait for the auth acknowledgement before subscribing.
+</Warning>
+
+## Heartbeat — Keeping the Connection Alive
+
+LiqZero's WebSocket server expects periodic activity from your client. Send a standard WebSocket `ping` frame at least every 30 seconds. The server responds with a `pong` frame. If the server does not receive a ping within the timeout window, it closes the connection.
+
+```json Ping message (text frame alternative)
+{
+  "event": "ping"
+}
+```
+
+```json Pong response
+{
+  "event": "pong",
+  "ts": 1649920583000
+}
+```
+
+<Tip>
+Implement an automatic reconnection strategy with exponential back-off. Network interruptions are normal — your client should detect a closed connection and re-establish it, re-authenticate (for private streams), and re-subscribe to all topics.
+</Tip>
+
+## Available Topics
+
+<CardGroup cols={2}>
+  <Card title="Orderbook" icon="book-open" href="/api-reference/websocket/public-streams#orderbook-stream">
+    Full depth-100 orderbook snapshots for a symbol, pushed every second. Topic: `{symbol}@orderbook`
+  </Card>
+  <Card title="Trade" icon="arrow-right-arrow-left" href="/api-reference/websocket/public-streams#trade-stream">
+    Real-time individual trade execution events as they occur. Topic: `{symbol}@trade`
+  </Card>
+  <Card title="Execution Report" icon="file-lines" href="/api-reference/websocket/private-streams">
+    Private per-account order lifecycle events — creation, fills, cancellations. Topic: `executionreport`
+  </Card>
+  <Card title="More Private Topics" icon="lock" href="/api-reference/websocket/private-streams">
+    Additional private topics include `balance`, `position`, `settle`, `wallet`, and `notifications`.
+  </Card>
+</CardGroup>

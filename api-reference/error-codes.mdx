@@ -1,0 +1,107 @@
+---
+title: 'LiqZero API Error Codes Reference'
+sidebarTitle: 'Error Codes'
+description: 'Complete list of LiqZero API error codes with HTTP status codes, descriptions, and resolution guidance for every failure category.'
+---
+
+When a LiqZero API request fails, the response body always follows the same structure regardless of the error type. Parse the `code` field to programmatically distinguish between authentication failures, validation errors, and trading rule violations, and use the `message` field for human-readable detail.
+
+## Error Response Format
+
+```json
+{
+  "success": false,
+  "code": -1005,
+  "message": "order_price must be a positive number"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | boolean | Always `false` when an error occurs |
+| `code` | integer | Numeric error code identifying the failure category |
+| `message` | string | Human-readable description of the specific error condition |
+
+## Error Code Reference
+
+### Authentication & Key Errors (−1001, −1002)
+
+These errors indicate a problem with your request credentials. Check your key registration, account association, and signing logic before retrying.
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1001` | 401 | The `perpo-key` header is in the wrong format. Ensure the key is a valid base58-encoded ed25519 public key, provided without the `ed25519:` prefix. |
+| `-1002` | 401 | The API key or secret is invalid. The key may have insufficient permissions, be expired, or have been revoked. Re-register the key using `POST /v1/add_orderly_key`. |
+
+### Rate Limiting (−1003)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1003` | 429 | Rate limit exceeded. Wait until the next time window before retrying. Do not immediately retry — doing so will not succeed. |
+
+### Request & Parameter Errors (−1004, −1005)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1004` | 400 | An unknown or unrecognized parameter was sent. Remove unsupported fields from your request body or query string. |
+| `-1005` | 400 | One or more parameters are in the wrong format. Check that numeric fields are numbers, that `ratio_qty_request` is in the range 0–1, that `extra_liquidation_ratio` is in the range 0–1, and that if `extra_liquidation_ratio` > 0, then `ratio_qty_request` must equal 1. |
+
+### Data State Errors (−1006, −1007)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1006` | 400 | The requested data was not found on the server. For example, attempting to cancel an order that is already in `CANCELLED` status will raise this error. |
+| `-1007` | 409 | The data already exists, or the request is a duplicate. Use idempotent identifiers like `client_order_id` to detect duplicates before retrying. |
+
+### Asset & Settlement Errors (−1008, −1009)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1008` | 400 | The settlement quantity is higher than the allowed amount. Reduce the settlement amount and retry. |
+| `-1009` | 400 | Cannot process the withdrawal or settlement request. There are outstanding arrears on the account — deposit funds to clear the deficit first. |
+
+### Internal & Network Errors (−1011, −1012)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1011` | 400 | Cannot place or cancel the order due to an internal network error. Retry the request after a few seconds. |
+| `-1012` | 400 | The order request was rejected by an internal module. The account may currently be in liquidation, or another liquidation is already in process. Retry after a few seconds once the liquidation process completes. |
+
+### Risk & Margin Errors (−1101, −1102)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1101` | 400 | Risk exposure is too high, or there is insufficient margin after the operation. This can result from a large order size or low leverage setting. Check your current exposure via the [client info endpoint](/api-reference/rest/accounts#get-client-info) and reduce position size or add collateral. |
+| `-1102` | 400 | The order value (price × size) is too small. Increase the order size or price to meet the minimum order value requirement. |
+
+### Order Price & Quantity Errors (−1103, −1104, −1105)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1103` | 400 | The order price violates one of the following rules: price is below the minimum allowed (`quote_min`), price exceeds the maximum allowed (`quote_max`), or price does not conform to the symbol's tick size. |
+| `-1104` | 400 | The order quantity violates one of the following rules: quantity is below the minimum (`base_min`), quantity exceeds the maximum (`base_max`), quantity does not conform to the symbol's step size, or visible quantity does not match the step size. |
+| `-1105` | 400 | The order price deviates too far from the current mid price (the error message specifies the percentage deviation). Bring your limit price closer to the mid price. |
+
+### Liquidation Errors (−1201, −1202)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1201` | 400 | Liquidation ratio constraint violation. If the total notional is less than 10,000, the least request ratio must be 1. Otherwise, the ratio must meet the specified constraint. |
+| `-1202` | 400 | No liquidation is needed — the user's margin is sufficient — or the provided `liquidationId` cannot be found. Verify the liquidation ID and re-check the account's margin status. |
+
+## Resolution Quick Reference
+
+<CardGroup cols={2}>
+  <Card title="Authentication failures" icon="key">
+    For `-1001` and `-1002`: verify your key format, check that the key is registered and linked to your account, and confirm the key has not expired.
+  </Card>
+  <Card title="Parameter validation" icon="circle-exclamation">
+    For `-1004` and `-1005`: review the parameter schema for the endpoint, check numeric ranges, and ensure enum values match exactly (case-sensitive).
+  </Card>
+  <Card title="Order rejection" icon="ban">
+    For `-1101` through `-1105`: query `/v1/public/info/:symbol` to retrieve tick size, step size, and price limits for the symbol before placing the order.
+  </Card>
+  <Card title="Transient errors" icon="rotate">
+    For `-1011` and `-1012`: implement exponential backoff with a few seconds of initial delay. These errors indicate temporary system conditions that usually resolve quickly.
+  </Card>
+</CardGroup>

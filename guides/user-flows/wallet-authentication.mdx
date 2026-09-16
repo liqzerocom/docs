@@ -1,0 +1,713 @@
+---
+title: 'Wallet Authentication and LiqZero Key Management'
+sidebarTitle: 'Wallet Auth'
+description: 'Set up two-layer authentication on LiqZero: wallet-signed EIP-712 messages for on-chain actions and ed25519 LiqZero keys for signing all API requests.'
+---
+
+LiqZero uses a two-layer authentication model to keep on-chain actions and API requests separately secured. Your user's wallet (via EIP-712) authorizes high-value operations like account creation, key registration, and withdrawals. A separate ed25519 keypair — the **LiqZero key** — signs every REST and WebSocket API call. This page explains both layers and walks you through generating and registering a LiqZero key.
+
+## EIP-712 Wallet Signatures
+
+LiqZero relies on the [EIP-712](https://eips.ethereum.org/EIPS/eip-712) standard to authenticate wallets for critical on-chain and protocol-level actions, including:
+
+<CardGroup cols={3}>
+  <Card title="Account Creation" icon="user-plus">
+    Sign a `Registration` message to create a new account tied to your wallet and builder ID.
+  </Card>
+  <Card title="Key Registration" icon="key">
+    Sign an `AddOrderlyKey` message to authorize a new LiqZero key for API access.
+  </Card>
+  <Card title="Withdrawals" icon="arrow-right-from-bracket">
+    Sign a `Withdraw` message to authorize a withdrawal request from your account balance.
+  </Card>
+</CardGroup>
+
+For all other interactions — placing orders, querying positions, managing account configuration — you sign requests using your LiqZero key rather than your wallet.
+
+### EIP-712 Domains
+
+LiqZero uses two EIP-712 domains depending on whether the action is processed entirely off-chain or verified on-chain.
+
+<Tabs>
+  <Tab title="Off-Chain Domain">
+    The `Registration` and `AddOrderlyKey` types are verified off-chain. The `verifyingContract` is set to the canonical placeholder address.
+
+    ```json
+    {
+      "name": "Orderly",
+      "version": "1",
+      "chainId": <your_chain_id>,
+      "verifyingContract": "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+    }
+    ```
+  </Tab>
+  <Tab title="On-Chain Domain">
+    Types like `Withdraw` and `SettlePnl` are verified on-chain. Use the Ledger contract address for the LiqZero L2 chain — look it up in the [Smart Contract Addresses](/api-reference/contracts/addresses) reference.
+
+    ```json
+    {
+      "name": "Orderly",
+      "version": "1",
+      "chainId": <your_chain_id>,
+      "verifyingContract": "<ledger_contract_address>"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### EIP-712 Message Types
+
+The complete set of typed message definitions used across all LiqZero EIP-712 operations:
+
+```json
+{
+  "EIP712Domain": [
+    { "name": "name", "type": "string" },
+    { "name": "version", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "verifyingContract", "type": "address" }
+  ],
+  "Registration": [
+    { "name": "brokerId", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "timestamp", "type": "uint64" },
+    { "name": "registrationNonce", "type": "uint256" }
+  ],
+  "AddOrderlyKey": [
+    { "name": "brokerId", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "orderlyKey", "type": "string" },
+    { "name": "scope", "type": "string" },
+    { "name": "timestamp", "type": "uint64" },
+    { "name": "expiration", "type": "uint64" }
+  ],
+  "Withdraw": [
+    { "name": "brokerId", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "receiver", "type": "address" },
+    { "name": "token", "type": "string" },
+    { "name": "amount", "type": "uint256" },
+    { "name": "withdrawNonce", "type": "uint64" },
+    { "name": "timestamp", "type": "uint64" }
+  ],
+  "SettlePnl": [
+    { "name": "brokerId", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "settleNonce", "type": "uint64" },
+    { "name": "timestamp", "type": "uint64" }
+  ],
+  "DelegateSigner": [
+    { "name": "delegateContract", "type": "address" },
+    { "name": "brokerId", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "timestamp", "type": "uint64" },
+    { "name": "registrationNonce", "type": "uint256" },
+    { "name": "txHash", "type": "bytes32" }
+  ],
+  "DelegateAddOrderlyKey": [
+    { "name": "delegateContract", "type": "address" },
+    { "name": "brokerId", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "orderlyKey", "type": "string" },
+    { "name": "scope", "type": "string" },
+    { "name": "timestamp", "type": "uint64" },
+    { "name": "expiration", "type": "uint64" }
+  ],
+  "DelegateWithdraw": [
+    { "name": "delegateContract", "type": "address" },
+    { "name": "brokerId", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "receiver", "type": "address" },
+    { "name": "token", "type": "string" },
+    { "name": "amount", "type": "uint256" },
+    { "name": "withdrawNonce", "type": "uint64" },
+    { "name": "timestamp", "type": "uint64" }
+  ],
+  "DelegateSettlePnl": [
+    { "name": "delegateContract", "type": "address" },
+    { "name": "brokerId", "type": "string" },
+    { "name": "chainId", "type": "uint256" },
+    { "name": "settleNonce", "type": "uint64" },
+    { "name": "timestamp", "type": "uint64" }
+  ]
+}
+```
+
+---
+
+## LiqZero Keys
+
+A LiqZero key is an **ed25519 keypair** generated client-side and registered on-chain to your account. Once registered, you use the private key to sign every REST and WebSocket API request. LiqZero keys have two scope levels:
+
+| Scope | Access |
+|---|---|
+| `read` | All private read-only endpoints (balances, positions, order history) |
+| `trading` | All `read` endpoints plus order creation, modification, and cancellation |
+| `asset` | Asset management operations (withdrawals, transfers) |
+
+You can grant multiple scopes in a single key by passing them comma-separated (e.g., `read,trading`).
+
+<Warning>
+  LiqZero keys have a maximum expiry of **365 days** from the time they are added. Rotate keys before they expire to avoid authentication failures.
+</Warning>
+
+### Setting Up a LiqZero Key
+
+<Steps>
+  <Step title="Generate an ed25519 keypair">
+    Use any standard ed25519 library to generate the keypair. The public key must be base58-encoded and prefixed with `ed25519:` when signing the EIP-712 message and when passing it to the API.
+
+    <CodeGroup>
+      ```java Java
+      import net.i2p.crypto.eddsa.KeyPairGenerator;
+
+      KeyPairGenerator keyGen = new KeyPairGenerator();
+      KeyPair keyPair = keyGen.generateKeyPair();
+      // Encode the public key as base58 and prefix with "ed25519:"
+      String orderlyKey = Util.encodePublicKey((EdDSAPrivateKey) keyPair.getPrivate());
+      ```
+
+      ```python Python
+      from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+      from base58 import b58encode
+
+      def encode_key(key: bytes) -> str:
+          return "ed25519:%s" % b58encode(key).decode("utf-8")
+
+      orderly_key_obj = Ed25519PrivateKey.generate()
+      orderly_key = encode_key(orderly_key_obj.public_key().public_bytes_raw())
+      ```
+
+      ```typescript TypeScript
+      import { getPublicKeyAsync, utils } from "@noble/ed25519";
+      import { encodeBase58 } from "ethers";
+
+      const privateKey = utils.randomPrivateKey();
+      const orderlyKey = `ed25519:${encodeBase58(await getPublicKeyAsync(privateKey))}`;
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Sign the AddOrderlyKey message via EIP-712">
+    Build the `AddOrderlyKey` message and sign it from the user's wallet. Use the **off-chain domain** (verifyingContract = `0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC`).
+
+    The message payload contains:
+
+    | Name | Type | Required | Description |
+    |---|---|---|---|
+    | `brokerId` | string | Y | Your builder ID |
+    | `chainId` | int | Y | Chain ID of the connected chain |
+    | `orderlyKey` | string | Y | ed25519 public key (`ed25519:<base58>`) |
+    | `scope` | string | Y | `read`, `trading`, `asset`, or comma-separated combination |
+    | `timestamp` | timestamp | Y | Current time in UNIX milliseconds |
+    | `expiration` | timestamp | Y | Key expiry in UNIX milliseconds (max 365 days ahead) |
+
+    Example message:
+    ```json
+    {
+      "brokerId": "your_broker_id",
+      "chainId": 42161,
+      "orderlyKey": "ed25519:HqN9uKJioHjAJZbadgQRGzq2e7huKg6foCyNY43hWbCk",
+      "scope": "read,trading",
+      "timestamp": 1685973094398,
+      "expiration": 1717509094398
+    }
+    ```
+
+    <CodeGroup>
+      ```java Java
+      JSONObject MESSAGE_TYPES = new JSONObject("""
+          {
+            "EIP712Domain": [
+              {"name": "name", "type": "string"},
+              {"name": "version", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "verifyingContract", "type": "address"}
+            ],
+            "AddOrderlyKey": [
+              {"name": "brokerId", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "orderlyKey", "type": "string"},
+              {"name": "scope", "type": "string"},
+              {"name": "timestamp", "type": "uint64"},
+              {"name": "expiration", "type": "uint64"}
+            ]
+          }""");
+
+      JSONObject OFF_CHAIN_DOMAIN = new JSONObject("""
+          {
+            "name": "Orderly",
+            "version": "1",
+            "chainId": 42161,
+            "verifyingContract": "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+          }""");
+
+      long timestamp = Instant.now().toEpochMilli();
+
+      JSONObject addKeyMessage = new JSONObject();
+      addKeyMessage.put("brokerId", brokerId);
+      addKeyMessage.put("chainId", chainId);
+      addKeyMessage.put("scope", "read,trading");
+      addKeyMessage.put("orderlyKey", orderlyKey);
+      addKeyMessage.put("timestamp", timestamp);
+      addKeyMessage.put("expiration", timestamp + 1_000L * 60 * 60 * 24 * 365); // 1 year
+
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put("types", MESSAGE_TYPES);
+      jsonObject.put("primaryType", "AddOrderlyKey");
+      jsonObject.put("domain", OFF_CHAIN_DOMAIN);
+      jsonObject.put("message", addKeyMessage);
+
+      Sign.SignatureData signature = Sign.signTypedData(jsonObject.toString(), credentials.getEcKeyPair());
+      ```
+
+      ```python Python
+      from eth_account import Account, messages
+      import math
+      from datetime import datetime
+
+      MESSAGE_TYPES = {
+          "EIP712Domain": [
+              {"name": "name", "type": "string"},
+              {"name": "version", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "verifyingContract", "type": "address"},
+          ],
+          "AddOrderlyKey": [
+              {"name": "brokerId", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "orderlyKey", "type": "string"},
+              {"name": "scope", "type": "string"},
+              {"name": "timestamp", "type": "uint64"},
+              {"name": "expiration", "type": "uint64"},
+          ],
+      }
+
+      OFF_CHAIN_DOMAIN = {
+          "name": "Orderly",
+          "version": "1",
+          "chainId": 42161,
+          "verifyingContract": "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+      }
+
+      d = datetime.utcnow()
+      epoch = datetime(1970, 1, 1)
+      timestamp = math.trunc((d - epoch).total_seconds() * 1_000)
+
+      add_key_message = {
+          "brokerId": broker_id,
+          "chainId": chain_id,
+          "orderlyKey": orderly_key,
+          "scope": "read,trading",
+          "timestamp": timestamp,
+          "expiration": timestamp + 1_000 * 60 * 60 * 24 * 365,  # 1 year
+      }
+
+      encoded_data = messages.encode_typed_data(
+          domain_data=OFF_CHAIN_DOMAIN,
+          message_types={"AddOrderlyKey": MESSAGE_TYPES["AddOrderlyKey"]},
+          message_data=add_key_message,
+      )
+      signed_message = account.sign_message(encoded_data)
+      ```
+
+      ```typescript TypeScript
+      import { ethers } from "ethers";
+
+      const MESSAGE_TYPES = {
+        EIP712Domain: [
+          { name: "name", type: "string" },
+          { name: "version", type: "string" },
+          { name: "chainId", type: "uint256" },
+          { name: "verifyingContract", type: "address" }
+        ],
+        AddOrderlyKey: [
+          { name: "brokerId", type: "string" },
+          { name: "chainId", type: "uint256" },
+          { name: "orderlyKey", type: "string" },
+          { name: "scope", type: "string" },
+          { name: "timestamp", type: "uint64" },
+          { name: "expiration", type: "uint64" }
+        ]
+      };
+
+      const OFF_CHAIN_DOMAIN = {
+        name: "Orderly",
+        version: "1",
+        chainId: 42161,
+        verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+      };
+
+      const timestamp = Date.now();
+      const addKeyMessage = {
+        brokerId: BROKER_ID,
+        chainId: CHAIN_ID,
+        orderlyKey,
+        scope: "read,trading",
+        timestamp,
+        expiration: timestamp + 1_000 * 60 * 60 * 24 * 365 // 1 year
+      };
+
+      const signature = await wallet.signTypedData(
+        OFF_CHAIN_DOMAIN,
+        { AddOrderlyKey: MESSAGE_TYPES.AddOrderlyKey },
+        addKeyMessage
+      );
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Register the key via POST /v1/orderly_key">
+    Submit the signed message, EIP-712 signature, and the user's wallet address to register the key.
+
+    <CodeGroup>
+      ```java Java
+      String baseUrl = "https://testnet-api.liqzero.com";
+
+      JSONObject jsonBody = new JSONObject();
+      jsonBody.put("message", addKeyMessage);
+      jsonBody.put("signature", signatureToHashString(signature));
+      jsonBody.put("userAddress", credentials.getAddress());
+
+      RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json"));
+      Request addKeyReq = new Request.Builder()
+            .url(baseUrl + "/v1/orderly_key")
+            .post(body)
+            .build();
+      String addKeyRes;
+      try (Response response = client.newCall(addKeyReq).execute()) {
+          addKeyRes = response.body().string();
+      }
+      System.out.println("orderly_key response: " + addKeyRes);
+      ```
+
+      ```python Python
+      import requests, json
+
+      base_url = "https://testnet-api.liqzero.com"
+
+      res = requests.post(
+          f"{base_url}/v1/orderly_key",
+          headers={"Content-Type": "application/json"},
+          json={
+              "message": add_key_message,
+              "signature": signed_message.signature.hex(),
+              "userAddress": account.address,
+          },
+      )
+      response = json.loads(res.text)
+      print("add_key response:", response)
+      ```
+
+      ```typescript TypeScript
+      const BASE_URL = "https://testnet-api.liqzero.com";
+
+      const keyRes = await fetch(`${BASE_URL}/v1/orderly_key`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: addKeyMessage,
+          signature,
+          userAddress: await wallet.getAddress()
+        })
+      });
+      const keyJson = await keyRes.json();
+      console.log("add_key response:", keyJson);
+      ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+---
+
+## Using LiqZero Keys for API Authentication
+
+Once the key is registered, sign every authenticated API request with the ed25519 private key and attach the following HTTP headers:
+
+| Header | Value |
+|---|---|
+| `perpo-account-id` | The user's LiqZero account ID (bytes32 hex string) |
+| `perpo-key` | The ed25519 public key — **without** the `ed25519:` prefix |
+| `perpo-signature` | The base64url-encoded ed25519 signature of the request message |
+| `perpo-timestamp` | Current UNIX timestamp in milliseconds |
+
+<Warning>
+  Pass the public key value **without** the `ed25519:` prefix in the `perpo-key` header. Only the raw base58 portion should be included. The prefix is required in the EIP-712 message during registration, but must be stripped for request headers.
+</Warning>
+
+<Tip>
+  For full details on constructing the signature string and forming authenticated requests, see the [API Authentication](/api-reference/authentication) reference page.
+</Tip>
+
+---
+
+## Key Expiry and Rotation
+
+LiqZero keys expire at the timestamp you specify in the `expiration` field when registering (maximum 365 days from registration). To rotate a key:
+
+1. Generate a new ed25519 keypair.
+2. Sign a new `AddOrderlyKey` EIP-712 message from the user's wallet.
+3. POST to `/v1/orderly_key` as described above.
+4. Update your application to use the new private key for signing requests.
+
+<Note>
+  Multiple keys can be active simultaneously on a single account. You can register a replacement key before the old one expires to ensure zero downtime for your users.
+</Note>
+
+---
+
+## Full Key Setup Example
+
+<CodeGroup>
+  ```java Java
+  import java.security.*;
+  import java.time.Instant;
+
+  import org.apache.commons.codec.binary.Hex;
+  import org.json.JSONObject;
+  import org.web3j.crypto.*;
+  import org.web3j.utils.Numeric;
+
+  import io.github.cdimascio.dotenv.Dotenv;
+  import net.i2p.crypto.eddsa.EdDSAPrivateKey;
+  import net.i2p.crypto.eddsa.KeyPairGenerator;
+  import okhttp3.*;
+
+  public class OrderlyKeyExample {
+      public static JSONObject MESSAGE_TYPES = new JSONObject("""
+          {
+            "EIP712Domain": [
+              {"name": "name", "type": "string"},
+              {"name": "version", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "verifyingContract", "type": "address"}
+            ],
+            "AddOrderlyKey": [
+              {"name": "brokerId", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "orderlyKey", "type": "string"},
+              {"name": "scope", "type": "string"},
+              {"name": "timestamp", "type": "uint64"},
+              {"name": "expiration", "type": "uint64"}
+            ]
+          }""");
+
+      public static JSONObject OFF_CHAIN_DOMAIN = new JSONObject("""
+          {
+            "name": "Orderly",
+            "version": "1",
+            "chainId": 42161,
+            "verifyingContract": "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+          }""");
+
+      public static void main(String[] args) throws Exception {
+          String baseUrl = "https://testnet-api.liqzero.com";
+          String brokerId = "your_broker_id";
+          int chainId = 42161;
+
+          Dotenv dotenv = Dotenv.load();
+          String pk = dotenv.get("PRIVATE_KEY");
+          Credentials credentials = Credentials.create(ECKeyPair.create(Hex.decodeHex(pk)));
+          OkHttpClient client = new OkHttpClient();
+
+          KeyPairGenerator keyGen = new KeyPairGenerator();
+          KeyPair keyPair = keyGen.generateKeyPair();
+          String orderlyKey = Util.encodePublicKey((EdDSAPrivateKey) keyPair.getPrivate());
+
+          long timestamp = Instant.now().toEpochMilli();
+
+          JSONObject addKeyMessage = new JSONObject();
+          addKeyMessage.put("brokerId", brokerId);
+          addKeyMessage.put("chainId", chainId);
+          addKeyMessage.put("scope", "read,trading");
+          addKeyMessage.put("orderlyKey", orderlyKey);
+          addKeyMessage.put("timestamp", timestamp);
+          addKeyMessage.put("expiration", timestamp + 1_000L * 60 * 60 * 24 * 365);
+
+          JSONObject typedData = new JSONObject();
+          typedData.put("types", MESSAGE_TYPES);
+          typedData.put("primaryType", "AddOrderlyKey");
+          typedData.put("domain", OFF_CHAIN_DOMAIN);
+          typedData.put("message", addKeyMessage);
+
+          Sign.SignatureData signature = Sign.signTypedData(typedData.toString(), credentials.getEcKeyPair());
+
+          JSONObject jsonBody = new JSONObject();
+          jsonBody.put("message", addKeyMessage);
+          jsonBody.put("signature", signatureToHashString(signature));
+          jsonBody.put("userAddress", credentials.getAddress());
+
+          RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json"));
+          Request addKeyReq = new Request.Builder()
+                .url(baseUrl + "/v1/orderly_key")
+                .post(body)
+                .build();
+          String addKeyRes;
+          try (Response response = client.newCall(addKeyReq).execute()) {
+              addKeyRes = response.body().string();
+          }
+          System.out.println("orderly_key response: " + addKeyRes);
+      }
+
+      public static String signatureToHashString(Sign.SignatureData signature) {
+          byte[] retval = new byte[65];
+          System.arraycopy(signature.getR(), 0, retval, 0, 32);
+          System.arraycopy(signature.getS(), 0, retval, 32, 32);
+          System.arraycopy(signature.getV(), 0, retval, 64, 1);
+          return Numeric.toHexString(retval);
+      }
+  }
+  ```
+
+  ```python Python
+  from datetime import datetime
+  import json, math, os
+  import requests
+  from base58 import b58encode
+  from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+  from eth_account import Account, messages
+
+  def encode_key(key: bytes) -> str:
+      return "ed25519:%s" % b58encode(key).decode("utf-8")
+
+  MESSAGE_TYPES = {
+      "EIP712Domain": [
+          {"name": "name", "type": "string"},
+          {"name": "version", "type": "string"},
+          {"name": "chainId", "type": "uint256"},
+          {"name": "verifyingContract", "type": "address"},
+      ],
+      "AddOrderlyKey": [
+          {"name": "brokerId", "type": "string"},
+          {"name": "chainId", "type": "uint256"},
+          {"name": "orderlyKey", "type": "string"},
+          {"name": "scope", "type": "string"},
+          {"name": "timestamp", "type": "uint64"},
+          {"name": "expiration", "type": "uint64"},
+      ],
+  }
+
+  OFF_CHAIN_DOMAIN = {
+      "name": "Orderly",
+      "version": "1",
+      "chainId": 42161,
+      "verifyingContract": "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
+  }
+
+  base_url = "https://testnet-api.liqzero.com"
+  broker_id = "your_broker_id"
+  chain_id = 42161
+
+  account = Account.from_key(os.environ.get("PRIVATE_KEY"))
+  orderly_key_obj = Ed25519PrivateKey.generate()
+  orderly_key = encode_key(orderly_key_obj.public_key().public_bytes_raw())
+
+  d = datetime.utcnow()
+  epoch = datetime(1970, 1, 1)
+  timestamp = math.trunc((d - epoch).total_seconds() * 1_000)
+
+  add_key_message = {
+      "brokerId": broker_id,
+      "chainId": chain_id,
+      "orderlyKey": orderly_key,
+      "scope": "read,trading",
+      "timestamp": timestamp,
+      "expiration": timestamp + 1_000 * 60 * 60 * 24 * 365,
+  }
+
+  encoded_data = messages.encode_typed_data(
+      domain_data=OFF_CHAIN_DOMAIN,
+      message_types={"AddOrderlyKey": MESSAGE_TYPES["AddOrderlyKey"]},
+      message_data=add_key_message,
+  )
+  signed_message = account.sign_message(encoded_data)
+
+  res = requests.post(
+      f"{base_url}/v1/orderly_key",
+      headers={"Content-Type": "application/json"},
+      json={
+          "message": add_key_message,
+          "signature": signed_message.signature.hex(),
+          "userAddress": account.address,
+      },
+  )
+  print("add_key response:", json.loads(res.text))
+  ```
+
+  ```typescript TypeScript
+  import { getPublicKeyAsync, utils } from "@noble/ed25519";
+  import { config } from "dotenv";
+  import { encodeBase58, ethers } from "ethers";
+  import { webcrypto } from "node:crypto";
+
+  // @ts-ignore
+  if (!globalThis.crypto) globalThis.crypto = webcrypto;
+
+  const MESSAGE_TYPES = {
+    EIP712Domain: [
+      { name: "name", type: "string" },
+      { name: "version", type: "string" },
+      { name: "chainId", type: "uint256" },
+      { name: "verifyingContract", type: "address" }
+    ],
+    AddOrderlyKey: [
+      { name: "brokerId", type: "string" },
+      { name: "chainId", type: "uint256" },
+      { name: "orderlyKey", type: "string" },
+      { name: "scope", type: "string" },
+      { name: "timestamp", type: "uint64" },
+      { name: "expiration", type: "uint64" }
+    ]
+  };
+
+  const OFF_CHAIN_DOMAIN = {
+    name: "Orderly",
+    version: "1",
+    chainId: 42161,
+    verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"
+  };
+
+  const BASE_URL = "https://testnet-api.liqzero.com";
+  const BROKER_ID = "your_broker_id";
+  const CHAIN_ID = 42161;
+
+  config();
+
+  async function createOrderlyKey(): Promise<void> {
+    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!);
+
+    const privateKey = utils.randomPrivateKey();
+    const orderlyKey = `ed25519:${encodeBase58(await getPublicKeyAsync(privateKey))}`;
+    const timestamp = Date.now();
+
+    const addKeyMessage = {
+      brokerId: BROKER_ID,
+      chainId: CHAIN_ID,
+      orderlyKey,
+      scope: "read,trading",
+      timestamp,
+      expiration: timestamp + 1_000 * 60 * 60 * 24 * 365 // 1 year
+    };
+
+    const signature = await wallet.signTypedData(
+      OFF_CHAIN_DOMAIN,
+      { AddOrderlyKey: MESSAGE_TYPES.AddOrderlyKey },
+      addKeyMessage
+    );
+
+    const keyRes = await fetch(`${BASE_URL}/v1/orderly_key`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: addKeyMessage,
+        signature,
+        userAddress: await wallet.getAddress()
+      })
+    });
+    const keyJson = await keyRes.json();
+    console.log("add_key response:", keyJson);
+  }
+
+  createOrderlyKey();
+  ```
+</CodeGroup>

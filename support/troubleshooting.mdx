@@ -1,0 +1,88 @@
+---
+title: "Troubleshooting LiqZero Integration Issues"
+sidebarTitle: "Troubleshooting"
+description: "Start here to diagnose any LiqZero integration, account, transaction, or trading issue — with links to detailed per-issue diagnostic guides."
+---
+
+When a user or your integration hits an unexpected error, this page is your starting point. Most issues fall into one of a handful of categories — failed transactions, deposit delays, withdrawal problems, liquidation disputes, or API authentication errors — and each has a structured diagnostic path. Work through the steps below before escalating to the support team, as the majority of issues can be resolved without a ticket.
+
+<Note>
+  For integration-specific questions during development, check the [Integration FAQs](/support/troubleshooting) page first. It covers the most common setup and behavior questions builders encounter.
+</Note>
+
+## Diagnostic Path
+
+<Steps>
+  <Step title="Check the Integration FAQs">
+    If you're building on LiqZero and hitting unexpected behavior, the [Integration FAQs](/support/troubleshooting) page covers common setup mistakes, authentication edge cases, and order rejection scenarios.
+  </Step>
+  <Step title="Use the Support Dashboard">
+    The [LiqZero Dashboard](https://orderly-dashboard.orderly.network/) lets you look up a user account by wallet address and retrieve their deposit/withdrawal history, open positions, and order history. Use this to confirm whether a user action was received and processed before diagnosing further.
+  </Step>
+  <Step title="Check chain and API status">
+    Confirm that the affected chain is not experiencing congestion or downtime by checking the block explorer. For API-level issues, verify the response HTTP status and error code in the response body.
+  </Step>
+  <Step title="Submit a Discord ticket">
+    If the issue is still unresolved after the steps above, open a support ticket in the [LiqZero Discord](https://discord.gg/OrderlyNetwork) with the wallet address, chain, timestamp, transaction hash or order ID, and any API response payload. Detailed context allows the support team to reproduce and resolve the issue quickly.
+  </Step>
+</Steps>
+
+## Issue Categories
+
+<CardGroup cols={2}>
+  <Card title="Transaction & Order Failures" icon="triangle-exclamation" href="/support/transaction-issues">
+    Diagnose failed deposits, withdrawals, registrations, and order rejections. Covers on-chain revert reasons and API-level error codes.
+  </Card>
+  <Card title="Deposit Issues" icon="arrow-down-to-bracket" href="/support/troubleshooting">
+    Investigate stuck or delayed deposits, including cross-chain message delays and token approval failures.
+  </Card>
+  <Card title="Withdrawal Issues" icon="arrow-up-from-bracket" href="/support/withdrawal-issues">
+    Trace delayed or missing withdrawals through the LayerZero cross-chain messaging layer and destination chain block explorers.
+  </Card>
+  <Card title="Liquidation Issues" icon="chart-line-down" href="/support/troubleshooting">
+    Review unexpected liquidation events, margin calculations, and liquidation price discrepancies.
+  </Card>
+  <Card title="Wrong Execution Prices" icon="arrows-up-down" href="/support/troubleshooting">
+    Investigate orders or positions that closed at prices different from what the user expected.
+  </Card>
+  <Card title="API Authentication Errors" icon="lock" href="/api-reference/authentication">
+    Diagnose `perpo-signature` failures, timestamp drift issues, and invalid key errors from the authentication layer.
+  </Card>
+</CardGroup>
+
+## Common Quick Checks
+
+Before opening a ticket, run through these fast checks — they resolve the majority of reported issues:
+
+<Accordion title="Authentication errors (-1001, -1002)">
+  - Confirm the `perpo-timestamp` header is within **±5 seconds** of the current server time (UTC). Clock drift is the most common cause of `-1002` errors.
+  - Verify that the `perpo-key` value is formatted as `ed25519:<base58-encoded-public-key>`.
+  - Check that the signing key has not expired or been revoked. Trading keys have a maximum lifetime and must be re-registered after expiry.
+  - Ensure the `perpo-account-id` matches the account ID derived from the wallet address and broker ID used during registration.
+</Accordion>
+
+<Accordion title="Order rejection (-1101, -1102, -1103, -1104, -1105)">
+  - `-1101` — Reduce order size or increase account leverage. Check current risk exposure via `GET /v1/client/info`.
+  - `-1102` — Order notional value (price × quantity) is below the symbol's minimum. Check `GET /v1/public/info` for symbol limits.
+  - `-1103` — Price is outside allowed bounds or does not conform to the tick size. Round price to the nearest valid tick.
+  - `-1104` — Quantity is outside allowed bounds or does not conform to the step size. Round quantity to the nearest valid step.
+  - `-1105` — Limit price is too far from the current mid price. Tighten the price or use a market order.
+</Accordion>
+
+<Accordion title="Internal errors (-1011, -1012)">
+  - `-1011` — Transient internal network error. Retry the request after a short delay (1–5 seconds).
+  - `-1012` — The account is currently in liquidation or another internal process is blocking order activity. Wait for the liquidation to complete before retrying.
+</Accordion>
+
+<Accordion title="Withdrawal delays">
+  Withdrawals are cross-chain and are not instant. Processing time varies by destination chain — some chains (such as Polygon) require more block confirmations before finality. Check [LayerZero Scan](https://layerzeroscan.com/) with "Source: Orderly" selected to verify that the cross-chain message was sent and its current relay status.
+</Accordion>
+
+## Support Channels
+
+| Channel | Use Case |
+|---|---|
+| [Discord](https://discord.gg/OrderlyNetwork) | Submit support tickets, ask questions, report bugs |
+| [LiqZero Dashboard](https://orderly-dashboard.orderly.network/) | Look up account state, deposit/withdrawal history |
+| [Integration FAQs](/support/troubleshooting) | Self-serve answers for common builder questions |
+| [Error Codes Reference](/api-reference/error-codes) | Full table of API error codes and descriptions |

@@ -1,0 +1,179 @@
+---
+title: "Integration Checklist for LiqZero Builders"
+sidebarTitle: "Integration Checklist"
+description: "A structured phase-by-phase checklist guiding LiqZero builders from tech stack selection and setup through development, testing, and go-live."
+---
+
+Use this checklist to plan, implement, and launch your builder integration on LiqZero. The structure moves from planning and pre-integration setup through core implementation, advanced features, and finally go-live readiness. Work through each phase in order — completing the earlier phases correctly makes the later ones significantly smoother. Each step links to the relevant reference page so you can go deeper without losing your place in the overall sequence.
+
+<Note>
+  A fully working example DEX built on top of the same underlying infrastructure is available at [https://github.com/OrderlyNetwork/example-dex](https://github.com/OrderlyNetwork/example-dex). Use it as a reference implementation while working through this checklist.
+</Note>
+
+## Phase Overview
+
+<Steps>
+  <Step title="Phase 1: Planning & Setup">
+    Align your product scope, choose your integration path, and establish your builder identity before writing any code.
+
+    **Choose your integration path**
+
+    Pick the stack that matches your product and team. Your choice here determines which libraries you import, how you manage authentication, and how much UI you build yourself.
+
+    <CardGroup cols={2}>
+      <Card title="React Hooks SDK" icon="react" href="/sdks/hooks-sdk">
+        React hooks for account, assets, orders, positions, funding, and market data. Full UI control with less boilerplate than the direct API.
+      </Card>
+      <Card title="React Components SDK" icon="puzzle-piece" href="/sdks/react-sdk">
+        Drop-in themed UI components (trading panels, order forms, position tables) that accelerate time to launch for teams building a standard DEX layout.
+      </Card>
+      <Card title="Python Connector" icon="python" href="https://github.com/OrderlyNetwork/orderly-evm-connector-python">
+        Server-side integration for trading teams building execution bots, algorithmic strategies, or backend order management systems.
+      </Card>
+      <Card title="Direct API" icon="terminal" href="/api-reference/introduction">
+        Full control over every request and response. Build your own backend and frontend directly against LiqZero's REST and WebSocket interfaces.
+      </Card>
+    </CardGroup>
+
+    **Set up your builder identity**
+
+    Register your builder account and obtain your builder ID before running any testnet flows. Your builder ID is embedded in account registration and fee configuration and cannot be changed after it is set.
+
+    <Warning>
+      Define your launch scope — core user flows, testnet plan, support process, and go-to-market milestones — before development starts. Scope changes during implementation are expensive.
+    </Warning>
+
+    **Review system design**
+
+    Before writing integration code, read:
+    - [Building on Omnichain](/introduction/getting-started/building-on-omnichain) — the three-layer architecture (Asset, Settlement, Engine) and what each layer handles
+    - [Smart Contract Overview](/api-reference/contracts/overview) — how the on-chain contracts interact across chains
+    - [Smart Contract Addresses](/api-reference/contracts/addresses) — deployed Vault and Ledger contract addresses for every supported chain
+  </Step>
+
+  <Step title="Phase 2: Core Implementation">
+    Implement the flows that every trading integration requires. Complete all of these before moving to advanced features.
+
+    **Account registration**
+
+    Let users create and activate their LiqZero account. The account registration flow involves an on-chain transaction to the Vault contract on the user's chosen chain. Once registered, the account is active across all supported chains through the shared Settlement Layer.
+
+    → [Account Registration docs](/guides/user-flows/accounts)
+
+    **Wallet authentication and LiqZero Keys**
+
+    Set up authentication for signed API access and trading actions. LiqZero uses ed25519 key pairs — users generate a key pair and add the public key to their account. Your application then uses the private key to sign every private API request.
+
+    The four required authentication headers are:
+    - `perpo-account-id` — the user's LiqZero account ID
+    - `perpo-key` — the user's ed25519 public key
+    - `perpo-signature` — ed25519 signature of the normalized request content, base64url-encoded
+    - `perpo-timestamp` — current Unix timestamp in milliseconds
+
+    → [Wallet Authentication docs](/guides/user-flows/wallet-authentication) · [API Authentication reference](/api-reference/authentication)
+
+    **Deposit and withdrawal**
+
+    Support funding and withdrawal flows from supported chains. Deposits are on-chain transactions to the per-chain Vault contract. Withdrawals involve a signed API request that triggers an on-chain payout. Both flows must be tested end-to-end on testnet before launch.
+
+    → [Deposit & Withdrawal docs](/guides/user-flows/deposit-withdrawal)
+
+    **Order management**
+
+    Implement order placement, cancellation, and order state tracking. Use the REST API for order submission and the WebSocket API for real-time order status updates via execution reports.
+
+    <Note>
+      Use the `reduce_only` flag for orders intended to close or reduce an existing position. Without it, a closing order may increase Initial Margin Requirements (IMR) and fail if the account does not have sufficient margin to cover the expanded requirement.
+    </Note>
+
+    → [Order Management docs](/guides/user-flows/order-management)
+
+    **Market and symbol data**
+
+    Integrate market metadata, prices, orderbook depth, and trade updates. Use the WebSocket API for real-time streams and the REST API for historical and snapshot data. Symbols follow the format `PERP_<TOKEN>_USDC` (for example, `PERP_ETH_USDC`, `PERP_BTC_USDC`).
+
+    → [WebSocket API Introduction](/api-reference/websocket/introduction) · [Orderbook stream](/api-reference/websocket/public-streams) · [Trade stream](/api-reference/websocket/public-streams)
+  </Step>
+
+  <Step title="Phase 3: Advanced Features & Optimization">
+    Add the pieces that make the integration operationally complete and ready to support a production user base.
+
+    **Settle PnL**
+
+    Handle realized PnL settlement as part of the account lifecycle. Users need to settle PnL to move realized gains from the trading account into their withdrawable balance. Build a clear UI trigger and handle the settlement confirmation flow.
+
+    → [Settle PnL docs](/guides/user-flows/settle-pnl)
+
+    **Isolated margin**
+
+    Support per-position margin isolation so users can cap their risk exposure to a specific position without affecting the rest of their account balance.
+
+    → [Isolated Margin docs](/guides/user-flows/isolated-margin)
+
+    **Internal transfers**
+
+    Allow users to move funds between accounts — for example between a main account and a sub-account — without an on-chain transaction. Internal transfers are fast and do not require gas.
+
+    → [Internal Transfer docs](/guides/user-flows/internal-transfer)
+
+    **Custom fees**
+
+    Configure your builder fee structure. LiqZero's model lets you define default builder fees and user-level fee overrides on top of the base protocol fee. Set this up before go-live so your revenue model is active from the first trade.
+
+    **User data surfaces**
+
+    Display balances, open positions, trade history, funding payments, and account health using the private REST endpoints. Ensure your UI reflects live account state and handles loading, empty, and error states cleanly for all data surfaces.
+
+    **Regulatory controls**
+
+    Implement geo-blocking and any other compliance checks required for your product and jurisdiction. LiqZero does not enforce jurisdiction restrictions at the infrastructure level — this is a builder responsibility.
+
+    **Real-time execution reports**
+
+    Subscribe to execution report events via the WebSocket API to give users live feedback on order fills, partial fills, cancellations, and rejections without polling.
+
+    → [Execution Report stream](/api-reference/websocket/private-streams)
+  </Step>
+
+  <Step title="Phase 4: Testing & Go-Live">
+    Verify the integration end-to-end on testnet, prepare your operational processes, and coordinate your launch.
+
+    **Validate on testnet**
+
+    Run through every user flow on the testnet environment before pointing your application at mainnet. Use the testnet API base URL: `https://testnet-api.liqzero.com`.
+
+    Your testnet validation checklist:
+    - Account registration and key generation
+    - Deposit flow (on-chain transaction to Vault contract)
+    - Order placement (limit and market), cancellation, and partial fills
+    - Withdrawal flow (API request and on-chain confirmation)
+    - PnL settlement
+    - WebSocket streams (orderbook, trades, execution reports)
+    - Error handling for all expected error codes
+
+    → [Error Codes reference](/api-reference/error-codes)
+
+    **Prepare for maintenance windows**
+
+    During system maintenance, market data and user positions become unavailable. Open positions remain open and can still be liquidated if market conditions change after trading resumes. Your UI must handle this state clearly.
+
+    - Integrate the [system maintenance status endpoint](/api-reference/introduction) and poll it on a regular interval
+    - Request access to the LiqZero builder Telegram channel for real-time maintenance announcements
+    - Communicate maintenance windows clearly in your product UI, including which actions (if any) remain available
+
+    <Warning>
+      Never allow users to submit orders or withdrawals silently during a maintenance window. Surface the maintenance state explicitly and disable trading actions until the system is back online.
+    </Warning>
+
+    **Review support and launch readiness**
+
+    Before going live, confirm that your team has clear ownership for:
+    - User support and incident communication
+    - Launch coordination with the LiqZero team
+    - Post-launch monitoring for error rate spikes and unusual account behavior
+
+    <Tip>
+      If you have implementation questions, reach out through the LiqZero partner support channel. Builder onboarding support is available throughout the integration process, not just at launch.
+    </Tip>
+  </Step>
+</Steps>

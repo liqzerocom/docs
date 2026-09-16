@@ -1,0 +1,208 @@
+---
+title: 'Using Isolated Margin Mode on LiqZero'
+sidebarTitle: 'Isolated Margin'
+description: 'Allocate dedicated margin per position with independent leverage settings and full risk isolation — one position liquidates without affecting the rest.'
+---
+
+LiqZero supports two margin modes: **Cross** and **Isolated**. In Cross margin, your entire available USDC balance backs all open positions — a loss on one position draws from the same pool as every other. In Isolated margin, each position receives a fixed margin allocation that you set explicitly. If that position is liquidated, only the margin assigned to it is lost; your other positions and your account balance remain completely unaffected.
+
+Both modes can be active simultaneously on the same account. You can hold a Cross position and an Isolated position on `PERP_ETH_USDC` at the same time — simply specify `margin_mode` when placing each order.
+
+## Cross vs. Isolated — Key Differences
+
+| | Cross Margin | Isolated Margin |
+|---|---|---|
+| **Margin source** | Entire account balance | Fixed allocation per position |
+| **Leverage** | Shared setting per symbol | Independent per symbol + mode |
+| **Liquidation risk** | All positions affected | Only the isolated position |
+| **Margin adjustment** | Automatic from balance | Manual via API or UI |
+| **Best for** | Long-term holds, lower liquidation risk | Precise risk caps per trade |
+
+## Integration Steps
+
+<Steps>
+  <Step title="Set Leverage for Isolated Mode">
+    Each symbol tracks independent leverage settings per margin mode. Before placing an isolated order, set the desired leverage for `ISOLATED` mode on the target symbol.
+
+    **`POST /v1/client/leverages`**
+
+    ```json Request Body
+    {
+      "symbol": "PERP_ETH_USDC",
+      "leverage": 10,
+      "margin_mode": "ISOLATED"
+    }
+    ```
+
+    To read back the currently configured leverage:
+
+    **`GET /v1/client/leverage?symbol=PERP_ETH_USDC&margin_mode=ISOLATED`**
+
+    ```json Response
+    {
+      "success": true,
+      "data": {
+        "symbol": "PERP_ETH_USDC",
+        "leverage": 10,
+        "margin_mode": "ISOLATED"
+      }
+    }
+    ```
+
+    Higher leverage means less margin is allocated from your balance when the position opens, but your liquidation price moves closer to entry.
+
+    <Tip>
+      When calling `POST /v1/client/leverages` without a `symbol`, the behavior differs by mode: Cross updates all symbols atomically (all succeed or none do), while Isolated only updates symbols that have no active positions or pending orders.
+    </Tip>
+  </Step>
+
+  <Step title="Place an Order in Isolated Mode">
+    Pass `"margin_mode": "ISOLATED"` in the order body. The engine allocates margin from your available balance based on the leverage you set in Step 1.
+
+    **`POST /v1/order`**
+
+    ```json Request Body
+    {
+      "symbol": "PERP_ETH_USDC",
+      "order_type": "LIMIT",
+      "side": "BUY",
+      "order_price": 3200.00,
+      "order_quantity": 1.0,
+      "margin_mode": "ISOLATED"
+    }
+    ```
+
+    If you omit `margin_mode`, the system uses the symbol's default margin mode. You can update the default display mode via `POST /v1/client/margin_mode` — this controls the UI default but does not restrict which mode you can trade in on any given order.
+
+    ```json Response
+    {
+      "success": true,
+      "data": {
+        "order_id": 912837465,
+        "symbol": "PERP_ETH_USDC",
+        "type": "LIMIT",
+        "side": "BUY",
+        "order_price": 3200.00,
+        "order_quantity": 1.0,
+        "margin_mode": "ISOLATED",
+        "status": "NEW",
+        "timestamp": 1712001000000
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Adjust Position Margin">
+    After the position is open, add or reduce the margin allocated to it at any time. Adding margin lowers the liquidation price (reduces risk); reducing margin frees up balance but raises the liquidation price.
+
+    **`POST /v1/position_margin`**
+
+    <Tabs>
+      <Tab title="Add Margin">
+        ```json Request Body
+        {
+          "symbol": "PERP_ETH_USDC",
+          "amount": "200",
+          "type": "ADD"
+        }
+        ```
+        Transfers `200 USDC` from your available balance into the isolated position, lowering the liquidation price.
+      </Tab>
+      <Tab title="Reduce Margin">
+        ```json Request Body
+        {
+          "symbol": "PERP_ETH_USDC",
+          "amount": "100",
+          "type": "REDUCE"
+        }
+        ```
+        Withdraws `100 USDC` from the isolated position back into your available balance, raising the liquidation price.
+      </Tab>
+    </Tabs>
+
+    | Type | Effect on liquidation price | Effect on available balance |
+    |---|---|---|
+    | `ADD` | Decreases (safer) | Decreases |
+    | `REDUCE` | Increases (riskier) | Increases |
+  </Step>
+
+  <Step title="Monitor the Isolated Position">
+    Query the position with the `margin_mode` parameter to retrieve isolated-specific fields:
+
+    **`GET /v1/position/PERP_ETH_USDC?margin_mode=ISOLATED`**
+
+    ```json Response
+    {
+      "success": true,
+      "data": {
+        "symbol": "PERP_ETH_USDC",
+        "position_qty": 1.0,
+        "avg_open_price": 3200.00,
+        "margin": 320.00,
+        "margin_mode": "ISOLATED",
+        "leverage": 10,
+        "est_liq_price": 2912.50,
+        "unsettled_pnl": 45.20,
+        "mark_price": 3245.20,
+        "imr": 0.1,
+        "mmr": 0.05
+      }
+    }
+    ```
+
+    | Field | Description |
+    |---|---|
+    | `margin` | USDC allocated to this isolated position |
+    | `est_liq_price` | Estimated price at which liquidation triggers |
+    | `unsettled_pnl` | Unrealized PnL; settled separately via `/v1/settle_pnl` |
+    | `imr` | Initial margin ratio required to open the position |
+    | `mmr` | Maintenance margin ratio below which liquidation triggers |
+
+    For real-time position updates without polling, subscribe to the private `position` WebSocket topic. Changes to margin, PnL, and liquidation price are pushed immediately after each trade or margin adjustment.
+  </Step>
+</Steps>
+
+## Account Balance — Isolated Margin Fields
+
+The `GET /v1/client/aggregate/holding` endpoint exposes two fields that reflect your isolated margin usage across all positions:
+
+<ResponseField name="isolated_margin" type="number">
+  Total USDC currently allocated across all active isolated positions
+</ResponseField>
+<ResponseField name="isolated_order_frozen" type="number">
+  USDC frozen in pending orders placed in isolated mode
+</ResponseField>
+
+These values are deducted from your `available_balance` — ensure you account for them when computing how much free margin a user has for new positions.
+
+## Liquidation Behavior
+
+When an isolated position's margin falls below the maintenance margin ratio (`mmr`), the liquidation engine closes that position.
+
+<Warning>
+  Liquidation in isolated mode **only affects the margin assigned to that specific position**. Your other open positions — whether cross or isolated on other symbols — and your remaining account balance are completely unaffected. The maximum loss on any single isolated position is the margin you allocated to it.
+</Warning>
+
+The steps the liquidation engine takes are:
+
+1. The position's margin-to-notional ratio falls below `mmr`
+2. The engine flags the position for liquidation
+3. The position is closed at the best available market price
+4. Any remaining margin (after losses and fees) is returned to available balance
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card title="Order Management" icon="list-check" href="/guides/user-flows/order-management">
+    Full order lifecycle, types, and REST API reference
+  </Card>
+  <Card title="Settle PnL" icon="circle-dollar-to-slot" href="/guides/user-flows/settle-pnl">
+    Convert unrealized gains from isolated positions into spendable USDC
+  </Card>
+  <Card title="WebSocket: Execution Report" icon="bolt" href="/api-reference/websocket/private-streams">
+    Real-time order fills and status changes
+  </Card>
+  <Card title="Error Codes" icon="circle-exclamation" href="/api-reference/error-codes">
+    Codes for margin and order rejection errors
+  </Card>
+</CardGroup>

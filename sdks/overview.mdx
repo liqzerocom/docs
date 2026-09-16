@@ -1,0 +1,74 @@
+---
+title: "LiqZero SDKs: Choose the Right Integration Path"
+sidebarTitle: "SDK Overview"
+description: "Compare LiqZero's React Components, React Hooks, Core, and Perp SDKs to pick the best starting point for your DEX integration."
+---
+
+LiqZero provides four EVM-focused JavaScript/TypeScript SDKs that cover every layer of a DEX build — from pre-built trading UI components down to raw key management and calculation utilities. Each SDK targets a different level of abstraction, so the right choice depends on how much control you want over your frontend and whether you're building in React. If you're working in Python or another non-JS/TS stack, a Python connector is also available for server-side integrations.
+
+## EVM SDKs
+
+<CardGroup cols={2}>
+  <Card title="React Components SDK" icon="rectangle-list" href="/sdks/react-sdk">
+    **`@orderly.network/react-app`**
+
+    High-level, pre-built React components for trading pages, portfolio dashboards, orderbooks, order entry forms, and more. Use this if you want a fully functional DEX UI with minimal code. Supports theming, i18n, and responsive layouts out of the box.
+
+    **Best for:** Builders who want the fastest path to a working DEX frontend.
+  </Card>
+  <Card title="React Hooks SDK" icon="code" href="/sdks/hooks-sdk">
+    **`@orderly.network/hooks`**
+
+    A comprehensive library of React hooks that give you full control over your trading UI. Hooks cover orderbook streams, account state, order placement, positions, market data, funding rates, and more.
+
+    **Best for:** React developers who want to build a fully custom UI without being constrained by pre-built component styles.
+  </Card>
+  <Card title="Core SDK" icon="gear" href="/sdks/core-sdk">
+    **`@orderly.network/core`**
+
+    The foundational library underpinning the Hooks SDK. Handles LiqZero key generation and storage, ed25519 request signing, account ID computation, and smart contract interaction helpers.
+
+    **Best for:** Non-React environments, server-side integrations, or any case where you need direct access to low-level primitives.
+  </Card>
+  <Card title="Perp SDK" icon="calculator" href="/sdks/overview">
+    **`@orderly.network/perp`**
+
+    A purely functional library of calculation formulas for perpetual futures trading — margin, PnL, liquidation price, funding, and more. Has no context or provider dependencies.
+
+    **Best for:** Adding trading math to any environment without pulling in React or provider boilerplate.
+  </Card>
+</CardGroup>
+
+## Decision Guide
+
+Use the table below to identify the right starting point for your integration scenario.
+
+| Scenario | Recommended SDK |
+|---|---|
+| Build a full DEX UI as fast as possible | React Components SDK |
+| Build a custom-designed React trading UI | React Hooks SDK |
+| Integrate in a non-React (Vue, Svelte, Node.js) app | Core SDK |
+| Add margin / liquidation / PnL calculations only | Perp SDK |
+| Server-side API signing and key management | Core SDK |
+| Build a custom SDK layer on top of LiqZero primitives | Core SDK |
+
+<Note>
+  The React Components SDK and React Hooks SDK are both built on top of the Core SDK. If you use the React Components SDK, you get the Hooks SDK and Core SDK functionality automatically — there is no need to install them separately unless you need direct access to lower-level APIs.
+</Note>
+
+## SDK Package Names
+
+| SDK | npm Package | Install Command |
+|---|---|---|
+| React Components | `@orderly.network/react-app` | `npm install @orderly.network/ui @orderly.network/react-app` |
+| React Hooks | `@orderly.network/hooks` | `npm install @orderly.network/types @orderly.network/hooks` |
+| Core | `@orderly.network/core` | `npm install @orderly.network/core` |
+| Perp | `@orderly.network/perp` | `npm install @orderly.network/perp` |
+
+## Python and Non-JS/TS Stacks
+
+If your backend or trading bot is written in Python, LiqZero provides a Python connector that wraps the REST and WebSocket APIs with authentication handled for you. For other non-JS runtimes, use the Core SDK patterns — ed25519 key generation, request signing, and account ID derivation — to implement authentication directly against the [REST API](/api-reference/introduction) and [WebSocket API](/api-reference/websocket/introduction).
+
+<Tip>
+  If you're not sure where to start, use the **React Components SDK** for your frontend and rely on the **REST API** directly for any server-side logic. You can always drop down to the Hooks SDK later if you need more UI flexibility.
+</Tip>

@@ -1,22 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "LiqZero",
+  "projectType": "saas",
+  "projectName": "LiqZero",
+  "projectDescription": "LiqZero is omnichain trading infrastructure for builders who want to launch perpetual futures DEXs on top of shared liquidity — without building the matching engine, settlement stack, or liquidity layer from scratch.",
   "theme": "luma",
-  "favicon": "https://media.brand.dev/ccaedf8d-fda5-4e50-b5f1-056388683946.png",
-  "colors": {
-    "primary": "#aa5cf8",
-    "light": "#fcbd24"
-  },
-  "logo": {
-    "light": "https://mintcdn.com/perpo/30I45GSeWO1hJkLA/logo/perpo_logo.svg?fit=max&auto=format&n=30I45GSeWO1hJkLA&q=85&s=878c7e4579a4f659f187d3a20f1f935e",
-    "dark": "https://mintcdn.com/perpo/30I45GSeWO1hJkLA/logo/perpo_logo.svg?fit=max&auto=format&n=30I45GSeWO1hJkLA&q=85&s=878c7e4579a4f659f187d3a20f1f935e"
-  },
-  "navbar": {
-    "primary": {
-      "type": "github",
-      "href": "https://github.com/OrderlyNetwork/example-dex"
-    }
-  },
+  "primaryColor": "#aa5cf8",
+  "lightColor": "#fcbd24",
+  "darkColor": null,
   "navigation": {
     "tabs": [
       {
@@ -108,5 +97,39 @@
         ]
       }
     ]
-  }
+  },
+  "keyFeatures": [
+    "Omnichain perpetual futures infrastructure",
+    "Shared liquidity orderbook across supported chains",
+    "REST and WebSocket APIs for trading, accounts, and market data",
+    "React SDK, Hooks SDK, Core SDK, and Perp SDK for accelerated integration",
+    "Smart contract rails for deposit, withdrawal, and settlement",
+    "ed25519-based API authentication",
+    "Isolated and cross margin modes",
+    "OmniVault: permissionless yield vault powered by professional market makers",
+    "Partner fee customization and referral programs",
+    "Support for 15+ EVM chains plus Solana"
+  ],
+  "publicApiSurface": [
+    "POST /v1/register_account",
+    "GET /v1/registration_nonce",
+    "POST /v1/order",
+    "DELETE /v1/order",
+    "GET /v1/orders",
+    "POST /v1/withdraw_request",
+    "GET /v1/withdrawal_nonce",
+    "POST /v1/settle_pnl",
+    "POST /v1/internal_transfer",
+    "GET /v1/client/info",
+    "GET /v1/public/info/:symbol",
+    "GET /v1/asset/history",
+    "PUT /v1/position/margin_mode",
+    "GET /v1/position/margin_modes",
+    "POST /v1/position/margin",
+    "WebSocket: orderbook topic",
+    "WebSocket: trade topic",
+    "WebSocket: executionreport topic",
+    "Vault.deposit(DepositData)",
+    "Vault.getDepositFee()"
+  ]
 }

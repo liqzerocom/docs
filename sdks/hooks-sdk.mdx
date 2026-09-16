@@ -1,0 +1,323 @@
+---
+title: "LiqZero Hooks SDK: React Hooks for Trading"
+sidebarTitle: "Hooks SDK"
+description: "Install the LiqZero React Hooks SDK and use purpose-built hooks for orderbooks, accounts, positions, orders, and market data."
+---
+
+The LiqZero React Hooks SDK (`@orderly.network/hooks`) provides a comprehensive library of React hooks that give you full control over every aspect of your trading frontend. Rather than rendering pre-built component trees, you consume trading state and dispatch trading actions through hooks — then build whatever UI structure fits your design. The Hooks SDK is built on top of the Core SDK and the Perp SDK, so key management, request signing, and trading calculations are all handled for you.
+
+<Note>
+  Use the Hooks SDK when you need a custom-designed trading UI in React. If you want pre-built trading page components instead, start with the [React Components SDK](/sdks/react-sdk).
+</Note>
+
+## Installation
+
+<CodeGroup>
+```bash npm
+npm install @orderly.network/types @orderly.network/hooks
+```
+
+```bash yarn
+yarn add @orderly.network/types @orderly.network/hooks
+```
+
+```bash pnpm
+pnpm add @orderly.network/types @orderly.network/hooks
+```
+</CodeGroup>
+
+## Provider Setup
+
+Wrap your application with `OrderlyConfigProvider` to configure your builder identity, network, and wallet adapters. All hooks must be used inside this provider.
+
+<Tabs>
+  <Tab title="Default Setup">
+    Use the default configuration for new projects. Provide your `brokerId` and the target `networkId`.
+
+    ```tsx
+    import type { FC, PropsWithChildren } from "react";
+    import { OrderlyConfigProvider } from "@orderly.network/hooks";
+
+    export const App: FC<PropsWithChildren> = ({ children }) => {
+      return (
+        <OrderlyConfigProvider brokerId="your-broker-id" networkId="mainnet">
+          {children}
+        </OrderlyConfigProvider>
+      );
+    };
+    ```
+  </Tab>
+  <Tab title="Custom Store Setup">
+    If you have an existing key management or configuration implementation, pass your own `configStore` and `keyStore` instances directly.
+
+    ```tsx
+    import type { FC, PropsWithChildren } from "react";
+    import { OrderlyConfigProvider } from "@orderly.network/hooks";
+    import type { ConfigStore, OrderlyKeyStore } from "@orderly.network/core";
+
+    const myConfigStore: ConfigStore = new MyConfigStore();
+    const myKeyStore: OrderlyKeyStore = new MyKeyStore();
+
+    export const App: FC<PropsWithChildren> = ({ children }) => {
+      return (
+        <OrderlyConfigProvider
+          configStore={myConfigStore}
+          keyStore={myKeyStore}
+          networkId="mainnet"
+        >
+          {children}
+        </OrderlyConfigProvider>
+      );
+    };
+    ```
+  </Tab>
+  <Tab title="With Wallet Adapters">
+    Connect EVM and Solana wallets explicitly by providing `walletAdapters` to the provider.
+
+    ```tsx
+    import type { FC, PropsWithChildren } from "react";
+    import { OrderlyConfigProvider } from "@orderly.network/hooks";
+    import { DefaultEVMWalletAdapter } from "@orderly.network/default-evm-adapter";
+    import { DefaultSolanaWalletAdapter } from "@orderly.network/default-solana-adapter";
+    import { EthersProvider } from "@orderly.network/web3-provider-ethers";
+
+    export const App: FC<PropsWithChildren> = ({ children }) => {
+      return (
+        <OrderlyConfigProvider
+          brokerId="your-broker-id"
+          networkId="mainnet"
+          walletAdapters={[
+            new DefaultEVMWalletAdapter(new EthersProvider()),
+            new DefaultSolanaWalletAdapter(),
+          ]}
+        >
+          {children}
+        </OrderlyConfigProvider>
+      );
+    };
+    ```
+  </Tab>
+</Tabs>
+
+<ParamField path="brokerId" type="string" required>
+  Your LiqZero builder/broker ID. Obtain this during the builder onboarding flow.
+</ParamField>
+
+<ParamField path="networkId" type="string" required>
+  `"mainnet"` or `"testnet"`. Cannot be changed at runtime — reload the page to switch networks.
+</ParamField>
+
+<ParamField path="walletAdapters" type="array">
+  An array of wallet adapter instances for EVM and/or Solana. Omit this if you are using `@orderly.network/wallet-connector` for built-in wallet UI.
+</ParamField>
+
+<ParamField path="configStore" type="ConfigStore">
+  A custom implementation of the `ConfigStore` interface from `@orderly.network/core`. Use this to override default network and endpoint configuration.
+</ParamField>
+
+<ParamField path="keyStore" type="OrderlyKeyStore">
+  A custom implementation of the `OrderlyKeyStore` interface for key persistence. Use this if you manage ed25519 key storage yourself.
+</ParamField>
+
+## Key Hooks
+
+### Account Hooks
+
+<Accordion title="useAccount — Account state and actions">
+  Returns the current account object and its connection state. Use this to check whether a user is connected, registered, and has an active LiqZero trading key.
+
+  ```tsx
+  import { useAccount } from "@orderly.network/hooks";
+
+  export const AccountStatus = () => {
+    const { account, state } = useAccount();
+
+    return (
+      <div>
+        <p>Address: {state.address}</p>
+        <p>Status: {state.status}</p>
+      </div>
+    );
+  };
+  ```
+</Accordion>
+
+<Accordion title="useMarginRatio — Margin and collateral information">
+  Returns the account's current margin ratio, available collateral, and unrealized PnL.
+
+  ```tsx
+  import { useMarginRatio } from "@orderly.network/hooks";
+
+  export const MarginDisplay = () => {
+    const { marginRatio, freeCollateral, totalCollateral } = useMarginRatio();
+
+    return (
+      <div>
+        <p>Margin Ratio: {(marginRatio * 100).toFixed(2)}%</p>
+        <p>Free Collateral: {freeCollateral} USDC</p>
+      </div>
+    );
+  };
+  ```
+</Accordion>
+
+### Market Data Hooks
+
+<Accordion title="useOrderbookStream — Live orderbook data">
+  Subscribes to the real-time orderbook WebSocket stream for a given symbol. Returns ask and bid arrays updated on every tick.
+
+  ```tsx
+  import { useOrderbookStream } from "@orderly.network/hooks";
+
+  export const Orderbook = ({ symbol }: { symbol: string }) => {
+    const [orderbook] = useOrderbookStream(symbol, undefined, { level: 10 });
+
+    return (
+      <div>
+        <div>
+          {orderbook?.asks?.map(([price, qty], i) => (
+            <div key={i}>{price} — {qty}</div>
+          ))}
+        </div>
+        <div>
+          {orderbook?.bids?.map(([price, qty], i) => (
+            <div key={i}>{price} — {qty}</div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  ```
+</Accordion>
+
+<Accordion title="useMarkets — Market list and 24h statistics">
+  Fetches all listed perpetual symbols with their current mark price, 24h volume, open interest, and funding rate.
+
+  ```tsx
+  import { useMarkets } from "@orderly.network/hooks";
+
+  export const MarketList = () => {
+    const [markets] = useMarkets();
+
+    return (
+      <ul>
+        {markets?.map((market) => (
+          <li key={market.symbol}>
+            {market.symbol} — ${market["24h_close"]}
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  ```
+</Accordion>
+
+### Order Hooks
+
+<Accordion title="useOrderEntry — Place and manage orders">
+  Returns helpers to submit, validate, and track a new order. Handles order state, validation errors, and submission lifecycle.
+
+  ```tsx
+  import { useOrderEntry } from "@orderly.network/hooks";
+  import { OrderSide, OrderType } from "@orderly.network/types";
+
+  export const OrderForm = ({ symbol }: { symbol: string }) => {
+    const { onSubmit, formattedOrder, setValue, errors } = useOrderEntry(
+      { symbol, side: OrderSide.BUY, order_type: OrderType.LIMIT },
+      { watchOrderbook: true }
+    );
+
+    return (
+      <form onSubmit={onSubmit}>
+        <input
+          type="number"
+          placeholder="Price"
+          onChange={(e) => setValue("order_price", e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Quantity"
+          onChange={(e) => setValue("order_quantity", e.target.value)}
+        />
+        {errors?.order_price && <span>{errors.order_price.message}</span>}
+        <button type="submit">Buy</button>
+      </form>
+    );
+  };
+  ```
+</Accordion>
+
+<Accordion title="useOrderStream — View and cancel orders">
+  Streams open, filled, and cancelled orders. Returns current orders and action helpers for cancellation and editing.
+
+  ```tsx
+  import { useOrderStream } from "@orderly.network/hooks";
+  import { OrderStatus } from "@orderly.network/types";
+
+  export const OpenOrders = () => {
+    const [orders, { cancelOrder }] = useOrderStream({ status: OrderStatus.OPEN });
+
+    return (
+      <ul>
+        {orders?.map((order) => (
+          <li key={order.order_id}>
+            {order.symbol} {order.side} {order.order_quantity} @ {order.order_price}
+            <button onClick={() => cancelOrder(order.order_id, order.symbol)}>
+              Cancel
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  ```
+</Accordion>
+
+### Position Hooks
+
+<Accordion title="usePositionStream — Open positions">
+  Returns all open positions with real-time unrealized PnL, quantity, average entry price, and liquidation price.
+
+  ```tsx
+  import { usePositionStream } from "@orderly.network/hooks";
+
+  export const Positions = () => {
+    const [positions] = usePositionStream();
+
+    return (
+      <ul>
+        {positions?.rows?.map((pos) => (
+          <li key={pos.symbol}>
+            {pos.symbol}: qty={pos.position_qty}, uPnL={pos.unrealized_pnl}
+          </li>
+        ))}
+      </ul>
+    );
+  };
+  ```
+</Accordion>
+
+## Coding Conventions
+
+The Hooks SDK follows consistent patterns across all hooks:
+
+| Pattern | Meaning |
+|---|---|
+| Returns an array `[data, helpers]` | First element is data; second element is an object with actions |
+| Hook name ends in `Stream` | Updates in real-time via WebSocket subscription |
+| Hook name ends in `Subscription` | Subscribes to WebSocket and accepts a callback function |
+| Hook name ends in `Query` | Wraps a REST API request |
+
+## Hooks vs. React Components SDK
+
+| | React Components SDK | React Hooks SDK |
+|---|---|---|
+| **UI** | Pre-built component trees | You build all UI |
+| **Flexibility** | Customizable via CSS variables | Full structural control |
+| **Setup time** | Minutes | Hours to days |
+| **Best for** | Standard DEX layouts | Fully custom designs |
+| **Underlying layer** | Built on Hooks SDK | Built on Core SDK |
+
+<Tip>
+  You can mix both SDKs. Use pre-built page components from `@orderly.network/trading` for most pages, then drop down to individual hooks for sections that need custom logic or a non-standard layout.
+</Tip>

@@ -1,0 +1,680 @@
+---
+title: 'Deposit and Withdraw USDC on LiqZero'
+sidebarTitle: 'Deposit & Withdrawal'
+description: 'Move USDC into and out of LiqZero accounts: approve the Vault contract, call the deposit function on-chain, and submit signed EIP-712 withdrawal requests.'
+---
+
+LiqZero accounts hold USDC as collateral for perpetual futures trading. Deposits are made directly on-chain by calling the Vault smart contract from any [supported chain](/introduction/concepts/supported-chains). Withdrawals are initiated off-chain via a signed EIP-712 message, then settled on any supported destination chain. This page covers both flows end to end.
+
+---
+
+## Deposit
+
+You deposit USDC into a LiqZero account by calling the `deposit` function on the Vault smart contract. The entire flow — from ERC-20 approval to the vault call — happens on the origin chain. Once the cross-chain transaction finalizes, the balance appears in the user's LiqZero account.
+
+<Note>
+  Vault and USDC contract addresses are chain-specific. Find the correct addresses for each supported network on the [Smart Contract Addresses](/api-reference/contracts/addresses) page. All contracts are verified, so you can retrieve the ABI directly from the block explorer for each chain.
+</Note>
+
+<Steps>
+  <Step title="Approve USDC spending by the Vault contract">
+    Before depositing, the user must grant the Vault contract an ERC-20 allowance for the amount they want to deposit. Call `approve` on the USDC contract with the Vault address as the spender.
+
+    <CodeGroup>
+      ```java Java
+      String usdcAddress = "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d";
+      String vaultAddress = "0x0EaC556c0C2321BA25b9DC01e4e3c95aD5CDCd2f";
+
+      Dotenv dotenv = Dotenv.load();
+      String pk = dotenv.get("PRIVATE_KEY");
+      Credentials credentials = Credentials.create(ECKeyPair.create(Hex.decodeHex(pk)));
+
+      Web3j web3j = Web3j.build(new HttpService("https://arbitrum-sepolia.publicnode.com"));
+      DefaultGasProvider gasProvider = new DefaultGasProvider();
+
+      NativeUSDC usdc = new NativeUSDC(usdcAddress, web3j, credentials, gasProvider);
+      BigInteger depositAmount = new BigInteger("10000000"); // 10 USDC (6 decimals)
+
+      // Approve USDC ERC-20 to be transferred to the Vault contract
+      usdc.approve(vaultAddress, depositAmount).send();
+      ```
+
+      ```python Python
+      from eth_account import Account
+      from web3 import Web3
+      from web3.middleware import construct_sign_and_send_raw_middleware
+      import json, os
+
+      usdc_address = Web3.to_checksum_address("0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d")
+      vault_address = Web3.to_checksum_address("0x0EaC556c0C2321BA25b9DC01e4e3c95aD5CDCd2f")
+
+      account = Account.from_key(os.environ.get("PRIVATE_KEY"))
+      w3 = Web3(Web3.HTTPProvider("https://arbitrum-sepolia.publicnode.com"))
+      w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
+
+      with open("./src/abi/NativeUSDC.json") as f:
+          abi = json.load(f)
+      usdc = w3.eth.contract(address=usdc_address, abi=abi)
+
+      deposit_amount = 10_000_000  # 10 USDC (6 decimals)
+
+      # Approve USDC ERC-20 to be transferred to the Vault contract
+      usdc.functions.approve(vault_address, deposit_amount).transact(
+          {"from": account.address}
+      )
+      ```
+
+      ```typescript TypeScript
+      import { ethers } from "ethers";
+      import { NativeUSDC__factory } from "./abi";
+
+      const usdcAddress = "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d";
+      const vaultAddress = "0x0EaC556c0C2321BA25b9DC01e4e3c95aD5CDCd2f";
+
+      const provider = new ethers.JsonRpcProvider("https://arbitrum-sepolia.publicnode.com");
+      const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+
+      const usdcContract = NativeUSDC__factory.connect(usdcAddress, wallet);
+      const depositAmount = 10_000_000n; // 10 USDC (6 decimals)
+
+      // Approve USDC ERC-20 to be transferred to the Vault contract
+      await usdcContract.approve(vaultAddress, depositAmount);
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Get the required deposit fee from the Vault">
+    The Vault charges a small protocol fee (in the native gas token, denominated in WEI) for cross-chain processing. Call `vault.getDepositFee()` with the full `DepositData` struct to retrieve the exact fee before submitting the transaction.
+
+    <CodeGroup>
+      ```java Java
+      String brokerId = "your_broker_id";
+      String tokenId = "USDC";
+      String orderlyAccountId = "0x..."; // The user's LiqZero account ID
+
+      Vault vault = new Vault(vaultAddress, web3j, credentials, gasProvider);
+
+      Keccak.Digest256 brokerHash = new Keccak.Digest256();
+      byte[] brokerIdBytes = brokerId.getBytes("UTF-8");
+      brokerHash.update(brokerIdBytes, 0, brokerIdBytes.length);
+
+      Keccak.Digest256 tokenHash = new Keccak.Digest256();
+      byte[] usdcBytes = tokenId.getBytes("UTF-8");
+      tokenHash.update(usdcBytes, 0, usdcBytes.length);
+
+      Vault.VaultDepositFE depositInput = new Vault.VaultDepositFE(
+          Hex.decodeHex(orderlyAccountId.substring(2)),
+          brokerHash.digest(),
+          tokenHash.digest(),
+          depositAmount);
+
+      // Get the WEI deposit fee required for the `deposit` call
+      BigInteger depositFee = vault.getDepositFee(credentials.getAddress(), depositInput).send();
+      ```
+
+      ```python Python
+      broker_id = "your_broker_id"
+      token_id = "USDC"
+      orderly_account_id = "0x..."  # The user's LiqZero account ID
+
+      with open("./src/abi/Vault.json") as f:
+          abi = json.load(f)
+      vault = w3.eth.contract(address=vault_address, abi=abi)
+
+      broker_hash = w3.keccak(text=broker_id)
+      token_hash = w3.keccak(text=token_id)
+
+      deposit_input = (
+          bytes.fromhex(orderly_account_id[2:]),
+          bytes.fromhex(broker_hash.hex()[2:]),
+          bytes.fromhex(token_hash.hex()[2:]),
+          deposit_amount,
+      )
+
+      # Get the WEI deposit fee required for the `deposit` call
+      deposit_fee = vault.functions.getDepositFee(
+          Web3.to_checksum_address(account.address),
+          deposit_input,
+      ).call()
+      ```
+
+      ```typescript TypeScript
+      import { keccak256 } from "ethers";
+      import { Vault__factory } from "./abi";
+      import type { VaultTypes } from "./abi/Vault";
+
+      const brokerId = "your_broker_id";
+      const tokenId = "USDC";
+      const orderlyAccountId = "0x..."; // The user's LiqZero account ID
+
+      const vaultContract = Vault__factory.connect(vaultAddress, wallet);
+      const encoder = new TextEncoder();
+
+      const depositInput = {
+        accountId: orderlyAccountId,
+        brokerHash: keccak256(encoder.encode(brokerId)),
+        tokenHash: keccak256(encoder.encode(tokenId)),
+        tokenAmount: depositAmount
+      } satisfies VaultTypes.VaultDepositFEStruct;
+
+      // Get the WEI deposit fee required for the `deposit` call
+      const depositFee = await vaultContract.getDepositFee(wallet.address, depositInput);
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Call vault.deposit() with the DepositData struct">
+    Submit the deposit transaction to the Vault contract, passing the `DepositData` struct and attaching the fee as the transaction's native value.
+
+    The `DepositData` struct fields are:
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `accountId` | bytes32 | Y | The user's LiqZero account ID as bytes |
+    | `brokerHash` | bytes32 | Y | `keccak256` of the builder ID string (e.g., `"your_broker_id"`) |
+    | `tokenHash` | bytes32 | Y | `keccak256` of the token string (e.g., `"USDC"`) |
+    | `tokenAmount` | uint128 | Y | Amount of USDC to deposit (6 decimal places) |
+
+    Solidity struct definition for reference:
+    ```solidity
+    struct DepositData {
+      bytes32 accountId;
+      bytes32 brokerHash;
+      bytes32 tokenHash;
+      uint128 tokenAmount;
+    }
+    ```
+
+    <CodeGroup>
+      ```java Java
+      // Deposit USDC into the Vault contract
+      vault.deposit(depositInput, depositFee).send();
+      ```
+
+      ```python Python
+      # Deposit USDC into the Vault contract
+      vault.functions.deposit(deposit_input).transact(
+          {"from": account.address, "value": deposit_fee}
+      )
+      ```
+
+      ```typescript TypeScript
+      // Deposit USDC into the Vault contract
+      await vaultContract.deposit(depositInput, { value: depositFee });
+      ```
+    </CodeGroup>
+
+    <Note>
+      Deposits take time to reflect in the user's LiqZero account balance. The delay depends on the origin chain's finality time and the cross-chain bridging duration. Once credited, the deposit appears in the account's asset history via the **Get Asset History** API.
+    </Note>
+  </Step>
+</Steps>
+
+### Full Deposit Example
+
+The snippets below run all three deposit steps — approval, fee estimation, and vault call — in a single end-to-end script.
+
+<CodeGroup>
+  ```java Java
+  import java.math.BigInteger;
+
+  import org.apache.commons.codec.binary.Hex;
+  import org.bouncycastle.jcajce.provider.digest.Keccak;
+  import org.web3j.crypto.Credentials;
+  import org.web3j.crypto.ECKeyPair;
+  import org.web3j.protocol.Web3j;
+  import org.web3j.protocol.http.HttpService;
+  import org.web3j.tx.gas.DefaultGasProvider;
+  import io.github.cdimascio.dotenv.Dotenv;
+
+  public class DepositExample {
+      public static void main(String[] args) throws Exception {
+          String brokerId = "your_broker_id";
+          String tokenId = "USDC";
+          String orderlyAccountId = "0x...";
+
+          String usdcAddress = "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d";
+          String vaultAddress = "0x0EaC556c0C2321BA25b9DC01e4e3c95aD5CDCd2f";
+
+          Dotenv dotenv = Dotenv.load();
+          String pk = dotenv.get("PRIVATE_KEY");
+          Credentials credentials = Credentials.create(ECKeyPair.create(Hex.decodeHex(pk)));
+
+          Web3j web3j = Web3j.build(new HttpService("https://arbitrum-sepolia.publicnode.com"));
+          DefaultGasProvider gasProvider = new DefaultGasProvider();
+          NativeUSDC usdc = new NativeUSDC(usdcAddress, web3j, credentials, gasProvider);
+
+          BigInteger depositAmount = new BigInteger("10000000");
+          usdc.approve(vaultAddress, depositAmount).send();
+
+          Vault vault = new Vault(vaultAddress, web3j, credentials, gasProvider);
+
+          Keccak.Digest256 brokerHash = new Keccak.Digest256();
+          byte[] brokerIdBytes = brokerId.getBytes("UTF-8");
+          brokerHash.update(brokerIdBytes, 0, brokerIdBytes.length);
+
+          Keccak.Digest256 tokenHash = new Keccak.Digest256();
+          byte[] usdcBytes = tokenId.getBytes("UTF-8");
+          tokenHash.update(usdcBytes, 0, usdcBytes.length);
+
+          Vault.VaultDepositFE depositInput = new Vault.VaultDepositFE(
+              Hex.decodeHex(orderlyAccountId.substring(2)),
+              brokerHash.digest(),
+              tokenHash.digest(),
+              depositAmount);
+
+          BigInteger depositFee = vault.getDepositFee(credentials.getAddress(), depositInput).send();
+          vault.deposit(depositInput, depositFee).send();
+      }
+  }
+  ```
+
+  ```python Python
+  import json, os
+  from eth_account import Account
+  from web3 import Web3
+  from web3.middleware import construct_sign_and_send_raw_middleware
+
+  broker_id = "your_broker_id"
+  token_id = "USDC"
+  orderly_account_id = "0x..."
+
+  usdc_address = Web3.to_checksum_address("0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d")
+  vault_address = Web3.to_checksum_address("0x0EaC556c0C2321BA25b9DC01e4e3c95aD5CDCd2f")
+
+  account = Account.from_key(os.environ.get("PRIVATE_KEY"))
+  w3 = Web3(Web3.HTTPProvider("https://arbitrum-sepolia.publicnode.com"))
+  w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
+
+  with open("./src/abi/NativeUSDC.json") as f:
+      usdc = w3.eth.contract(address=usdc_address, abi=json.load(f))
+
+  deposit_amount = 10_000_000
+  usdc.functions.approve(vault_address, deposit_amount).transact({"from": account.address})
+
+  with open("./src/abi/Vault.json") as f:
+      vault = w3.eth.contract(address=vault_address, abi=json.load(f))
+
+  broker_hash = w3.keccak(text=broker_id)
+  token_hash = w3.keccak(text=token_id)
+
+  deposit_input = (
+      bytes.fromhex(orderly_account_id[2:]),
+      bytes.fromhex(broker_hash.hex()[2:]),
+      bytes.fromhex(token_hash.hex()[2:]),
+      deposit_amount,
+  )
+
+  deposit_fee = vault.functions.getDepositFee(
+      Web3.to_checksum_address(account.address), deposit_input
+  ).call()
+
+  vault.functions.deposit(deposit_input).transact(
+      {"from": account.address, "value": deposit_fee}
+  )
+  ```
+
+  ```typescript TypeScript
+  import { config } from "dotenv";
+  import { AbiCoder, ethers, keccak256, solidityPackedKeccak256 } from "ethers";
+  import { Vault__factory, NativeUSDC__factory } from "./abi";
+  import type { VaultTypes } from "./abi/Vault";
+
+  const brokerId = "your_broker_id";
+  const tokenId = "USDC";
+  const usdcAddress = "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d";
+  const vaultAddress = "0x0EaC556c0C2321BA25b9DC01e4e3c95aD5CDCd2f";
+
+  config();
+
+  export function getAccountId(address: string, brokerId: string): string {
+    const abicoder = AbiCoder.defaultAbiCoder();
+    return keccak256(
+      abicoder.encode(
+        ["address", "bytes32"],
+        [address, solidityPackedKeccak256(["string"], [brokerId])]
+      )
+    );
+  }
+
+  async function deposit(): Promise<void> {
+    const provider = new ethers.JsonRpcProvider("https://arbitrum-sepolia.publicnode.com");
+    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+
+    const usdcContract = NativeUSDC__factory.connect(usdcAddress, wallet);
+    const depositAmount = 10_000_000n;
+    await usdcContract.approve(vaultAddress, depositAmount);
+
+    const vaultContract = Vault__factory.connect(vaultAddress, wallet);
+    const orderlyAccountId = getAccountId(wallet.address, brokerId);
+    const encoder = new TextEncoder();
+
+    const depositInput = {
+      accountId: orderlyAccountId,
+      brokerHash: keccak256(encoder.encode(brokerId)),
+      tokenHash: keccak256(encoder.encode(tokenId)),
+      tokenAmount: depositAmount
+    } satisfies VaultTypes.VaultDepositFEStruct;
+
+    const depositFee = await vaultContract.getDepositFee(wallet.address, depositInput);
+    await vaultContract.deposit(depositInput, { value: depositFee });
+  }
+
+  deposit();
+  ```
+</CodeGroup>
+
+---
+
+## Withdrawal
+
+Withdrawals move USDC from a user's LiqZero account balance to a wallet on any supported chain. The flow is entirely API-driven: you sign an EIP-712 `Withdraw` message and POST it to the withdrawal endpoint. LiqZero handles the cross-chain settlement.
+
+<Steps>
+  <Step title="Choose a target chain for the withdrawal">
+    Select the destination chain where the user wants to receive funds. The full list of supported chains and their chain IDs is available on the [Smart Contract Addresses](/api-reference/contracts/addresses) page.
+  </Step>
+
+  <Step title="Check destination chain liquidity">
+    LiqZero is an omnichain system and routes withdrawn USDC across chains. If the target chain currently has insufficient liquidity for the requested amount, an additional cross-chain bridging fee is deducted from the user's account balance at the time of settlement.
+
+    <Note>
+      You can notify users of a potential cross-chain fee before they confirm the withdrawal by querying the chain liquidity via the **Get Chain Liquidity** public API endpoint. If liquidity is sufficient, no extra fee is charged and the user receives the exact amount requested.
+    </Note>
+  </Step>
+
+  <Step title="Obtain a withdrawal nonce">
+    Fetch a one-time nonce from the **Get Withdrawal Nonce** private API endpoint. This nonce is embedded in the EIP-712 message to prevent replay attacks.
+
+    ```http
+    GET /v1/withdraw_nonce
+    ```
+
+    Response:
+    ```json
+    {
+      "success": true,
+      "data": {
+        "withdraw_nonce": 7
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Sign the EIP-712 Withdraw message">
+    Build and sign the `Withdraw` message using the **on-chain domain** (the `verifyingContract` is the Ledger contract address on the LiqZero L2 chain — see [Addresses](/api-reference/contracts/addresses)).
+
+    The `Withdraw` message type definition:
+    ```json
+    "Withdraw": [
+      { "name": "brokerId", "type": "string" },
+      { "name": "chainId", "type": "uint256" },
+      { "name": "receiver", "type": "address" },
+      { "name": "token", "type": "string" },
+      { "name": "amount", "type": "uint256" },
+      { "name": "withdrawNonce", "type": "uint64" },
+      { "name": "timestamp", "type": "uint64" }
+    ]
+    ```
+
+    The message payload fields:
+
+    | Name | Type | Required | Description |
+    |---|---|---|---|
+    | `brokerId` | string | Y | Your builder ID |
+    | `chainId` | int | Y | Chain ID of the destination withdrawal chain |
+    | `receiver` | address | Y | Receiving wallet address — must match the account owner's address |
+    | `token` | string | Y | Token string to withdraw (e.g., `"USDC"`) |
+    | `amount` | string | Y | Amount to withdraw in token base units (USDC: 6 decimals) |
+    | `withdrawNonce` | int | Y | Nonce obtained from the Get Withdrawal Nonce endpoint |
+    | `timestamp` | timestamp | Y | Current time in UNIX milliseconds |
+
+    Example signed message:
+    ```json
+    {
+      "brokerId": "your_broker_id",
+      "chainId": 42161,
+      "receiver": "0x036Cb579025d3535a0ADcD929D05481a3189714b",
+      "token": "USDC",
+      "amount": "1000000",
+      "withdrawNonce": 7,
+      "timestamp": 1685973017064
+    }
+    ```
+
+    <CodeGroup>
+      ```java Java
+      JSONObject MESSAGE_TYPES = new JSONObject("""
+          {
+            "EIP712Domain": [
+              {"name": "name", "type": "string"},
+              {"name": "version", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "verifyingContract", "type": "address"}
+            ],
+            "Withdraw": [
+              {"name": "brokerId", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "receiver", "type": "address"},
+              {"name": "token", "type": "string"},
+              {"name": "amount", "type": "uint256"},
+              {"name": "withdrawNonce", "type": "uint64"},
+              {"name": "timestamp", "type": "uint64"}
+            ]
+          }""");
+
+      // On-chain domain: use the Ledger contract address for the LiqZero L2 chain
+      JSONObject ON_CHAIN_DOMAIN = new JSONObject("""
+          {
+            "name": "Orderly",
+            "version": "1",
+            "chainId": 291,
+            "verifyingContract": "<ledger_contract_address>"
+          }""");
+
+      JSONObject withdrawMessage = new JSONObject();
+      withdrawMessage.put("brokerId", "your_broker_id");
+      withdrawMessage.put("chainId", 42161);
+      withdrawMessage.put("receiver", credentials.getAddress());
+      withdrawMessage.put("token", "USDC");
+      withdrawMessage.put("amount", "1000000");
+      withdrawMessage.put("withdrawNonce", withdrawNonce);
+      withdrawMessage.put("timestamp", Instant.now().toEpochMilli());
+
+      JSONObject typedData = new JSONObject();
+      typedData.put("types", MESSAGE_TYPES);
+      typedData.put("primaryType", "Withdraw");
+      typedData.put("domain", ON_CHAIN_DOMAIN);
+      typedData.put("message", withdrawMessage);
+
+      Sign.SignatureData signature = Sign.signTypedData(typedData.toString(), credentials.getEcKeyPair());
+      ```
+
+      ```python Python
+      from eth_account import Account, messages
+      import math
+      from datetime import datetime
+
+      MESSAGE_TYPES = {
+          "EIP712Domain": [
+              {"name": "name", "type": "string"},
+              {"name": "version", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "verifyingContract", "type": "address"},
+          ],
+          "Withdraw": [
+              {"name": "brokerId", "type": "string"},
+              {"name": "chainId", "type": "uint256"},
+              {"name": "receiver", "type": "address"},
+              {"name": "token", "type": "string"},
+              {"name": "amount", "type": "uint256"},
+              {"name": "withdrawNonce", "type": "uint64"},
+              {"name": "timestamp", "type": "uint64"},
+          ],
+      }
+
+      # On-chain domain: use the Ledger contract address for the LiqZero L2 chain
+      ON_CHAIN_DOMAIN = {
+          "name": "Orderly",
+          "version": "1",
+          "chainId": 291,
+          "verifyingContract": "<ledger_contract_address>",
+      }
+
+      d = datetime.utcnow()
+      epoch = datetime(1970, 1, 1)
+      timestamp = math.trunc((d - epoch).total_seconds() * 1_000)
+
+      withdraw_message = {
+          "brokerId": "your_broker_id",
+          "chainId": 42161,
+          "receiver": account.address,
+          "token": "USDC",
+          "amount": "1000000",
+          "withdrawNonce": withdraw_nonce,
+          "timestamp": timestamp,
+      }
+
+      encoded_data = messages.encode_typed_data(
+          domain_data=ON_CHAIN_DOMAIN,
+          message_types={"Withdraw": MESSAGE_TYPES["Withdraw"]},
+          message_data=withdraw_message,
+      )
+      signed_message = account.sign_message(encoded_data)
+      ```
+
+      ```typescript TypeScript
+      import { ethers } from "ethers";
+
+      const MESSAGE_TYPES = {
+        EIP712Domain: [
+          { name: "name", type: "string" },
+          { name: "version", type: "string" },
+          { name: "chainId", type: "uint256" },
+          { name: "verifyingContract", type: "address" }
+        ],
+        Withdraw: [
+          { name: "brokerId", type: "string" },
+          { name: "chainId", type: "uint256" },
+          { name: "receiver", type: "address" },
+          { name: "token", type: "string" },
+          { name: "amount", type: "uint256" },
+          { name: "withdrawNonce", type: "uint64" },
+          { name: "timestamp", type: "uint64" }
+        ]
+      };
+
+      // On-chain domain: use the Ledger contract address for the LiqZero L2 chain
+      const ON_CHAIN_DOMAIN = {
+        name: "Orderly",
+        version: "1",
+        chainId: 291,
+        verifyingContract: "<ledger_contract_address>"
+      };
+
+      const withdrawMessage = {
+        brokerId: "your_broker_id",
+        chainId: 42161,
+        receiver: await wallet.getAddress(),
+        token: "USDC",
+        amount: "1000000",
+        withdrawNonce,
+        timestamp: Date.now()
+      };
+
+      const signature = await wallet.signTypedData(
+        ON_CHAIN_DOMAIN,
+        { Withdraw: MESSAGE_TYPES.Withdraw },
+        withdrawMessage
+      );
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Submit the withdrawal request via POST /v1/withdraw_request">
+    POST the signed message and signature to the Create Withdraw Request endpoint. The request must be authenticated using the user's LiqZero key headers.
+
+    ```http
+    POST /v1/withdraw_request
+    ```
+
+    <CodeGroup>
+      ```java Java
+      String baseUrl = "https://api.liqzero.com";
+
+      JSONObject jsonBody = new JSONObject();
+      jsonBody.put("message", withdrawMessage);
+      jsonBody.put("signature", signatureToHashString(signature));
+      jsonBody.put("userAddress", credentials.getAddress());
+
+      RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json"));
+      Request withdrawReq = new Request.Builder()
+            .url(baseUrl + "/v1/withdraw_request")
+            .post(body)
+            .addHeader("perpo-account-id", accountId)
+            .addHeader("perpo-key", orderlyPublicKey)
+            .addHeader("perpo-signature", requestSignature)
+            .addHeader("perpo-timestamp", String.valueOf(Instant.now().toEpochMilli()))
+            .build();
+      String withdrawRes;
+      try (Response response = client.newCall(withdrawReq).execute()) {
+          withdrawRes = response.body().string();
+      }
+      System.out.println("Withdraw response: " + withdrawRes);
+      ```
+
+      ```python Python
+      import requests, json
+
+      base_url = "https://api.liqzero.com"
+
+      res = requests.post(
+          f"{base_url}/v1/withdraw_request",
+          headers={
+              "Content-Type": "application/json",
+              "perpo-account-id": account_id,
+              "perpo-key": orderly_public_key,
+              "perpo-signature": request_signature,
+              "perpo-timestamp": str(timestamp),
+          },
+          json={
+              "message": withdraw_message,
+              "signature": signed_message.signature.hex(),
+              "userAddress": account.address,
+          },
+      )
+      print("Withdraw response:", json.loads(res.text))
+      ```
+
+      ```typescript TypeScript
+      const BASE_URL = "https://api.liqzero.com";
+
+      const withdrawRes = await fetch(`${BASE_URL}/v1/withdraw_request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "perpo-account-id": accountId,
+          "perpo-key": orderlyPublicKey,
+          "perpo-signature": requestSignature,
+          "perpo-timestamp": String(Date.now())
+        },
+        body: JSON.stringify({
+          message: withdrawMessage,
+          signature,
+          userAddress: await wallet.getAddress()
+        })
+      });
+      const withdrawJson = await withdrawRes.json();
+      console.log("Withdraw response:", withdrawJson);
+      ```
+    </CodeGroup>
+
+    <Note>
+      The `perpo-signature` header in the withdrawal POST is your **LiqZero key signature** over the HTTP request, not the EIP-712 withdrawal signature. The EIP-712 signature goes inside the request body as the `signature` field. See [API Authentication](/api-reference/authentication) for how to construct the request-level signature.
+    </Note>
+  </Step>
+</Steps>
+
+<Warning>
+  If the destination chain does not have sufficient USDC liquidity at the time of settlement, LiqZero deducts an additional cross-chain bridging fee from the user's account balance. The user receives the full requested amount on the destination chain, but their LiqZero account balance is reduced by both the withdrawal amount and the cross-chain fee. Always inform users of this possibility before they confirm a withdrawal request.
+</Warning>

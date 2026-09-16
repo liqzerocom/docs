@@ -1,0 +1,287 @@
+---
+title: 'Accounts REST API — Register, Query, and Manage'
+sidebarTitle: 'Accounts'
+description: 'Register user accounts on-chain, query wallet registration status, retrieve account info, and manage ed25519 LiqZero keys via the Accounts API.'
+---
+
+The Accounts API handles all user identity and key management operations on the LiqZero platform. Before a user can trade, their wallet must be registered to a builder (your `brokerId`) on a supported chain. Once registered, the user obtains a LiqZero account ID and can add ed25519 keys for API access. These endpoints span both public (no auth required) and private (auth required) surfaces.
+
+---
+
+## Check if Wallet is Registered
+
+Verify whether a wallet address already has a LiqZero account before initiating the registration flow.
+
+**`GET /v1/check_registered`**
+
+### Query Parameters
+
+<ParamField query="address" type="string" required>
+  The EVM or Solana wallet address to check.
+</ParamField>
+
+### Example Request
+
+```bash cURL
+curl --request GET \
+  --url 'https://api.liqzero.com/v1/check_registered?address=0xYourWalletAddress'
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "registered": false
+  },
+  "timestamp": 1702989203989
+}
+```
+
+<ResponseField name="registered" type="boolean">
+  `true` if the address has an existing LiqZero account; `false` if registration is required.
+</ResponseField>
+
+---
+
+## Get Registration Nonce
+
+Retrieve a one-time nonce required to construct the EIP-712 registration signature. Fetch this immediately before calling `POST /v1/register_account` as nonces are time-limited.
+
+**`GET /v1/registration_nonce`**
+
+No authentication required. No query parameters.
+
+### Example Request
+
+```bash cURL
+curl --request GET \
+  --url 'https://api.liqzero.com/v1/registration_nonce'
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "registration_nonce": "8c7f3e2a1b4d9056"
+  },
+  "timestamp": 1702989203989
+}
+```
+
+<ResponseField name="registration_nonce" type="string">
+  A unique nonce string. Include this value in the EIP-712 typed data before signing with the user's wallet.
+</ResponseField>
+
+---
+
+## Register Account
+
+Register a user's wallet address with LiqZero on a specific chain. This creates the on-chain account and associates it with your builder ID. The user must sign the registration payload using their wallet (EIP-712 on EVM chains).
+
+**`POST /v1/register_account`**
+
+### Request Parameters
+
+<ParamField body="brokerId" type="string" required>
+  Your builder ID assigned when you integrated with LiqZero. This associates the new account with your platform.
+</ParamField>
+
+<ParamField body="chainId" type="integer" required>
+  The numeric chain ID of the network on which to register the account (e.g. `42161` for Arbitrum One, `8453` for Base).
+</ParamField>
+
+<ParamField body="timestamp" type="integer" required>
+  The current Unix timestamp in milliseconds at the time of signing. Must match the timestamp embedded in the EIP-712 payload.
+</ParamField>
+
+<ParamField body="registrationNonce" type="string" required>
+  The nonce obtained from `GET /v1/registration_nonce`. Prevents replay attacks.
+</ParamField>
+
+<ParamField body="userAddress" type="string" required>
+  The user's wallet address being registered.
+</ParamField>
+
+<ParamField body="signature" type="string" required>
+  The EIP-712 wallet signature produced by the user signing the registration typed data with their private key.
+</ParamField>
+
+### Example Request
+
+```bash cURL
+curl --request POST \
+  --url https://api.liqzero.com/v1/register_account \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "brokerId": "my_builder_id",
+    "chainId": 42161,
+    "timestamp": 1649920583000,
+    "registrationNonce": "8c7f3e2a1b4d9056",
+    "userAddress": "0xYourWalletAddress",
+    "signature": "0xSignatureHex..."
+  }'
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "account_id": "0xabc123...accountId",
+    "user_id": 12345
+  },
+  "timestamp": 1702989203989
+}
+```
+
+<ResponseField name="account_id" type="string">
+  The newly created LiqZero account ID. Store this value — it is required as the `perpo-account-id` header on all authenticated API calls.
+</ResponseField>
+
+<ResponseField name="user_id" type="integer">
+  Internal numeric user identifier.
+</ResponseField>
+
+---
+
+## Get Client Info
+
+Retrieve a summary of the authenticated account's collateral, margin, positions, and open orders. Requires authentication.
+
+**`GET /v1/client/info`**
+
+### Example Request
+
+```bash cURL
+curl --request GET \
+  --url https://api.liqzero.com/v1/client/info \
+  --header 'perpo-account-id: <your-account-id>' \
+  --header 'perpo-key: <your-public-key>' \
+  --header 'perpo-signature: <computed-signature>' \
+  --header 'perpo-timestamp: 1649920583000'
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "account_id": "0xabc123...accountId",
+    "total_collateral_value": 10000.00,
+    "free_collateral": 8500.00,
+    "total_pnl_24_h": 120.50,
+    "total_unrealized_pnl": 45.00,
+    "margin_ratio": 0.15,
+    "positions": [
+      {
+        "symbol": "PERP_ETH_USDC",
+        "position_qty": 2.0,
+        "avg_open_price": 1950.00,
+        "unrealized_pnl": 100.00,
+        "mark_price": 2000.00
+      }
+    ]
+  },
+  "timestamp": 1702989203989
+}
+```
+
+<ResponseField name="account_id" type="string">
+  The LiqZero account ID of the authenticated user.
+</ResponseField>
+
+<ResponseField name="total_collateral_value" type="number">
+  Total collateral deposited, in USDC.
+</ResponseField>
+
+<ResponseField name="free_collateral" type="number">
+  Collateral available to open new positions or withdraw, in USDC.
+</ResponseField>
+
+<ResponseField name="total_unrealized_pnl" type="number">
+  Sum of unrealized profit/loss across all open positions, in USDC.
+</ResponseField>
+
+<ResponseField name="margin_ratio" type="number">
+  Current margin ratio of the account. Values approaching 0 indicate risk of liquidation.
+</ResponseField>
+
+<ResponseField name="positions" type="array">
+  List of open positions. Each entry includes `symbol`, `position_qty`, `avg_open_price`, `unrealized_pnl`, and `mark_price`.
+</ResponseField>
+
+---
+
+## Add LiqZero Key
+
+Register a new ed25519 public key to enable API authentication for this account. A wallet signature is required to authorize the key addition. After registration, the key can be used in the `perpo-key` header.
+
+**`POST /v1/add_orderly_key`**
+
+### Request Parameters
+
+<ParamField body="orderly_key" type="string" required>
+  The ed25519 public key to register, prefixed with `ed25519:`. Example: `ed25519:8tm7dnKYkSc3FzgPuJaw1wztr79eeZpN35nHW5pL5XhX`.
+</ParamField>
+
+<ParamField body="signature" type="string" required>
+  EIP-712 wallet signature authorizing the key addition. Constructed from the `orderly_key`, `timestamp`, and `brokerId`.
+</ParamField>
+
+<ParamField body="timestamp" type="integer" required>
+  Unix timestamp in milliseconds used in the signed payload.
+</ParamField>
+
+<ParamField body="brokerId" type="string" required>
+  Your builder ID.
+</ParamField>
+
+<ParamField body="chainId" type="integer" required>
+  The chain ID on which to register the key.
+</ParamField>
+
+### Example Request
+
+```bash cURL
+curl --request POST \
+  --url https://api.liqzero.com/v1/add_orderly_key \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "orderly_key": "ed25519:8tm7dnKYkSc3FzgPuJaw1wztr79eeZpN35nHW5pL5XhX",
+    "signature": "0xWalletSignatureHex...",
+    "timestamp": 1649920583000,
+    "brokerId": "my_builder_id",
+    "chainId": 42161
+  }'
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "key": "ed25519:8tm7dnKYkSc3FzgPuJaw1wztr79eeZpN35nHW5pL5XhX",
+    "key_status": "ACTIVE"
+  },
+  "timestamp": 1702989203989
+}
+```
+
+<ResponseField name="key" type="string">
+  The public key that was registered.
+</ResponseField>
+
+<ResponseField name="key_status" type="string">
+  Status of the registered key. Returns `"ACTIVE"` when the key is ready for use in API requests.
+</ResponseField>
+
+<Tip>
+  Generate a new ed25519 key pair for each integration environment (mainnet/testnet). Store private keys securely — treat them with the same care as wallet private keys. Compromised keys can be removed and replaced by registering a new key pair.
+</Tip>

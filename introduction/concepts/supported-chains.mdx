@@ -1,0 +1,72 @@
+---
+title: 'Supported Chains on LiqZero'
+sidebarTitle: 'Supported Chains'
+description: 'LiqZero supports 15 EVM chains and Solana. Users can register, deposit, trade, and withdraw from any supported chain without bridging.'
+---
+
+LiqZero deploys its Asset Layer smart contracts on every supported chain, so users can register accounts, deposit USDC, trade perpetual futures, and withdraw back to their wallet — all without leaving the chain they already use. As a builder, you choose which of these chains to surface in your product. New chains are added over time as LiqZero expands the Asset Layer footprint.
+
+## What "Supported" Means
+
+A chain is supported when LiqZero has deployed its vault and account registration contracts on it and wired up the cross-chain relay to the Settlement Layer. On a supported chain, your users can:
+
+- **Register** a LiqZero trading account linked to their wallet address
+- **Deposit** USDC into the shared liquidity pool
+- **Trade** perpetual futures against the shared orderbook
+- **Withdraw** USDC back to their wallet on any supported chain
+
+No bridging step is required at any point. The user's funds flow in and out of LiqZero entirely through the Asset Layer contracts on their native chain.
+
+## EVM Chains
+
+The following EVM-compatible chains are currently supported:
+
+| Chain | Type | Notes |
+|---|---|---|
+| **Arbitrum** | EVM (L2) | Primary recommended chain for builders |
+| **Optimism** | EVM (L2) | OP Stack chain |
+| **Base** | EVM (L2) | Coinbase OP Stack chain |
+| **Mantle** | EVM (L2) | Mantle Network |
+| **Ethereum** | EVM (L1) | Ethereum mainnet |
+| **SEI** | EVM (L1) | SEI Network EVM environment |
+| **Avalanche** | EVM (L1) | Avalanche C-Chain |
+| **Morph** | EVM (L2) | Morph L2 |
+| **Sonic** | EVM (L1) | Sonic Network |
+| **Story** | EVM (L1) | Story Protocol chain |
+| **Mode** | EVM (L2) | Mode Network OP Stack chain |
+| **Plume** | EVM (L2) | Plume Network |
+| **Abstract** | EVM (L2) | Abstract L2 |
+| **BNB Smart Chain** | EVM (L1) | BSC mainnet |
+| **Monad** | EVM (L1) | Monad high-throughput chain |
+
+## Non-EVM Chains
+
+<CardGroup cols={1}>
+  <Card title="Solana" icon="circle-dot">
+    Solana is LiqZero's primary non-EVM supported chain. Users on Solana can register accounts, deposit USDC (SPL), trade, and withdraw using their Solana wallet. The Asset Layer on Solana connects to the same shared liquidity pool and Settlement Layer as all EVM chains. Full program addresses are listed on the [Contract Addresses](/api-reference/contracts/addresses#solana) page.
+  </Card>
+</CardGroup>
+
+## Chain Coverage for Builders
+
+When you build on LiqZero, you decide which supported chains to expose to your users. A user arriving with a Base wallet can deposit and trade without you needing to support every chain in the list. You can launch with a subset of chains and expand later — adding a new chain means pointing your frontend at the correct Asset Layer contract address for that chain. No changes to your Engine Layer integration are required.
+
+<Tip>
+  Start with the chains your target users are most active on. Arbitrum, Base, and Optimism cover the majority of EVM DeFi activity and have well-established USDC liquidity. Solana is the recommended starting point for non-EVM coverage.
+</Tip>
+
+## Finding Contract Addresses
+
+Every supported chain has a dedicated set of smart contract addresses for the vault, account registration, and related contracts. Full addresses — including Solana program IDs — are published on the Contract Addresses reference page.
+
+<Card title="Contract Addresses" icon="file-contract" href="/api-reference/contracts/addresses">
+  View deployed Asset Layer contract addresses for all supported EVM chains and Solana.
+</Card>
+
+## Chain Additions
+
+LiqZero adds new chains on an ongoing basis. When a new chain launches, the Asset Layer contracts are deployed, the cross-chain relay is configured, and the chain becomes available for builders to integrate. Watch the product changelog or join the builder community for announcements about new chain support.
+
+<Note>
+  The chain list above reflects currently supported mainnet deployments. Testnet support may differ. Check the [Contract Addresses](/api-reference/contracts/addresses) page for the most current deployment status of each chain, including testnet contract addresses where available.
+</Note>
