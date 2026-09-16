@@ -1,5 +1,5 @@
 ---
-title: 'Register and Manage User Accounts on LiqZero'
+title: 'LiqZero Account Setup: Registration and ID Derivation'
 sidebarTitle: 'Accounts'
 description: 'Learn how LiqZero account IDs are computed, how to check registration status, and how to register a new account using EIP-712 signatures.'
 ---
@@ -45,7 +45,7 @@ Before a user can deposit funds or place orders, their wallet must be registered
   </Step>
 
   <Step title="Check if the wallet is already registered">
-    Avoid duplicate registration errors by checking first. Use the **Check Wallet Registration** or **Check Account Exists** public API endpoints.
+    Avoid duplicate registration errors by checking first. Call `GET /v1/check_registered` with the wallet address to see whether an account already exists for that wallet.
 
     <CodeGroup>
       ```java Java
@@ -57,14 +57,14 @@ Before a user can deposit funds or place orders, their wallet must be registered
       String walletAddress = "0xYourWalletAddress";
 
       Request checkReq = new Request.Builder()
-            .url(baseUrl + "/v1/get_account?address=" + walletAddress + "&broker_id=your_broker_id")
+            .url(baseUrl + "/v1/check_registered?address=" + walletAddress)
             .build();
       String checkRes;
       try (Response response = client.newCall(checkReq).execute()) {
           checkRes = response.body().string();
       }
       JSONObject checkObj = new JSONObject(checkRes);
-      boolean isRegistered = checkObj.getJSONObject("data").getBoolean("account_id") != null;
+      boolean isRegistered = checkObj.getJSONObject("data").getBoolean("registered");
       ```
 
       ```python Python
@@ -73,14 +73,13 @@ Before a user can deposit funds or place orders, their wallet must be registered
       base_url = "https://testnet-api.liqzero.com"
 
       wallet_address = "0xYourWalletAddress"
-      broker_id = "your_broker_id"
 
       res = requests.get(
-          f"{base_url}/v1/get_account",
-          params={"address": wallet_address, "broker_id": broker_id}
+          f"{base_url}/v1/check_registered",
+          params={"address": wallet_address}
       )
       response = json.loads(res.text)
-      is_registered = response.get("data", {}).get("account_id") is not None
+      is_registered = response.get("data", {}).get("registered") == True
       print("Already registered:", is_registered)
       ```
 
@@ -88,13 +87,12 @@ Before a user can deposit funds or place orders, their wallet must be registered
       const BASE_URL = "https://testnet-api.liqzero.com";
 
       const walletAddress = "0xYourWalletAddress";
-      const brokerId = "your_broker_id";
 
       const checkRes = await fetch(
-        `${BASE_URL}/v1/get_account?address=${walletAddress}&broker_id=${brokerId}`
+        `${BASE_URL}/v1/check_registered?address=${walletAddress}`
       );
       const checkJson = await checkRes.json();
-      const isRegistered = checkJson.data?.account_id != null;
+      const isRegistered = checkJson.data?.registered === true;
       console.log("Already registered:", isRegistered);
       ```
     </CodeGroup>

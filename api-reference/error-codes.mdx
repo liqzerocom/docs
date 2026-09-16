@@ -1,5 +1,5 @@
 ---
-title: 'LiqZero API Error Codes Reference'
+title: 'LiqZero API Error Codes: HTTP Status and Descriptions'
 sidebarTitle: 'Error Codes'
 description: 'Complete list of LiqZero API error codes with HTTP status codes, descriptions, and resolution guidance for every failure category.'
 ---
@@ -24,6 +24,12 @@ When a LiqZero API request fails, the response body always follows the same stru
 
 ## Error Code Reference
 
+### General Errors (−1000)
+
+| Error Code | HTTP Status | Description |
+|---|---|---|
+| `-1000` | 400 | An unknown or unexpected error occurred while processing the request. If this error persists, contact support with the full request details. |
+
 ### Authentication & Key Errors (−1001, −1002)
 
 These errors indicate a problem with your request credentials. Check your key registration, account association, and signing logic before retrying.
@@ -31,7 +37,7 @@ These errors indicate a problem with your request credentials. Check your key re
 | Error Code | HTTP Status | Description |
 |---|---|---|
 | `-1001` | 401 | The `perpo-key` header is in the wrong format. Ensure the key is a valid base58-encoded ed25519 public key, provided without the `ed25519:` prefix. |
-| `-1002` | 401 | The API key or secret is invalid. The key may have insufficient permissions, be expired, or have been revoked. Re-register the key using `POST /v1/add_orderly_key`. |
+| `-1002` | 401 | The API key or secret is invalid. The key may have insufficient permissions, be expired, or have been revoked. Re-register the key via the [Accounts API](/api-reference/rest/accounts). |
 
 ### Rate Limiting (−1003)
 

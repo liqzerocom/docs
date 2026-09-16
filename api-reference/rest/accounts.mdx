@@ -1,5 +1,5 @@
 ---
-title: 'Accounts REST API — Register, Query, and Manage'
+title: 'REST Accounts API — Registration and Key Management'
 sidebarTitle: 'Accounts'
 description: 'Register user accounts on-chain, query wallet registration status, retrieve account info, and manage ed25519 LiqZero keys via the Accounts API.'
 ---
@@ -222,16 +222,16 @@ curl --request GET \
 
 Register a new ed25519 public key to enable API authentication for this account. A wallet signature is required to authorize the key addition. After registration, the key can be used in the `perpo-key` header.
 
-**`POST /v1/add_orderly_key`**
+**`POST /v1/add_perpo_key`**
 
 ### Request Parameters
 
-<ParamField body="orderly_key" type="string" required>
+<ParamField body="perpo_key" type="string" required>
   The ed25519 public key to register, prefixed with `ed25519:`. Example: `ed25519:8tm7dnKYkSc3FzgPuJaw1wztr79eeZpN35nHW5pL5XhX`.
 </ParamField>
 
 <ParamField body="signature" type="string" required>
-  EIP-712 wallet signature authorizing the key addition. Constructed from the `orderly_key`, `timestamp`, and `brokerId`.
+  EIP-712 wallet signature authorizing the key addition. Constructed from the `perpo_key`, `timestamp`, and `brokerId`.
 </ParamField>
 
 <ParamField body="timestamp" type="integer" required>
@@ -250,10 +250,10 @@ Register a new ed25519 public key to enable API authentication for this account.
 
 ```bash cURL
 curl --request POST \
-  --url https://api.liqzero.com/v1/add_orderly_key \
+  --url https://api.liqzero.com/v1/add_perpo_key \
   --header 'Content-Type: application/json' \
   --data '{
-    "orderly_key": "ed25519:8tm7dnKYkSc3FzgPuJaw1wztr79eeZpN35nHW5pL5XhX",
+    "perpo_key": "ed25519:8tm7dnKYkSc3FzgPuJaw1wztr79eeZpN35nHW5pL5XhX",
     "signature": "0xWalletSignatureHex...",
     "timestamp": 1649920583000,
     "brokerId": "my_builder_id",

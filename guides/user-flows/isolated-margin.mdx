@@ -1,5 +1,5 @@
 ---
-title: 'Using Isolated Margin Mode on LiqZero'
+title: 'Configure and Use Isolated Margin Mode on LiqZero Perps'
 sidebarTitle: 'Isolated Margin'
 description: 'Allocate dedicated margin per position with independent leverage settings and full risk isolation — one position liquidates without affecting the rest.'
 ---
@@ -21,43 +21,54 @@ Both modes can be active simultaneously on the same account. You can hold a Cros
 ## Integration Steps
 
 <Steps>
-  <Step title="Set Leverage for Isolated Mode">
-    Each symbol tracks independent leverage settings per margin mode. Before placing an isolated order, set the desired leverage for `ISOLATED` mode on the target symbol.
+  <Step title="Set the Margin Mode for a Symbol">
+    Before placing an isolated order, set `ISOLATED` as the margin mode for the target symbol using `PUT /v1/position/margin_mode`. This records the per-symbol margin mode preference for the account.
 
-    **`POST /v1/client/leverages`**
+    **`PUT /v1/position/margin_mode`**
 
     ```json Request Body
     {
       "symbol": "PERP_ETH_USDC",
-      "leverage": 10,
       "margin_mode": "ISOLATED"
     }
     ```
 
-    To read back the currently configured leverage:
+    ```json Response
+    {
+      "success": true,
+      "data": {}
+    }
+    ```
 
-    **`GET /v1/client/leverage?symbol=PERP_ETH_USDC&margin_mode=ISOLATED`**
+    To retrieve the currently configured margin modes across all symbols, use the read endpoint:
+
+    **`GET /v1/position/margin_modes`**
 
     ```json Response
     {
       "success": true,
       "data": {
-        "symbol": "PERP_ETH_USDC",
-        "leverage": 10,
-        "margin_mode": "ISOLATED"
+        "rows": [
+          {
+            "symbol": "PERP_ETH_USDC",
+            "margin_mode": "ISOLATED"
+          },
+          {
+            "symbol": "PERP_BTC_USDC",
+            "margin_mode": "CROSS"
+          }
+        ]
       }
     }
     ```
 
-    Higher leverage means less margin is allocated from your balance when the position opens, but your liquidation price moves closer to entry.
-
     <Tip>
-      When calling `POST /v1/client/leverages` without a `symbol`, the behavior differs by mode: Cross updates all symbols atomically (all succeed or none do), while Isolated only updates symbols that have no active positions or pending orders.
+      You only need to call `PUT /v1/position/margin_mode` once per symbol unless you want to switch modes. The configured mode is stored per-account per-symbol and persists across sessions.
     </Tip>
   </Step>
 
   <Step title="Place an Order in Isolated Mode">
-    Pass `"margin_mode": "ISOLATED"` in the order body. The engine allocates margin from your available balance based on the leverage you set in Step 1.
+    Pass `"margin_mode": "ISOLATED"` in the order body. The engine allocates margin from your available balance according to the position's leverage setting.
 
     **`POST /v1/order`**
 
@@ -72,7 +83,7 @@ Both modes can be active simultaneously on the same account. You can hold a Cros
     }
     ```
 
-    If you omit `margin_mode`, the system uses the symbol's default margin mode. You can update the default display mode via `POST /v1/client/margin_mode` — this controls the UI default but does not restrict which mode you can trade in on any given order.
+    If you omit `margin_mode`, the system uses the symbol's default margin mode as configured in Step 1.
 
     ```json Response
     {
@@ -93,9 +104,9 @@ Both modes can be active simultaneously on the same account. You can hold a Cros
   </Step>
 
   <Step title="Adjust Position Margin">
-    After the position is open, add or reduce the margin allocated to it at any time. Adding margin lowers the liquidation price (reduces risk); reducing margin frees up balance but raises the liquidation price.
+    After the position is open, add or reduce the margin allocated to it at any time using `POST /v1/position/margin`. Adding margin lowers the liquidation price (reduces risk); reducing margin frees up balance but raises the liquidation price.
 
-    **`POST /v1/position_margin`**
+    **`POST /v1/position/margin`**
 
     <Tabs>
       <Tab title="Add Margin">
@@ -154,7 +165,7 @@ Both modes can be active simultaneously on the same account. You can hold a Cros
     |---|---|
     | `margin` | USDC allocated to this isolated position |
     | `est_liq_price` | Estimated price at which liquidation triggers |
-    | `unsettled_pnl` | Unrealized PnL; settled separately via `/v1/settle_pnl` |
+    | `unsettled_pnl` | Unrealized PnL; settled separately via `POST /v1/settle_pnl` |
     | `imr` | Initial margin ratio required to open the position |
     | `mmr` | Maintenance margin ratio below which liquidation triggers |
 
@@ -162,9 +173,18 @@ Both modes can be active simultaneously on the same account. You can hold a Cros
   </Step>
 </Steps>
 
+## API Reference Summary
+
+| Endpoint | Purpose |
+|---|---|
+| `PUT /v1/position/margin_mode` | Set the margin mode (CROSS or ISOLATED) for a symbol |
+| `GET /v1/position/margin_modes` | Retrieve the configured margin mode for all symbols |
+| `POST /v1/position/margin` | Add or reduce margin on an open isolated position |
+| `POST /v1/order` | Place an order, passing `margin_mode` to select the mode per order |
+
 ## Account Balance — Isolated Margin Fields
 
-The `GET /v1/client/aggregate/holding` endpoint exposes two fields that reflect your isolated margin usage across all positions:
+The `GET /v1/client/info` endpoint exposes two fields that reflect your isolated margin usage across all positions:
 
 <ResponseField name="isolated_margin" type="number">
   Total USDC currently allocated across all active isolated positions
@@ -189,6 +209,8 @@ The steps the liquidation engine takes are:
 2. The engine flags the position for liquidation
 3. The position is closed at the best available market price
 4. Any remaining margin (after losses and fees) is returned to available balance
+
+See the [Error Codes](/api-reference/error-codes) reference for margin-related rejection codes such as insufficient margin or mode-switch conflicts.
 
 ## Related Pages
 

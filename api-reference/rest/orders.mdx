@@ -1,5 +1,5 @@
 ---
-title: 'Orders REST API — Create, Cancel, and Query'
+title: 'Orders REST API — Create, Cancel, and Query Orders'
 sidebarTitle: 'Orders'
 description: 'Use POST /v1/order to create orders, DELETE /v1/order to cancel, and GET /v1/orders to query order history with filtering and pagination.'
 ---
@@ -462,3 +462,7 @@ print(res.json())
 <ResponseField name="rows[].updated_time" type="integer">
   Last status update time as a 13-digit Unix timestamp in milliseconds.
 </ResponseField>
+
+<Tip>
+  For real-time order status updates without polling, subscribe to the [WebSocket execution report stream](/api-reference/websocket/private-streams). The `executionreport` topic fires instantly on every order state transition — placement, partial fill, fill, and cancellation.
+</Tip>

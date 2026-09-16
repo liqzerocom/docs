@@ -1,5 +1,5 @@
 ---
-title: "Integration Checklist for LiqZero Builders"
+title: "LiqZero Integration Checklist: From Setup to Go-Live"
 sidebarTitle: "Integration Checklist"
 description: "A structured phase-by-phase checklist guiding LiqZero builders from tech stack selection and setup through development, testing, and go-live."
 ---
@@ -7,7 +7,7 @@ description: "A structured phase-by-phase checklist guiding LiqZero builders fro
 Use this checklist to plan, implement, and launch your builder integration on LiqZero. The structure moves from planning and pre-integration setup through core implementation, advanced features, and finally go-live readiness. Work through each phase in order — completing the earlier phases correctly makes the later ones significantly smoother. Each step links to the relevant reference page so you can go deeper without losing your place in the overall sequence.
 
 <Note>
-  A fully working example DEX built on top of the same underlying infrastructure is available at [https://github.com/OrderlyNetwork/example-dex](https://github.com/OrderlyNetwork/example-dex). Use it as a reference implementation while working through this checklist.
+  A fully working example DEX built on top of LiqZero's infrastructure is available through the LiqZero partner portal. Use it as a reference implementation while working through this checklist.
 </Note>
 
 ## Phase Overview
@@ -27,7 +27,7 @@ Use this checklist to plan, implement, and launch your builder integration on Li
       <Card title="React Components SDK" icon="puzzle-piece" href="/sdks/react-sdk">
         Drop-in themed UI components (trading panels, order forms, position tables) that accelerate time to launch for teams building a standard DEX layout.
       </Card>
-      <Card title="Python Connector" icon="python" href="https://github.com/OrderlyNetwork/orderly-evm-connector-python">
+      <Card title="Python Connector" icon="python" href="/api-reference/introduction">
         Server-side integration for trading teams building execution bots, algorithmic strategies, or backend order management systems.
       </Card>
       <Card title="Direct API" icon="terminal" href="/api-reference/introduction">
@@ -48,7 +48,7 @@ Use this checklist to plan, implement, and launch your builder integration on Li
     Before writing integration code, read:
     - [Building on Omnichain](/introduction/getting-started/building-on-omnichain) — the three-layer architecture (Asset, Settlement, Engine) and what each layer handles
     - [Smart Contract Overview](/api-reference/contracts/overview) — how the on-chain contracts interact across chains
-    - [Smart Contract Addresses](/api-reference/contracts/addresses) — deployed Vault and Ledger contract addresses for every supported chain
+    - [Smart Contract Addresses](/api-reference/contracts/addresses) — deployed contract addresses for every supported chain
   </Step>
 
   <Step title="Phase 2: Core Implementation">

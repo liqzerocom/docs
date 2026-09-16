@@ -1,5 +1,5 @@
 ---
-title: 'Wallet Authentication and LiqZero Key Management'
+title: 'LiqZero Authentication: EIP-712 Wallets and ed25519 Keys'
 sidebarTitle: 'Wallet Auth'
 description: 'Set up two-layer authentication on LiqZero: wallet-signed EIP-712 messages for on-chain actions and ed25519 LiqZero keys for signing all API requests.'
 ---
@@ -357,7 +357,7 @@ You can grant multiple scopes in a single key by passing them comma-separated (e
     </CodeGroup>
   </Step>
 
-  <Step title="Register the key via POST /v1/orderly_key">
+  <Step title="Register the key via POST /v1/add_orderly_key">
     Submit the signed message, EIP-712 signature, and the user's wallet address to register the key.
 
     <CodeGroup>
@@ -371,14 +371,14 @@ You can grant multiple scopes in a single key by passing them comma-separated (e
 
       RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json"));
       Request addKeyReq = new Request.Builder()
-            .url(baseUrl + "/v1/orderly_key")
+            .url(baseUrl + "/v1/add_orderly_key")
             .post(body)
             .build();
       String addKeyRes;
       try (Response response = client.newCall(addKeyReq).execute()) {
           addKeyRes = response.body().string();
       }
-      System.out.println("orderly_key response: " + addKeyRes);
+      System.out.println("add_orderly_key response: " + addKeyRes);
       ```
 
       ```python Python
@@ -387,7 +387,7 @@ You can grant multiple scopes in a single key by passing them comma-separated (e
       base_url = "https://testnet-api.liqzero.com"
 
       res = requests.post(
-          f"{base_url}/v1/orderly_key",
+          f"{base_url}/v1/add_orderly_key",
           headers={"Content-Type": "application/json"},
           json={
               "message": add_key_message,
@@ -402,7 +402,7 @@ You can grant multiple scopes in a single key by passing them comma-separated (e
       ```typescript TypeScript
       const BASE_URL = "https://testnet-api.liqzero.com";
 
-      const keyRes = await fetch(`${BASE_URL}/v1/orderly_key`, {
+      const keyRes = await fetch(`${BASE_URL}/v1/add_orderly_key`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -447,7 +447,7 @@ LiqZero keys expire at the timestamp you specify in the `expiration` field when 
 
 1. Generate a new ed25519 keypair.
 2. Sign a new `AddOrderlyKey` EIP-712 message from the user's wallet.
-3. POST to `/v1/orderly_key` as described above.
+3. POST to `/v1/add_orderly_key` as described above.
 4. Update your application to use the new private key for signing requests.
 
 <Note>
@@ -473,7 +473,7 @@ LiqZero keys expire at the timestamp you specify in the `expiration` field when 
   import net.i2p.crypto.eddsa.KeyPairGenerator;
   import okhttp3.*;
 
-  public class OrderlyKeyExample {
+  public class LiqZeroKeyExample {
       public static JSONObject MESSAGE_TYPES = new JSONObject("""
           {
             "EIP712Domain": [
@@ -539,14 +539,14 @@ LiqZero keys expire at the timestamp you specify in the `expiration` field when 
 
           RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json"));
           Request addKeyReq = new Request.Builder()
-                .url(baseUrl + "/v1/orderly_key")
+                .url(baseUrl + "/v1/add_orderly_key")
                 .post(body)
                 .build();
           String addKeyRes;
           try (Response response = client.newCall(addKeyReq).execute()) {
               addKeyRes = response.body().string();
           }
-          System.out.println("orderly_key response: " + addKeyRes);
+          System.out.println("add_orderly_key response: " + addKeyRes);
       }
 
       public static String signatureToHashString(Sign.SignatureData signature) {
@@ -623,7 +623,7 @@ LiqZero keys expire at the timestamp you specify in the `expiration` field when 
   signed_message = account.sign_message(encoded_data)
 
   res = requests.post(
-      f"{base_url}/v1/orderly_key",
+      f"{base_url}/v1/add_orderly_key",
       headers={"Content-Type": "application/json"},
       json={
           "message": add_key_message,
@@ -673,7 +673,7 @@ LiqZero keys expire at the timestamp you specify in the `expiration` field when 
 
   config();
 
-  async function createOrderlyKey(): Promise<void> {
+  async function createLiqZeroKey(): Promise<void> {
     const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!);
 
     const privateKey = utils.randomPrivateKey();
@@ -695,7 +695,7 @@ LiqZero keys expire at the timestamp you specify in the `expiration` field when 
       addKeyMessage
     );
 
-    const keyRes = await fetch(`${BASE_URL}/v1/orderly_key`, {
+    const keyRes = await fetch(`${BASE_URL}/v1/add_orderly_key`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -708,6 +708,6 @@ LiqZero keys expire at the timestamp you specify in the `expiration` field when 
     console.log("add_key response:", keyJson);
   }
 
-  createOrderlyKey();
+  createLiqZeroKey();
   ```
 </CodeGroup>

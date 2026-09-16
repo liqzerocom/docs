@@ -1,20 +1,20 @@
 ---
-title: "Troubleshooting LiqZero Integration Issues"
+title: "LiqZero Integration Troubleshooting and Diagnostics"
 sidebarTitle: "Troubleshooting"
-description: "Start here to diagnose any LiqZero integration, account, transaction, or trading issue — with links to detailed per-issue diagnostic guides."
+description: "Start here to diagnose any LiqZero integration, account, transaction, or trading issue — with structured diagnostic paths for every issue type."
 ---
 
 When a user or your integration hits an unexpected error, this page is your starting point. Most issues fall into one of a handful of categories — failed transactions, deposit delays, withdrawal problems, liquidation disputes, or API authentication errors — and each has a structured diagnostic path. Work through the steps below before escalating to the support team, as the majority of issues can be resolved without a ticket.
 
 <Note>
-  For integration-specific questions during development, check the [Integration FAQs](/support/troubleshooting) page first. It covers the most common setup and behavior questions builders encounter.
+  For integration-specific questions during development, check the [Troubleshooting](/support/troubleshooting) page first. It covers the most common setup and behavior questions builders encounter.
 </Note>
 
 ## Diagnostic Path
 
 <Steps>
-  <Step title="Check the Integration FAQs">
-    If you're building on LiqZero and hitting unexpected behavior, the [Integration FAQs](/support/troubleshooting) page covers common setup mistakes, authentication edge cases, and order rejection scenarios.
+  <Step title="Check the Troubleshooting Guide">
+    If you're building on LiqZero and hitting unexpected behavior, review the sections below — they cover common setup mistakes, authentication edge cases, and order rejection scenarios.
   </Step>
   <Step title="Use the Support Dashboard">
     The [LiqZero Dashboard](https://orderly-dashboard.orderly.network/) lets you look up a user account by wallet address and retrieve their deposit/withdrawal history, open positions, and order history. Use this to confirm whether a user action was received and processed before diagnosing further.
@@ -33,17 +33,17 @@ When a user or your integration hits an unexpected error, this page is your star
   <Card title="Transaction & Order Failures" icon="triangle-exclamation" href="/support/transaction-issues">
     Diagnose failed deposits, withdrawals, registrations, and order rejections. Covers on-chain revert reasons and API-level error codes.
   </Card>
-  <Card title="Deposit Issues" icon="arrow-down-to-bracket" href="/support/troubleshooting">
-    Investigate stuck or delayed deposits, including cross-chain message delays and token approval failures.
+  <Card title="Deposit Issues" icon="arrow-down-to-bracket">
+    Investigate stuck or delayed deposits, including cross-chain message delays and token approval failures. Confirm the `Vault.deposit()` transaction succeeded on-chain and that the user approved a sufficient USDC allowance before depositing.
   </Card>
   <Card title="Withdrawal Issues" icon="arrow-up-from-bracket" href="/support/withdrawal-issues">
     Trace delayed or missing withdrawals through the LayerZero cross-chain messaging layer and destination chain block explorers.
   </Card>
-  <Card title="Liquidation Issues" icon="chart-line-down" href="/support/troubleshooting">
-    Review unexpected liquidation events, margin calculations, and liquidation price discrepancies.
+  <Card title="Liquidation Issues" icon="chart-line-down">
+    Review unexpected liquidation events by checking margin calculations, the maintenance margin threshold, and the account's position history via `GET /v1/client/info`. Confirm the mark price used for liquidation against the orderbook mid price at the time of the event.
   </Card>
-  <Card title="Wrong Execution Prices" icon="arrows-up-down" href="/support/troubleshooting">
-    Investigate orders or positions that closed at prices different from what the user expected.
+  <Card title="Wrong Execution Prices" icon="arrows-up-down">
+    Investigate orders that executed at unexpected prices by retrieving the fill details from `GET /v1/orders` and comparing the fill price to the orderbook state at the time of submission. Slippage on market orders and partial fills on limit orders are the most common causes.
   </Card>
   <Card title="API Authentication Errors" icon="lock" href="/api-reference/authentication">
     Diagnose `perpo-signature` failures, timestamp drift issues, and invalid key errors from the authentication layer.
@@ -84,5 +84,5 @@ Before opening a ticket, run through these fast checks — they resolve the majo
 |---|---|
 | [Discord](https://discord.gg/OrderlyNetwork) | Submit support tickets, ask questions, report bugs |
 | [LiqZero Dashboard](https://orderly-dashboard.orderly.network/) | Look up account state, deposit/withdrawal history |
-| [Integration FAQs](/support/troubleshooting) | Self-serve answers for common builder questions |
+| [Partner Support](/support/partner-support) | Builder resources, grants, and onboarding guidance |
 | [Error Codes Reference](/api-reference/error-codes) | Full table of API error codes and descriptions |

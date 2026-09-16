@@ -1,5 +1,5 @@
 ---
-title: "Diagnose Stuck or Delayed Withdrawals on LiqZero"
+title: "Diagnose Stuck or Delayed LiqZero Withdrawal Requests"
 sidebarTitle: "Withdrawal Issues"
 description: "Diagnose delayed or stuck LiqZero withdrawals by checking asset history, LayerZero message status, and destination chain block explorers."
 ---
@@ -30,7 +30,7 @@ If the withdrawal has not arrived after the expected window, proceed with the di
 
 <Steps>
   <Step title="Confirm the withdrawal request was accepted">
-    Query the user's asset history to confirm that LiqZero received and processed the withdrawal request. A withdrawal that appears in the history with a `processing` or `completed` status was accepted by the system.
+    Query the user's asset history to confirm that LiqZero received and processed the withdrawal request. A withdrawal that appears in the history with a `processing` or `completed` status was accepted by the system. See the [Asset History endpoint](/api-reference/rest/assets) for full response schema and filter options.
 
     ```bash
     GET https://api.liqzero.com/v1/asset/history?type=WITHDRAW

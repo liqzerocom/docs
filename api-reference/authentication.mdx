@@ -1,7 +1,7 @@
 ---
-title: 'Authenticate LiqZero API Requests with ed25519'
+title: 'LiqZero API Authentication with ed25519 Signatures'
 sidebarTitle: 'Authentication'
-description: 'Generate ed25519 signatures, set the required request headers, and understand key validation rules for every private LiqZero API call.'
+description: 'Learn to generate ed25519 signatures, set all required request headers, and understand the timestamp window and key rules for LiqZero API calls.'
 ---
 
 Every private LiqZero API endpoint requires cryptographic request signing using the [ed25519 elliptic curve standard](https://ed25519.cr.yp.to/). Rather than passing an API key and secret in a traditional header pair, you sign a normalized representation of each request with your ed25519 private key and send the resulting signature alongside your public key and account ID. This design means your private key never leaves your environment — the server only needs your public key to verify the signature.
@@ -30,7 +30,7 @@ Include the following headers on every authenticated request:
   </Step>
 
   <Step title="Set your perpo-key">
-    Generate an ed25519 key pair and register the public key with LiqZero. Add the public key (without the `ed25519:` prefix) to the `perpo-key` header. See the [Key Management](/api-reference/rest/accounts#add-liqzero-key) section for how to register a new key.
+    Generate an ed25519 key pair and register the public key with LiqZero. Add the public key (without the `ed25519:` prefix) to the `perpo-key` header. See the [Accounts API](/api-reference/rest/accounts) for how to register a new key.
   </Step>
 
   <Step title="Capture the current timestamp">
@@ -81,7 +81,7 @@ import { getPublicKeyAsync, signAsync } from '@noble/ed25519';
 import { encodeBase58 } from 'ethers';
 
 export async function signAndSendRequest(
-  orderlyAccountId: string,
+  liqzeroAccountId: string,
   privateKey: Uint8Array | string,
   input: URL | string,
   init?: RequestInit | undefined
@@ -94,7 +94,7 @@ export async function signAndSendRequest(
   if (init?.body) {
     message += init.body;
   }
-  const orderlySignature = await signAsync(encoder.encode(message), privateKey);
+  const liqzeroSignature = await signAsync(encoder.encode(message), privateKey);
 
   return fetch(input, {
     headers: {
@@ -103,9 +103,9 @@ export async function signAndSendRequest(
           ? 'application/json'
           : 'application/x-www-form-urlencoded',
       'perpo-timestamp': String(timestamp),
-      'perpo-account-id': orderlyAccountId,
-      'perpo-key': `ed25519:${encodeBase58(await getPublicKeyAsync(privateKey))}`,
-      'perpo-signature': Buffer.from(orderlySignature).toString('base64url'),
+      'perpo-account-id': liqzeroAccountId,
+      'perpo-key': encodeBase58(await getPublicKeyAsync(privateKey)),
+      'perpo-signature': Buffer.from(liqzeroSignature).toString('base64url'),
       ...(init?.headers ?? {})
     },
     ...(init ?? {})
@@ -126,12 +126,12 @@ config();
 
 async function main() {
   const baseUrl = 'https://api.liqzero.com';
-  const orderlyAccountId = '<your-account-id>';
-  const orderlyKey = bs58.decode(process.env.ORDERLY_SECRET!);
+  const liqzeroAccountId = '<your-account-id>';
+  const liqzeroKey = bs58.decode(process.env.LIQZERO_SECRET!);
 
   const res = await signAndSendRequest(
-    orderlyAccountId,
-    orderlyKey,
+    liqzeroAccountId,
+    liqzeroKey,
     `${baseUrl}/v1/order`,
     {
       method: 'POST',
@@ -170,26 +170,24 @@ class Signer(object):
         epoch = datetime(1970, 1, 1)
         timestamp = math.trunc((d - epoch).total_seconds() * 1_000)
 
-        json_str = ""
-        if req.json is not None:
-            json_str = json.dumps(req.json)
-
         url = urllib.parse.urlparse(req.url)
-        message = str(timestamp) + req.method + url.path + json_str
+        message = str(timestamp) + req.method + url.path
         if len(url.query) > 0:
             message += "?" + url.query
+        if req.json is not None:
+            message += json.dumps(req.json)
 
-        orderly_signature = urlsafe_b64encode(
+        liqzero_signature = urlsafe_b64encode(
             self._private_key.sign(message.encode())
         ).decode("utf-8")
 
         req.headers = {
             "perpo-timestamp": str(timestamp),
             "perpo-account-id": self._account_id,
-            "perpo-key": "ed25519:%s" % b58encode(
+            "perpo-key": b58encode(
                 self._private_key.public_key().public_bytes_raw()
             ).decode("utf-8"),
-            "perpo-signature": orderly_signature,
+            "perpo-signature": liqzero_signature,
         }
         if req.method == "GET" or req.method == "DELETE":
             req.headers["Content-Type"] = "application/x-www-form-urlencoded"
@@ -208,13 +206,13 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from signer import Signer
 
 base_url = "https://api.liqzero.com"
-orderly_account_id = "<your-account-id>"
+liqzero_account_id = "<your-account-id>"
 
-key = b58decode(os.environ.get("ORDERLY_SECRET"))
-orderly_key = Ed25519PrivateKey.from_private_bytes(key)
+key = b58decode(os.environ.get("LIQZERO_SECRET"))
+liqzero_key = Ed25519PrivateKey.from_private_bytes(key)
 
 session = Session()
-signer = Signer(orderly_account_id, orderly_key)
+signer = Signer(liqzero_account_id, liqzero_key)
 
 req = signer.sign_request(
     Request(
@@ -248,17 +246,17 @@ import org.json.JSONObject;
 public class AuthenticationExample {
     public static void main(String[] args) throws Exception {
         String baseUrl = "https://api.liqzero.com";
-        String orderlyAccountId = "<your-account-id>";
+        String liqzeroAccountId = "<your-account-id>";
 
         Dotenv dotenv = Dotenv.load();
         OkHttpClient client = new OkHttpClient();
 
-        String key = dotenv.get("ORDERLY_SECRET");
+        String key = dotenv.get("LIQZERO_SECRET");
         EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
         EdDSAPrivateKeySpec encoded = new EdDSAPrivateKeySpec(Base58.decode(key), spec);
-        EdDSAPrivateKey orderlyKey = new EdDSAPrivateKey(encoded);
+        EdDSAPrivateKey liqzeroKey = new EdDSAPrivateKey(encoded);
 
-        Signer signer = new Signer(baseUrl, orderlyAccountId, orderlyKey);
+        Signer signer = new Signer(baseUrl, liqzeroAccountId, liqzeroKey);
 
         JSONObject json = new JSONObject();
         json.put("symbol", "PERP_ETH_USDC");
@@ -282,7 +280,7 @@ curl --request POST \
   --url https://api.liqzero.com/v1/order \
   --header 'Content-Type: application/json' \
   --header 'perpo-account-id: <your-account-id>' \
-  --header 'perpo-key: ed25519:8tm7dnKYkSc3FzgPuJaw1wztr79eeZpN35nHW5pL5XhX' \
+  --header 'perpo-key: 8tm7dnKYkSc3FzgPuJaw1wztr79eeZpN35nHW5pL5XhX' \
   --header 'perpo-signature: dG4bkKiqG0dUYLzViRZkvbI6Sy239JxAdNMIBxFZ4w03...' \
   --header 'perpo-timestamp: 1649920583000' \
   --data '{
@@ -310,7 +308,7 @@ LiqZero validates every incoming request through three independent checks. A req
 
 <Accordion title="Key Validity Check">
   The `perpo-key` header must reference a key that satisfies all of the following:
-  - **Registered** — the key has been added to the LiqZero network via the `POST /v1/add_orderly_key` endpoint
+  - **Registered** — the key has been added to LiqZero via the [Accounts API](/api-reference/rest/accounts)
   - **Associated** — the key is linked to the account identified by `perpo-account-id`
   - **Not expired** — the key has not passed its expiry date or been revoked
 </Accordion>
@@ -320,6 +318,6 @@ LiqZero validates every incoming request through three independent checks. A req
 | Error Code | Cause | Resolution |
 |---|---|---|
 | `-1001` | The `perpo-key` header is malformed or uses an unsupported format | Ensure the key is a valid base58-encoded ed25519 public key without the `ed25519:` prefix |
-| `-1002` | The key is invalid, has insufficient permissions, or has expired | Re-register the key with `POST /v1/add_orderly_key`, check account association, and verify the key has not expired |
+| `-1002` | The key is invalid, has insufficient permissions, or has expired | Re-register the key via the [Accounts API](/api-reference/rest/accounts), check account association, and verify the key has not expired |
 
 See the full [Error Codes](/api-reference/error-codes) reference for all possible failure codes.

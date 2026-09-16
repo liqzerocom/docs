@@ -1,5 +1,5 @@
 ---
-title: 'LiqZero Smart Contract Architecture Overview'
+title: 'LiqZero Smart Contract Architecture and Vault Overview'
 sidebarTitle: 'Contract Overview'
 description: 'Understand how LiqZero vault contracts handle asset custody, cross-chain deposits and withdrawals, and on-chain PnL settlement across supported chains.'
 ---
@@ -113,7 +113,7 @@ Order matching and position management happen entirely off-chain within LiqZero'
 
 ## Security and Audits
 
-All LiqZero vault and settlement contracts are fully audited. Audit reports are publicly available at [github.com/OrderlyNetwork/Audits](https://github.com/OrderlyNetwork/Audits). All contracts are verified on their respective chain explorers — you can read the ABI and source code directly. The latest contract ABI files are published on [GitHub](https://github.com/OrderlyNetwork/contract-evm-abi).
+All LiqZero vault and settlement contracts are fully audited. Audit reports are publicly available on the official LiqZero GitHub. All contracts are verified on their respective chain explorers — you can read the ABI and source code directly. The latest contract ABI files are published on the official LiqZero GitHub repository.
 
 <Warning>
 Never integrate against unverified contract addresses. Always cross-reference addresses from the official [Contract Addresses](/api-reference/contracts/addresses) page before sending user funds. Do not rely on addresses obtained from third-party sources.

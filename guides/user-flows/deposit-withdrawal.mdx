@@ -1,5 +1,5 @@
 ---
-title: 'Deposit and Withdraw USDC on LiqZero'
+title: 'LiqZero Deposits and Withdrawals: USDC Vault Guide'
 sidebarTitle: 'Deposit & Withdrawal'
 description: 'Move USDC into and out of LiqZero accounts: approve the Vault contract, call the deposit function on-chain, and submit signed EIP-712 withdrawal requests.'
 ---
@@ -387,7 +387,7 @@ Withdrawals move USDC from a user's LiqZero account balance to a wallet on any s
     Fetch a one-time nonce from the **Get Withdrawal Nonce** private API endpoint. This nonce is embedded in the EIP-712 message to prevent replay attacks.
 
     ```http
-    GET /v1/withdraw_nonce
+    GET /v1/withdrawal_nonce
     ```
 
     Response:
@@ -395,7 +395,7 @@ Withdrawals move USDC from a user's LiqZero account balance to a wallet on any s
     {
       "success": true,
       "data": {
-        "withdraw_nonce": 7
+        "withdrawal_nonce": 7
       }
     }
     ```

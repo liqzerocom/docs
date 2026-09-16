@@ -20,7 +20,7 @@ After opening the WebSocket connection, send an `auth` event before any subscrib
   "id": "auth_req",
   "event": "auth",
   "params": {
-    "orderly_key": "your_perpo_key",
+    "perpo_key": "your_perpo_key",
     "sign": "base64url_ed25519_signature",
     "timestamp": 1649920583000
   }
@@ -286,7 +286,7 @@ The following shows a full execution report payload. The `status` field tells yo
 </ResponseField>
 
 <ResponseField name="data.timestamp" type="integer">
-  Exchange-side Unix timestamp in milliseconds of the event that triggered this report.
+  Exchange-side Unix timestamp in milliseconds of the event that triggered this report. Also referred to as `transactTime` in FIX protocol conventions — represents the time at which the order state transition was processed by the matching engine.
 </ResponseField>
 
 <ResponseField name="data.marginMode" type="string">

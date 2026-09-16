@@ -16,7 +16,7 @@ The Assets API covers all fund movement operations on the LiqZero platform. Depo
 
 Retrieve a one-time nonce required to construct the withdrawal signature. Fetch a fresh nonce immediately before each withdrawal request, as nonces are single-use.
 
-**`GET /v1/withdraw_nonce`**
+**`GET /v1/withdrawal_nonce`**
 
 Requires authentication.
 
@@ -24,7 +24,7 @@ Requires authentication.
 
 ```bash cURL
 curl --request GET \
-  --url https://api.liqzero.com/v1/withdraw_nonce \
+  --url https://api.liqzero.com/v1/withdrawal_nonce \
   --header 'perpo-account-id: <your-account-id>' \
   --header 'perpo-key: <your-public-key>' \
   --header 'perpo-signature: <computed-signature>' \
@@ -80,7 +80,7 @@ Requires authentication.
 </ParamField>
 
 <ParamField body="withdrawNonce" type="number" required>
-  The nonce obtained from `GET /v1/withdraw_nonce`. Prevents replay attacks.
+  The nonce obtained from `GET /v1/withdrawal_nonce`. Prevents replay attacks.
 </ParamField>
 
 <ParamField body="timestamp" type="integer" required>

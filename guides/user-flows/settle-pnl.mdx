@@ -1,7 +1,7 @@
 ---
-title: 'Settle Realized PnL into USDC on LiqZero'
+title: 'Settle Realized PnL into Spendable USDC on LiqZero'
 sidebarTitle: 'Settle PnL'
-description: "Convert realized and unrealized perpetual futures PnL into spendable USDC balance using LiqZero's EIP-712 signed settlement flow."
+description: "Convert realized and unrealized perpetual futures PnL into spendable USDC balance using LiqZero's secure EIP-712 signed settlement flow."
 ---
 
 Every perpetual futures position on LiqZero accumulates PnL — both realized (from closed trades) and unrealized (from open positions). This PnL does not automatically become part of your spendable USDC balance. To convert it, you must trigger a **PnL settlement** request. Settlement can be requested by the account owner at any time and is also triggerable by third parties (such as other traders or the platform itself) to keep system balances healthy.
@@ -15,7 +15,7 @@ You need to settle PnL before withdrawing profits, when you want to realize gain
 - **Risk management**: regular settlement keeps your collateral accounting clean and avoids accumulating large unsettled amounts
 
 <Note>
-  PnL settlement requests are processed asynchronously. After submitting, verify the settlement landed by polling `GET /v1/asset/history` and looking for a record with type `PNL_SETTLEMENT`.
+  PnL settlement requests are processed asynchronously. After submitting, verify the settlement landed by polling [`GET /v1/asset/history`](/api-reference/rest/assets) and looking for a record with type `PNL_SETTLEMENT`.
 </Note>
 
 ## Settlement Flow
@@ -205,7 +205,7 @@ You need to settle PnL before withdrawing profits, when you want to realize gain
   </Step>
 
   <Step title="Verify Settlement via Asset History">
-    Poll the asset history endpoint to confirm the settlement has been applied to the account balance.
+    Poll the [asset history endpoint](/api-reference/rest/assets) to confirm the settlement has been applied to the account balance.
 
     **`GET /v1/asset/history?type=PNL_SETTLEMENT`**
 
@@ -258,6 +258,9 @@ If your settlement request is rejected, the API returns one of the following err
   </Card>
   <Card title="Internal Transfer" icon="arrow-left-right" href="/guides/user-flows/internal-transfer">
     Move USDC between LiqZero accounts without on-chain gas
+  </Card>
+  <Card title="Asset History" icon="clock-rotate-left" href="/api-reference/rest/assets">
+    Query your transaction and settlement history via GET /v1/asset/history
   </Card>
   <Card title="Error Codes" icon="circle-exclamation" href="/api-reference/error-codes">
     Full API error code reference including settlement-specific codes

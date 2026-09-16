@@ -1,5 +1,5 @@
 ---
-title: "Diagnose Failed Transactions and Order Errors"
+title: "Diagnose Failed Transactions and API Order Rejections"
 sidebarTitle: "Transaction Issues"
 description: "Triage failed transactions and order rejections by separating on-chain revert failures from API-level errors and matching error codes."
 ---
@@ -57,7 +57,7 @@ Once you have this information, determine which category applies:
   | `insufficient allowance` | The user did not approve enough USDC for the Vault contract | Ask the user to approve the correct token amount before depositing |
   | `wrong token` | The user attempted to deposit a non-USDC token | Only USDC deposits are supported |
   | `invalid account id` | The account ID in the calldata does not match the wallet | Verify the account ID was computed correctly from the wallet address and broker ID |
-  | `paused` | The contract is in maintenance mode | Check the [system maintenance status endpoint](/api-reference/introduction) and notify users |
+  | `paused` | The contract is in maintenance mode | Check the [API status and maintenance information](/api-reference/introduction) and notify users |
   | Out of gas | Gas limit was set too low | Ask the user to retry with a higher gas limit |
 
   <Warning>
