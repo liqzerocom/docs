@@ -785,9 +785,6 @@
             ]
           },
           {
-            "tab": "SDKs"
-          },
-          {
             "tab": "SDKs",
             "groups": [
               {
@@ -1258,24 +1255,6 @@
             ]
           },
           {
-            "tab": "Release notes",
-            "groups": [
-              {
-                "group": "Updates by area",
-                "pages": [
-                  "release-notes/omnichain",
-                  "release-notes/sdk"
-                ]
-              },
-              {
-                "group": "Classification",
-                "pages": [
-                  "release-notes/classification"
-                ]
-              }
-            ]
-          },
-          {
             "tab": "Troubleshooting",
             "groups": [
               {
@@ -1295,9 +1274,33 @@
                 ]
               }
             ]
+          },
+          {
+            "tab": "Release notes",
+            "groups": [
+              {
+                "group": "Updates by area",
+                "pages": [
+                  "release-notes/omnichain",
+                  "release-notes/sdk"
+                ]
+              },
+              {
+                "group": "Classification",
+                "pages": [
+                  "release-notes/classification"
+                ]
+              }
+            ]
           }
         ]
       }
+    ]
+  },
+  "api": {
+    "openapi": [
+      "https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/orderly.openapi.yaml",
+      "https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/sv.openapi.yaml"
     ]
   }
 }
