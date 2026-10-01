@@ -8,10 +8,6 @@
     "light": "#BE7CFF",
     "dark": "#AA5CF8"
   },
-  "logo": {
-    "light": "https://mintcdn.com/perpo/30I45GSeWO1hJkLA/logo/perpo_logo.svg?fit=max&auto=format&n=30I45GSeWO1hJkLA&q=85&s=878c7e4579a4f659f187d3a20f1f935e",
-    "dark": "https://mintcdn.com/perpo/30I45GSeWO1hJkLA/logo/perpo_logo.svg?fit=max&auto=format&n=30I45GSeWO1hJkLA&q=85&s=878c7e4579a4f659f187d3a20f1f935e"
-  },
   "navbar": {
     "primary": {
       "type": "github",
