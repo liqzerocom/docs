@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "name": "LiqZero",
   "theme": "mint",
-  "favicon": "/images/liqzero-favicon.png",
+  "favicon": "/liqzero-favicon.png",
   "colors": {
     "primary": "#aa5cf8",
     "light": "#BE7CFF",
@@ -1304,7 +1304,7 @@
     "default": "dark"
   },
   "logo": {
-    "light": "/images/Group(5).png",
-    "dark": "/images/Group(5).png"
+    "light": "/Group (5).png",
+    "dark": "/Group (5).png"
   }
 }
