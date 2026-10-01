@@ -1,20 +1,17 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "LiqZero",
-  "theme": "luma",
-  "favicon": "https://media.brand.dev/ccaedf8d-fda5-4e50-b5f1-056388683946.png",
+  "theme": "mint",
+  "favicon": "/liqzero-favicon.png",
   "colors": {
     "primary": "#aa5cf8",
-    "light": "#fcbd24"
-  },
-  "logo": {
-    "light": "https://mintcdn.com/perpo/30I45GSeWO1hJkLA/logo/perpo_logo.svg?fit=max&auto=format&n=30I45GSeWO1hJkLA&q=85&s=878c7e4579a4f659f187d3a20f1f935e",
-    "dark": "https://mintcdn.com/perpo/30I45GSeWO1hJkLA/logo/perpo_logo.svg?fit=max&auto=format&n=30I45GSeWO1hJkLA&q=85&s=878c7e4579a4f659f187d3a20f1f935e"
+    "light": "#BE7CFF",
+    "dark": "#AA5CF8"
   },
   "navbar": {
     "primary": {
       "type": "github",
-      "href": "https://github.com/OrderlyNetwork/example-dex"
+      "href": "https://github.com/liqzerocom/docs"
     }
   },
   "navigation": {
@@ -1302,5 +1299,12 @@
       "https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/orderly.openapi.yaml",
       "https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/sv.openapi.yaml"
     ]
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "logo": {
+    "light": "/Group (5).png",
+    "dark": "/Group (5).png"
   }
 }
