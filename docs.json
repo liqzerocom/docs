@@ -2,7 +2,10 @@
   "$schema": "https://mintlify.com/docs.json",
   "name": "LiqZero",
   "theme": "mint",
-  "favicon": "/liqzero-favicon.png",
+  "favicon": {
+    "light": "/images/liqzero-favicon.png",
+    "dark": "/images/liqzero-favicon.png"
+  },
   "colors": {
     "primary": "#aa5cf8",
     "light": "#BE7CFF",
@@ -1304,7 +1307,8 @@
     "default": "dark"
   },
   "logo": {
-    "light": "/Group (5).png",
-    "dark": "/Group (5).png"
-  }
+    "light": "/images/Group(5).png",
+    "dark": "/images/Group(5).png"
+  },
+  "description": "Developer documentation for building on LiqZero’s omnichain trading infrastructure. Explore API references, SDK guides, and integration walkthroughs."
 }
