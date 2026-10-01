@@ -1310,5 +1310,12 @@
     "light": "/images/Group(5).png",
     "dark": "/images/Group(5).png"
   },
-  "description": "Developer documentation for building on LiqZero’s omnichain trading infrastructure. Explore API references, SDK guides, and integration walkthroughs."
+  "description": "Developer documentation for building on LiqZero’s omnichain trading infrastructure. Explore API references, SDK guides, and integration walkthroughs.",
+  "redirects": [
+    {
+      "source": "/introduction/getting-started/what-is-liqzero",
+      "destination": "/introduction/getting-started/what-is-orderly",
+      "permanent": true
+    }
+  ]
 }
