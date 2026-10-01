@@ -1,0 +1,222 @@
+---
+title: "Algo Order Sample Requests"
+description: "Sample API request payloads for creating STOP, TP/SL, Positional TP/SL, and Bracket algo orders."
+---
+
+## STOP
+
+A `STOP` order is triggered when the `trigger_price` is reached, creating a new order of the specified `type`.
+
+```json
+{
+  "symbol": "PERP_NEAR_USDC",
+  "algo_type": "STOP",
+  "quantity": "5.5",
+  "side": "BUY",
+  "type": "LIMIT",
+  "trigger_price_type": "MARK_PRICE",
+  "trigger_price": "4.203",
+  "price": "3.5"
+}
+```
+
+## TP_SL
+
+For each `TP_SL` order placed, three algo orders are created in the LiqZero system.
+
+**Rules:**
+
+- To edit a `TP_SL` order, send the edit request on the `root_algo_order` and pass both `root_algo_order` and `child_orders` as parameters. You may pass only one `child_order` for editing. If editing `quantity`, both `child_orders` must be passed with identical `quantity`.
+- Maximum 10 untriggered `TP_SL` orders per user.
+- Maximum 1 untriggered POSITIONAL_TP_SL order per user per symbol per side
+
+### Market TP/SL
+
+```json
+{
+  "symbol": "PERP_NEAR_USDC",
+  "algo_type": "TP_SL",
+  "quantity": "5.5",
+  "trigger_price_type": "MARK_PRICE",
+  "order_tag": "test_tag",
+  "child_orders": [
+    {
+      "symbol": "PERP_NEAR_USDC",
+      "algo_type": "TAKE_PROFIT",
+      "side": "SELL",
+      "type": "MARKET",
+      "trigger_price": 3.365,
+      "reduce_only": true
+    },
+    {
+      "symbol": "PERP_NEAR_USDC",
+      "algo_type": "STOP_LOSS",
+      "side": "SELL",
+      "type": "MARKET",
+      "trigger_price": 3.36,
+      "reduce_only": true
+    }
+  ]
+}
+```
+
+### Limit TP/SL
+
+`TP_SL` orders also support triggering Limit orders:
+
+```json
+{
+  "symbol": "PERP_NEAR_USDC",
+  "algo_type": "TP_SL",
+  "quantity": 6,
+  "trigger_price_type": "MARK_PRICE",
+  "child_orders": [
+    {
+      "symbol": "PERP_NEAR_USDC",
+      "algo_type": "TAKE_PROFIT",
+      "side": "SELL",
+      "type": "LIMIT",
+      "price": 2.4,
+      "trigger_price": 2.3,
+      "reduce_only": true
+    },
+    {
+      "symbol": "PERP_NEAR_USDC",
+      "algo_type": "STOP_LOSS",
+      "side": "SELL",
+      "type": "LIMIT",
+      "price": 2.1,
+      "trigger_price": 1.9,
+      "reduce_only": true
+    }
+  ]
+}
+```
+
+## POSITIONAL_TP_SL
+
+```json
+{
+  "symbol": "PERP_NEAR_USDC",
+  "algo_type": "POSITIONAL_TP_SL",
+  "trigger_price_type": "MARK_PRICE",
+  "child_orders": [
+    {
+      "symbol": "PERP_NEAR_USDC",
+      "algo_type": "TAKE_PROFIT",
+      "side": "SELL",
+      "type": "CLOSE_POSITION",
+      "trigger_price_type": "MARK_PRICE",
+      "trigger_price": 4.05,
+      "reduce_only": true
+    },
+    {
+      "symbol": "PERP_NEAR_USDC",
+      "algo_type": "STOP_LOSS",
+      "side": "SELL",
+      "type": "CLOSE_POSITION",
+      "trigger_price_type": "MARK_PRICE",
+      "trigger_price": 3.95,
+      "reduce_only": true
+    }
+  ]
+}
+```
+
+## BRACKET
+
+A `BRACKET` order tracks a regular order and automatically closes its position with a `TP_SL` or `POSITIONAL_TP_SL` order.
+
+| Term    | Description                                                              |
+| ------- | ------------------------------------------------------------------------ |
+| `leg_1` | The `BRACKET` order and its triggered regular order                      |
+| `leg_2` | The `POSITIONAL_TP_SL` or `TP_SL` order and their triggered child orders |
+
+**Quantity behavior:**
+
+- `BRACKET` + `TP_SL`: The `TP_SL` quantity is determined by the `executed_quantity` of `leg_1`.
+- `BRACKET` + `POSITIONAL_TP_SL`: The `POSITIONAL_TP_SL` quantity is determined by the user's position at the time of triggering.
+
+<Note>
+  For `BRACKET` + `POSITIONAL_TP_SL`: - When `leg_2`'s `POSITIONAL_TP_SL` is triggered, any
+  previously active `POSITIONAL_TP_SL` orders will be canceled. - If a triggered `POSITIONAL_TP_SL`
+  order already exists, `leg_2` will be canceled instead -- ensuring only one active
+  `POSITIONAL_TP_SL` order at a time. - When any regular order in `leg_1` is executed, `leg_1` and
+  `leg_2` are decoupled, and `leg_2` becomes an independent `POSITIONAL_TP_SL` order.
+</Note>
+
+### BRACKET + POSITIONAL_TP_SL
+
+```json
+{
+  "symbol": "PERP_ETH_USDC",
+  "algo_type": "BRACKET",
+  "quantity": "0.0032",
+  "side": "BUY",
+  "type": "LIMIT",
+  "price": "3415.9",
+  "child_orders": [
+    {
+      "symbol": "PERP_ETH_USDC",
+      "algo_type": "POSITIONAL_TP_SL",
+      "child_orders": [
+        {
+          "symbol": "PERP_ETH_USDC",
+          "algo_type": "TAKE_PROFIT",
+          "side": "SELL",
+          "type": "CLOSE_POSITION",
+          "trigger_price": "3518.4",
+          "reduce_only": true
+        },
+        {
+          "symbol": "PERP_ETH_USDC",
+          "algo_type": "STOP_LOSS",
+          "side": "SELL",
+          "type": "CLOSE_POSITION",
+          "trigger_price": "3313.4",
+          "reduce_only": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+### BRACKET + TP_SL
+
+```json
+{
+  "symbol": "PERP_NEAR_USDC",
+  "algo_type": "BRACKET",
+  "quantity": "4",
+  "side": "BUY",
+  "type": "LIMIT",
+  "price": 2.03,
+  "child_orders": [
+    {
+      "symbol": "PERP_NEAR_USDC",
+      "algo_type": "TP_SL",
+      "child_orders": [
+        {
+          "symbol": "PERP_NEAR_USDC",
+          "algo_type": "TAKE_PROFIT",
+          "side": "SELL",
+          "type": "LIMIT",
+          "price": 2.06,
+          "trigger_price": 2.05,
+          "reduce_only": true
+        },
+        {
+          "symbol": "PERP_NEAR_USDC",
+          "algo_type": "STOP_LOSS",
+          "side": "SELL",
+          "type": "LIMIT",
+          "price": 2.02,
+          "trigger_price": 2.02,
+          "reduce_only": true
+        }
+      ]
+    }
+  ]
+}
+```

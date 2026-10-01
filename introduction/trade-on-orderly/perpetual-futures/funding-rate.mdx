@@ -1,0 +1,198 @@
+---
+title: "Funding Rate"
+description: "Learn how funding rates are calculated and settled between long and short traders."
+---
+
+Funding Fees are cash flows periodically exchanged between long and short position holders. These fees are based on a **Funding Rate** designed to keep the futures price aligned with the underlying Index Price.
+
+## Settlement schedule
+
+Funding payments settle at fixed intervals depending on the market's funding period:
+
+| Period  | Settlement times (UTC)                   |
+| ------- | ---------------------------------------- |
+| 1 hour  | Every hour on the hour                   |
+| 4 hours | 00:00, 04:00, 08:00, 12:00, 16:00, 20:00 |
+| 8 hours | 00:00, 08:00, 16:00                      |
+
+<Note>
+  In the event of extreme market volatility or for new listings, LiqZero reserves the right to
+  adjust the funding interval (e.g. from 8h to 4h, 2h, or 1h), as well as update the Funding Rate
+  Cap and Floor.
+</Note>
+
+## Rate components
+
+The Funding Rate is determined by two components: the **Premium** and the **Interest Rate**.
+
+### Premium calculation
+
+The Premium measures the deviation between the futures price and the Index Price (i.e. the basis). To avoid manipulation, LiqZero uses **Impact Bid and Ask prices** rather than the simple best bid/ask:
+
+- **Impact Bid Price** -- the average fill price to execute a sell order with the size of the Impact Margin Notional.
+- **Impact Ask Price** -- the average fill price to execute a buy order with the size of the Impact Margin Notional.
+- **Impact Margin Notional** -- the notional available to trade with 1,000 USDC of collateral at the maximum leverage of the specific market. For example, for NEAR-USDC with 10x max leverage, the Impact Margin Notional is 10,000 USDC.
+
+Every 15 seconds, LiqZero computes the Premium:
+
+```
+Premium = [Max(0, Impact Bid Price - I) - Max(0, I - Impact Ask Price)] / I
+
+where I = Index Price
+```
+
+### Piecewise linear funding function
+
+For each funding period, LiqZero calculates the Premium every 15 seconds. The number of sample points depends on the funding period:
+
+| Funding period | Sample points (N) |
+| -------------- | ----------------- |
+| 1 hour         | 240               |
+| 4 hours        | 960               |
+| 8 hours        | 1,920             |
+
+An Average Premium is then computed:
+
+```
+Average Premium = (Premium_1 + Premium_2 + ... + Premium_N) / N
+```
+
+A piecewise linear function with **increasing slopes** is applied to the Average Premium (`x`), allowing faster convergence when prices deviate significantly:
+
+| Region | Condition           | Slope | Formula                                            |
+| ------ | ------------------- | ----- | -------------------------------------------------- |
+| Low    | \|x\| < 0.5%        | 1x    | `f(x) = x`                                         |
+| Medium | 0.5% ≤ \|x\| < 1.5% | 2x    | `f(x) = 0.5% * sign(x) + (x - 0.5% * sign(x)) * 2` |
+| Large  | \|x\| ≥ 1.5%        | 4x    | `f(x) = 2.5% * sign(x) + (x - 1.5% * sign(x)) * 4` |
+
+In the **Low** range, the function equals the premium itself. In the **Medium** range, each additional basis point of deviation counts double. In the **Large** range, it counts 4x -- pushing the funding rate to correct faster.
+
+### Interest Rate
+
+The second component is the Interest Rate:
+
+```
+Interest Rate = (USDC Interest - Underlying Asset Interest) / Funding Interval
+```
+
+The Interest Rate is fixed at **0.01%** for most perpetual markets (assuming USDC interest of 0.06% and asset interest of 0.03%). LiqZero reserves the right to adjust this depending on market conditions.
+
+## Final Funding Rate
+
+The final Funding Rate combines the Premium function and Interest Rate, subject to per-market caps and floors:
+
+```
+Funding Rate = clamp[Funding Function(Average Premium) + clamp(Interest Rate - Average Premium, cap_ir, floor_ir) / (8/N), Cap Funding, Floor Funding]
+```
+
+The `Cap Funding` and `Floor Funding` values are specific to each perpetual market. In extreme market conditions, LiqZero may adjust these parameters to allow the higher-slope regions of the funding function to take effect.
+
+| Perp Market | Interval | Cap Funding | Floor Funding | Interest Rate | Cap IR | Floor IR |
+| ----------- | -------- | ----------- | ------------- | ------------- | ------ | -------- |
+| 1000BONK    | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| 1000PEPE    | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| 1000SHIB    | 8 hours  | 0.4875%     | \-0.4875%     | 0.01000%      | 0.01%  | \-0.01%  |
+| AAVE        | 8 hours  | 0.7500%     | \-0.7500%     | 0.01000%      | 0.01%  | \-0.01%  |
+| ADA         | 8 hours  | 0.3750%     | \-0.3750%     | 0.01000%      | 0.01%  | \-0.01%  |
+| APT         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| ARB         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| ASTER       | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| AVAX        | 8 hours  | 0.3750%     | \-0.3750%     | 0.01000%      | 0.01%  | \-0.01%  |
+| AXS         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| BASED       | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| BCH         | 8 hours  | 0.3750%     | \-0.3750%     | 0.01000%      | 0.01%  | \-0.01%  |
+| BERA        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| BIO         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| BNB         | 8 hours  | 0.3750%     | \-0.3750%     | 0.01000%      | 0.01%  | \-0.01%  |
+| BTC         | 8 hours  | 0.3000%     | \-0.3000%     | 0.01000%      | 0.04%  | \-0.04%  |
+| BZ          | 4 hours  | 0.5000%     | \-0.5000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| CAKE        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| CL          | 4 hours  | 0.5000%     | \-0.5000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| CRV         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| DASH        | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| DOGE        | 8 hours  | 0.4875%     | \-0.4875%     | 0.01000%      | 0.01%  | \-0.01%  |
+| DOT         | 8 hours  | 0.4875%     | \-0.4875%     | 0.01000%      | 0.02%  | \-0.02%  |
+| EDGE        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| ENA         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| ETH         | 8 hours  | 0.3000%     | \-0.3000%     | 0.01000%      | 0.04%  | \-0.04%  |
+| ETHFI       | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| EURUSD      | 8 hours  | 0.5000%     | \-0.5000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| FARTCOIN    | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| FET         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| GOAT        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| GOOGL       | 8 hours  | 2.0000%     | \-2.0000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| HBAR        | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| HYPE        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| ICP         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| INJ         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| IP          | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| JUP         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| LDO         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| LINEA       | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| LINK        | 8 hours  | 0.3750%     | \-0.3750%     | 0.01000%      | 0.01%  | \-0.01%  |
+| LIT         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| LTC         | 8 hours  | 0.3750%     | \-0.3750%     | 0.01000%      | 0.01%  | \-0.01%  |
+| M           | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| MEGA        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| MERL        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| MNT         | 8 hours  | 4.00%       | \-4.00%       | 0.01000%      | 0.02%  | \-0.02%  |
+| MON         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| MORPHO      | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| NAS100      | 8 hours  | 0.2000%     | \-0.2000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| NEAR        | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| NVDA        | 8 hours  | 2.0000%     | \-2.0000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| ONDO        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| OP          | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| ORDER       | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.02%  | \-0.02%  |
+| PENDLE      | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| PENGU       | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| POL         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| PUMP        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| RAY         | 4 hours  | 0.7500%     | \-0.7500%     | 0.01000%      | 0.01%  | \-0.01%  |
+| S           | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| SEI         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| SKR         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| SOL         | 8 hours  | 0.3750%     | \-0.3750%     | 0.01000%      | 0.01%  | \-0.01%  |
+| SPX         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| SPX500      | 8 hours  | 0.2000%     | \-0.2000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| SUI         | 8 hours  | 0.7500%     | \-0.7500%     | 0.01000%      | 0.01%  | \-0.01%  |
+| TAO         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| TIA         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| TRUMP       | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| TRX         | 8 hours  | 0.4875%     | \-0.4875%     | 0.01000%      | 0.01%  | \-0.01%  |
+| TSLA        | 8 hours  | 2.0000%     | \-2.0000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| UNI         | 8 hours  | 0.4500%     | \-0.4500%     | 0.01000%      | 0.02%  | \-0.02%  |
+| USDJPY      | 8 hours  | 0.5000%     | \-0.5000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| USELESS     | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| VIRTUAL     | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| WIF         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| WLD         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| WLFI        | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| WOO         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| XAG         | 4 hours  | 0.5000%     | \-0.5000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| XAU         | 4 hours  | 0.5000%     | \-0.5000%     | 0.01000%      | 0.07%  | \-0.07%  |
+| XMR         | 8 hours  | 0.7500%     | \-0.7500%     | 0.01000%      | 0.01%  | \-0.01%  |
+| XPL         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| XRP         | 8 hours  | 0.3750%     | \-0.3750%     | 0.01000%      | 0.01%  | \-0.01%  |
+| ZEC         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+| ZEN         | 8 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.02%  | \-0.02%  |
+| ZRO         | 4 hours  | 2.00%       | \-2.00%       | 0.01000%      | 0.01%  | \-0.01%  |
+
+## Funding period
+
+The Funding Period for LiqZero perpetual futures can be 1 hour, 4 hours, or 8 hours depending on the market. The Funding Rate is expressed on the basis of the funding period for each market.
+
+## Accrued Funding
+
+At each funding settlement time, a position accrues the following funding:
+
+```
+Accrued Funding = Position Size × Mark Price × Funding Rate
+```
+
+- **Positive funding rate**: longs pay shorts
+- **Negative funding rate**: shorts pay longs
+
+## Funding settlement
+
+The accrued funding of an account's position is settled when a PNL settlement is triggered on that account (see [PNL settlement](/introduction/trade-on-orderly/perpetual-futures/margin-leverage-and-pnl#pnl-settlement)).

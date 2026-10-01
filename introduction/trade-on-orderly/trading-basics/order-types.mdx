@@ -1,0 +1,33 @@
+---
+title: "Order Types"
+description: "Discover the supported order types on LiqZero, including Market, Limit, and execution rules."
+---
+
+LiqZero supports the following order types:
+
+## Limit
+
+An order to buy or sell at a specified price or better. A limit order is placed on the order book and will only execute at the specified limit price or a more favorable price.
+
+## Market
+
+Executes immediately at the best available prices until the full size is filled. If the order is larger than the entire book, or the matching price exceeds the [price limit](/introduction/trade-on-orderly/perpetual-futures/orders-price-limits), the remaining quantity is canceled.
+
+## IOC (Immediate or Cancel)
+
+Fills as much as possible at the specified price, immediately. Any unfilled portion is canceled -- it will not remain in the order book.
+
+## FOK (Fill or Kill)
+
+All-or-nothing. If the entire order can be filled at the specified price, it executes in full. Otherwise the entire order is canceled with no partial fill.
+
+## Post Only
+
+Guarantees you are the **maker**. If the order would match visible quantity
+immediately upon placement, it is canceled instead. If it matches only hidden
+quantity, the incoming Post Only order is marked as maker and the resting hidden
+order is marked as taker.
+
+## Reduce Only
+
+Can only **decrease** an existing position. It will not open a new position or increase your current one. Useful for closing out a position without risk of accidentally flipping direction.

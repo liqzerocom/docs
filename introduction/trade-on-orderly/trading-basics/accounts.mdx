@@ -1,0 +1,14 @@
+---
+title: "Accounts"
+description: "Explore the account structure and how it works within the LiqZero Network ecosystem."
+---
+
+On LiqZero, each wallet gets a **separate account per front-end (DEX)**. Your account address is derived from your wallet address and the builder ID of the front-end you're trading on.
+
+## What this means
+
+If you trade on DEX A and DEX B with the same wallet, you will have two independent accounts. Each account is fully isolated:
+
+- **Trades** placed through DEX A cannot be seen or modified through DEX B.
+- **Fees, volume, and fee tiers** are tracked separately per account.
+- **No shared state** exists between accounts, even if the same wallet owns both.

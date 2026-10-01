@@ -1,0 +1,2835 @@
+---
+title: TypeScript SDK
+description: "Release notes for the LiqZero TypeScript SDK"
+icon: "layer-group"
+---
+
+import { Chip } from "/snippets/chip.mdx";
+
+## Latest update
+
+| Release date    | Stable release                                                  |
+| --------------- | --------------------------------------------------------------- |
+| September 30, 2026 | [3.2.2](https://github.com/OrderlyNetwork/js-sdk/tree/v3.2.2) |
+
+## Version 3.2.2
+
+_September 30, 2026_
+
+This version includes the following updates:
+
+- **Updated the default dark theme** to LiqZero Design System v2, alongside refreshed typography and form controls and improved light-theme contrast.
+- **Added a Trader tab** to the multi-level referral dashboard in `@orderly.network/affiliate`, with fee rebate and trading volume summaries, rebate charts, and daily rebate history. Summaries and charts support 7-, 30-, and 90-day periods; history can be filtered by date ranges of up to 90 days.
+- **Added trading fee rebate settings** in `@orderly.network/affiliate`, allowing eligible multi-level affiliates to share a portion of their referral commissions with directly referred traders. The settings show a preview of the resulting trading fee rebate rate before saving.
+- **Added CeFi conversions to USDC** in `@orderly.network/ui-transfer` for tokens with `on_chain_swap: false`. For CeFi conversions, the form hides slippage settings and the minimum received amount.
+
+### Companion release: DevKit 1.2.2
+
+`@orderly.network/devkit@1.2.2` is released alongside SDK 3.2.2. See the [DevKit guide](/build-on-omnichain/builder-marketplace/marketplace-submission) for command usage and submission requirements.
+
+- **Updated Marketplace integration** to use the new API for plugin search, submission, and management.
+- **Changed Marketplace login to wallet authentication.** Run `orderly-devkit login --force`, connect your wallet, and sign the login message. Plugin submissions require a linked GitHub account; custom login callback ports must be within 9876–9899.
+- **Added automatic uploads for local cover images** when submitting or updating plugins. Plugin submissions now go through asynchronous review.
+- **Updated plugin submission requirements.** Provide `npmName`, `repoUrl`, `name`, `description`, 1–5 `tags`, and 1–5 `coverImages`. Remove `--storybook-url` from submission commands; metadata updates no longer support `storybookUrl` or `storybookTooltip`.
+- **Replaced plugin deletion with delisting.** Use `orderly-devkit disable --pluginId <id>` instead of `orderly-devkit delete --pluginId <id>` to delist an available plugin. This retains the listing record and cannot be reversed through the CLI.
+
+## Version 3.2.1
+
+_September 17, 2026_
+
+- In `@orderly.network/ui-transfer`, users can now convert USDC to USDG from the Robinhood network withdrawal form.
+- `account.assetsManager.convert()` now accepts an optional `received_asset`, and the `convert()` function returned by `useConvert()` accepts an optional `receivedAsset`. When omitted, the received asset remains USDC.
+- Market lists now include a “Show low vol.” toggle. It is on by default and remembers the user’s choice; turning it off hides markets with less than $1,000 in 24-hour trading volume.
+- Fixed conversion history to label received amounts and fees with the asset actually received.
+
+## Version 3.2.0
+
+_September 11, 2026_
+
+<Warning>
+  **Upgrade notice: This release includes TypeScript compatibility changes.**
+
+  - `@orderly.network/types`: Removed `OrderEntity.broker_id`. Remove this field from order objects and related type references.
+  - `@orderly.network/types`: Added the required `margin_mode` field to `API.FundingFeeRow`. Update manually constructed records and test fixtures with `MarginMode.CROSS` or `MarginMode.ISOLATED`, as appropriate.
+  - `@orderly.network/hooks`: Corrected the return types of `useOrderEntry().helper.validate()` and `helper.validator()` from `Promise<OrderValidationResult | null>` to `Promise<OrderlyOrder>`. Treat successful results as order objects and update related type annotations.
+
+  See the published [types 3.2.0](https://www.npmjs.com/package/@orderly.network/types/v/3.2.0) and [hooks 3.2.0](https://www.npmjs.com/package/@orderly.network/hooks/v/3.2.0) packages.
+</Warning>
+
+This version includes the following updates:
+
+- **Multi-collateral support in isolated margin mode:** Eligible non-USDC assets now count toward available collateral when placing isolated orders or adjusting position margin.
+- **Limit execution for full-position TP/SL:** Take-profit and stop-loss orders can independently use `MARKET` or `LIMIT` execution, with a separate limit price for each. When editing an existing order, newly added TP or SL orders also support either execution type.
+- **Unsettled funding fees in the Positions list:** Added an unsettled funding fee column to the Positions list in `@orderly.network/ui-positions`. Click a value to view the corresponding position's funding fee history.
+- **USDC borrow limit checks:** `useOrderEntry().submit()` now accepts `usdcBorrowLimit` and rejects isolated, non-reduce-only orders with `USDCBorrowLimitExceededError` when projected borrowing exceeds the limit. The default limit is 50,000 USDC when no value is provided.
+- **New threshold query hook:** Added `useConvertThreshold()` to `@orderly.network/hooks` to retrieve the auto-conversion LTV and negative USDC balance thresholds.
+- **Configurable list item keys:** Added the optional `keyExtractor` prop to `ListView` in `@orderly.network/ui` to support stable list item identifiers.
+- Fixed an issue where updating the limit price of a triggered full-position take-profit order could fail. Trigger prices are read-only after the TP/SL order is triggered.
+- Fixed an issue where prices could become inconsistent between the order list and editing interfaces after pending orders were updated.
+- Fixed an issue where the Adjust Margin dialog did not update its displayed information and adjustment amount when positions or available funds changed.
+- Fixed an issue on mobile where the close-position dialog could show the wrong trading symbol after another position was closed.
+- Corrected available collateral calculations when cross-margin orders are pending.
+- Corrected maximum order quantity calculations in isolated margin mode.
+
+## Version 3.1.12
+
+_August 31, 2026_
+
+<Warning>
+  **Action required:** `QuantityInput` and `AvailableQuantity` from
+  `@orderly.network/ui-transfer` now display token symbols by default. To continue displaying
+  `token.display_name`, pass `showDisplayName`:
+
+  ```tsx
+  <QuantityInput showDisplayName {...props} />
+  <AvailableQuantity showDisplayName {...props} />
+  ```
+</Warning>
+
+- Added `ArbitrumMainnetChainInfo` and `SolanaMainnetChainInfo` to `@orderly.network/types`, together with `mainnetChainFallback` and `testnetChainFallback` in `@orderly.network/hooks`.
+- Improved `useChains` and Privy wallet initialization when chain metadata is unavailable, including broker configurations that expose only Solana chains.
+- Fixed missing or inaccurate estimated deposit times across supported EVM and Solana networks.
+- Fixed an issue where order entry could display a zero maximum quantity instead of an insufficient-balance message.
+- Improved token labeling across deposit, withdrawal, vault, and exclusive-deposit flows.
+
+## Version 3.1.11
+
+_August 21, 2026_
+
+This version includes the following updates:
+
+- After a wallet is connected, users are automatically guided to create an account or enable trading based on their account status.
+- After signing in with Privy, the wallet connection is automatically restored and account initialization resumes.
+- When switching between EVM and Solana networks, the appropriate onboarding flow continues based on the account status of the newly connected wallet.
+- Improved state handling when a connection is canceled or fails, and during asynchronous network switching. This prevents false connection-success messages and clears incomplete verification states.
+
+## Version 3.1.10
+
+_August 19, 2026_
+
+This version includes the following updates:
+
+- Improved Convert status display. After submission, users can see whether a conversion is in progress, delayed, completed, or failed. Reopening the Convert UI continues tracking unfinished conversions.
+- Improved Convert slippage settings. The minimum savable value is `0.2%`, and the recommended value is `0.5%`, with risk guidance when the setting is below or above the recommended value.
+- Fixed an issue where a failed conversion could still show a success toast.
+
+## Version 3.1.9
+
+_August 17, 2026_
+
+This version includes the following updates:
+
+- Added `isTestnetChain(chainId)` to the result returned by [`useChains`](https://github.com/OrderlyNetwork/js-sdk/blob/v3.1.9/packages/hooks/src/orderly/useChains.ts) in `@orderly.network/hooks`. Use `const [, { isTestnetChain }] = useChains()`. The static `isTestnet(chainId)` helper in `@orderly.network/utils` is deprecated.
+- Improved wallet initialization reliability across supported providers, including compatibility when Privy is not configured.
+- Fixed an issue where a deposit could fail with `Insufficient allowance` immediately after successful token approval.
+- Fixed an issue that could produce inconsistent order-book data during slippage calculations.
+
+## Version 3.1.8
+
+_August 11, 2026_
+
+<Warning>
+  **Action required:** `@orderly.network/hooks` no longer exports `useOdosQuote`. Replace it with
+  [`useSwapQuote`](https://github.com/OrderlyNetwork/js-sdk/blob/v3.1.8/packages/hooks/src/orderly/useSwapQuote.ts)
+  and send a `SwapQuoteRequest` containing `fromToken`, `toToken`, `amount`, and `slippage`. The
+  previous Odos request shape is not compatible.
+</Warning>
+
+This version includes the following updates:
+
+- Convert quotes now use the LiqZero Swap API. Added `useSwapQuote` with typed requests and responses.
+- Changed the default Convert slippage from `1%` to `0.5%`. Existing locally saved settings are preserved.
+- Improved quote precision, minimum received amount calculations, exchange-rate calculations, and Convert error reporting.
+- Added `ThemeConfig.isDefault` and `ThemeConfig.tradingViewColorConfig` to `@orderly.network/ui`.
+- Added `pnlZeroColor` and `closeIconColor`. The existing `pnlZoreColor` and `closeIcon` fields remain supported but are deprecated.
+- Improved theme fallback behavior and TradingView color synchronization.
+- Fixed an issue where Ledger-specific behavior could remain active after switching from a Solana Ledger wallet to another wallet.
+- Updated testnet and Chain Selector behavior, including support for X Layer Testnet and automatic selection of the Testnet view when no mainnet chains are available.
+
+## Version 3.1.7
+
+_August 3, 2026_
+
+This version includes the following updates:
+
+- Updated the default `OrderlyLogo` to the latest LiqZero wordmark.
+- Improved Affiliate FAQ content presentation.
+
+## Version 3.1.6
+
+_July 16, 2026_
+
+<Warning>
+  **Action required:**
+  [`useReferralCode().createReferralCode`](https://github.com/OrderlyNetwork/js-sdk/blob/v3.1.6/packages/affiliate/src/hooks/useReferralCode.ts)
+  in `@orderly.network/affiliate` now requires
+  `{ referral_code: string; referee_rebate_rate: number }`. `referral_code` must contain 4-15
+  uppercase letters or digits.
+
+  **Network configuration:** The default Ethereum RPC in `@orderly.network/types` changed to
+  `https://ethereum-rpc.publicnode.com`. Applications that restrict outbound RPC traffic must allow
+  this endpoint.
+</Warning>
+
+This version includes the following updates:
+
+- Added support for custom referral codes in the multi-level Affiliate flow.
+- Fixed an issue where plugin-provided components could remount and lose local state when the plugin context changed.
+- Improved the mobile Markets selector and corrected Markets table layering.
+- Changed the default Ethereum RPC endpoint to `ethereum-rpc.publicnode.com`.
+
+[Official SDK release notes](https://orderly.network/docs/release-notes/sdk) | [SDK overview](https://orderly.network/docs/sdks/overview) | [React Components setup](https://orderly.network/docs/sdks/react/getting_started) | [Hooks setup](https://orderly.network/docs/sdks/hooks/setup) | [Source repository](https://github.com/OrderlyNetwork/js-sdk)
+
+## Earlier releases
+
+## Jul 14th, 2026 - v3.1.5
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **ADI chain support** — Added support for the ADI chain
+    </div>
+  </div>
+</div>
+
+
+## Jul 10th, 2026 - v3.1.4
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **Referral remarks / descriptions** — Added support for leaving remarks or descriptions on direct referrals. This helps affiliates better identify, manage, and track their direct referees
+      - **Longer referral codes** — Increased the referral code maximum length to 15 characters
+    </div>
+  </div>
+</div>
+
+
+## Jul 7th, 2026 - v3.1.3
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Added a new Crypto category across market list experiences, including the market selector, market search, market sidebar, and markets page
+      - Expanded Trading page plugin support, allowing builders to add custom order types and extend key trading page areas without forking the SDK. This includes order entry, chart overlays, data list tabs, and mobile trading layout extension points
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Optimizations**
+      - Optimized K-line history loading for newly listed markets. The chart now stops requesting unavailable historical data before a market's listing time, reducing unnecessary requests and improving page stability
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed Rabby Wallet compatibility issues
+      - Fixed an issue where the portfolio page could not scroll to access Settings in Chrome when the browser window height was small
+      - Fixed an issue where the max quantity shown in the TP/SL input could differ from the actual position quantity
+      - Fixed an isolated margin close issue on TradingView position lines. Closing an isolated margin position from the chart now sends the correct margin mode and no longer fails with reduce-only validation errors
+    </div>
+  </div>
+</div>
+
+
+## Jun 11th, 2026 - v3.1.1
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **Pre-TGE Market Support** — The SDK now supports pre-TGE market listings, enabling trading on perpetual markets ahead of a token's generation event
+      - **Commission Rate Adjustment Limits Removed** — Brokers can now lower their commission rate without the previous downward adjustment cap
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed an error that caused asset convert quote estimates to fail
+    </div>
+  </div>
+</div>
+
+
+## May 27th, 2026 - v3.1.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **RTL Language Support** — The SDK now supports right-to-left languages, including Arabic, Persian, and Hebrew. Layouts, typography, and components mirror correctly for RTL locales
+      - **ISO Max-Out Order Fix** — Maxing out an isolated margin market order with the slider at 100% is no longer rejected with "margin will be insufficient after". The SDK now reserves a taker fee buffer that matches the backend's frozen-margin formula, aligning isolated margin with cross margin. Verified across fee tiers and isolated margin flip orders
+    </div>
+  </div>
+</div>
+
+
+## May 20th, 2026 - v3.0.4
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Features & Improvements** - Updated the wallet registration request to align with the latest
+      backend API
+    </div>
+  </div>
+</div>
+
+## May 7th, 2026 - v3.0.3
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Bug Fixes** - Fixed Perp Anything symbol funding rate modal on mobile showing empty values for
+      Interval, Funding cap/floor, and Estimated funding fee
+    </div>
+  </div>
+</div>
+
+## Apr 30th, 2026 - v3.0.2
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **Responsive Breakpoint** — Raised the mobile/desktop breakpoint from 768px to 1024px, eliminating horizontal scrolling for users in the 768–1024px range by switching to the mobile layout instead
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed referral code not sent as uppercase to the API
+      - Fixed symbol leverage not updating after switching to isolated margin mode
+      - Fixed wrong order symbol when switching between cross and isolated margin symbols
+      - Fixed Assets list table height not adjusting to actual row count
+    </div>
+  </div>
+</div>
+
+## Apr 29th, 2026 - v3.0.1
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Features & Improvements** - **Plugin Developer Toolchain** — Improvements to liqzero-devkit
+      CLI, plugin agent skills, and SDK Docs MCP server
+    </div>
+  </div>
+</div>
+
+## Apr 28th, 2026 - v3.0.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Features & Improvements** - **Plugin System** — SDK v3 introduces the plugin system,
+      enabling builders to develop, share, and install custom modules on top of the LiqZero trading
+      interface. Plugins register interceptors at specific target paths in the SDK's rendering
+      pipeline to enhance, wrap, or replace existing components. See the [Builder
+      Marketplace](/build-on-omnichain/builder-marketplace/introduction) for details
+    </div>
+  </div>
+</div>
+
+## Apr 22nd, 2026 - v2.12.4
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **Referral Code Binding Post Account Creation** — Users can now bind a referral code after their account has already been created, removing the requirement to set it during initial signup
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed closed/closing vaults blocking withdrawals — users can now always withdraw funds from closing or closed vaults
+    </div>
+  </div>
+</div>
+
+## Apr 21st, 2026 - v2.12.3
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **Solana Multi-DVN Cross-Chain Security Upgrade** — Solana deposit transactions now use 3 independent DVN verifiers with 3/3 consensus, significantly improving cross-chain message verification security
+      - **Google Login in Telegram Mini App** — Users can now sign in with Google inside the Telegram Mini App by routing OAuth requests through the external browser
+      - **TP/SL "From Mark" Options** — Take Profit and Stop Loss settings now support Offset and Offset% calculated from the Mark Price, enabling users to lock in profits relative to the current market price
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed liquidation price flickering on single open positions in non-Chrome browsers
+      - Fixed trade sound notifications replaying all at once when returning to the trading tab in Safari, Firefox, and Edge
+      - Fixed app crash when toggling Chrome DevTools to mobile mode
+      - Fixed styling classname typos that caused incorrect background and border styles
+    </div>
+  </div>
+</div>
+
+## Apr 14th, 2026 - v2.12.2
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **Dynamic i18n Resource Loading** — Locale translation files are now loaded dynamically via import, reducing initial bundle size for multi-language deployments
+      - **Smarter TP/SL Detection on TradingView** — When dragging to set TP/SL on the chart, the system now uses the target price relative to mark price (instead of entry price) to determine whether the order is a Take Profit or Stop Loss, enabling lock-profit stop-loss scenarios for profitable positions
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed incorrect validation logic for TP/SL on short positions that could prevent valid orders from being placed
+      - Fixed a crash caused by base_min being undefined on certain symbols
+      - Fixed Account ID not being copyable in the Switch Account modal on mobile devices
+      - Fixed SL trigger price calculation error when using PnL mode (DEX-2923)
+    </div>
+  </div>
+</div>
+
+## Mar 31st, 2026 - v2.12.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - **Exclusive Receiver Address** — Builders can now configure a dedicated deposit address for their users. Funds sent to this address are automatically credited as deposits — no gas fees or wallet connection required
+      - **Perp Anything Symbols Support** — The SDK now fully supports Perp Anything symbols, with proper UI rendering and trading support aligned with the platform-wide rollout
+      - **ISO / Cross Margin Labels on Orders & Positions** — Position lines on the TradingView chart (positions, TP/SL, liquidation, etc.) now display cross/isolated margin mode labels along with leverage, making it easy for users to distinguish between different positions at a glance
+      - **Asset Categories on UI** — Builders can now configure custom asset categories for their UI. No categories are set by default — builders choose which categories to display for their users
+      - **Liquidation Price Line Toggle on TradingView** — Users can now show or hide the liquidation price line directly on the TradingView chart, reducing chart clutter for those who don't need it
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed filled orders not being sorted correctly, ensuring order history displays in the expected chronological order
+    </div>
+  </div>
+</div>
+
+## Mar 24th, 2026 - v2.11.2
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - Updated trading page market layout — Refreshed the markets section on the trading page for improved readability
+      - Simplified market data display — Removed Mark / Index price columns from the markets view to reduce clutter
+      - Referral commission label update — Renamed "Referral active users" to "New traders" in the Commission table for clarity
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed API key copy button on the portfolio page not working correctly
+      - Fixed duplicate Solana address creation when using Privy wallet integration
+    </div>
+  </div>
+</div>
+
+## Mar 17th, 2026 - v2.11.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Features & Improvements** - Isolated Margin — Added isolated margin mode, allowing traders
+      to allocate specific margin to individual positions for better risk management
+    </div>
+  </div>
+</div>
+
+## Mar 16th, 2026 - v2.10.2
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - Bulk close by profitability — Close all profitable or losing positions at once with new bulk close options
+      - Sound notifications — Added configurable sound notification options for trading events
+      - RWA & Crypto market sections — Markets page now separates RWA and Crypto into two configurable sections
+      - Markets page update — Refreshed markets layout and data display
+      - TP/SL line details — Position quantity and PnL amount now displayed directly on TP/SL lines in the TradingView chart
+      - Liquidation price line — Liquidation price is now visible as a line on the TradingView chart
+      - Portfolio volume charts — Added Daily Volume and Cumulative Volume charts to Portfolio Performance
+      - Multiple theme support — Enabled configuration and selection of multiple themes
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed PnL chart showing empty bars caused by precision mismatch in daily statistics
+      - Fixed mark price display issue
+    </div>
+  </div>
+</div>
+
+## Mar 13th, 2026 - v2.10.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features & Improvements**
+      - Introduced Deposit Zap-in for a streamlined deposit experience.
+      - Added an Open Interest column to the symbol table.
+      - Added tooltips to last price and order book middle price.
+      - Zap-In Deposit now supports dynamic chain configuration via API.
+      - Added funding rate timeframe display
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Show error toast if Metamask wallet does not have a Solana address.
+    </div>
+  </div>
+</div>
+
+## Feb 13th, 2026 - v2.9.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Features** - Introduce the new affiliate program (multilevel structure) - Add tooltip to
+      clarify specific withdrawal limitations
+    </div>
+  </div>
+</div>
+
+## Feb 10th, 2026 - v2.8.14
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Added in left hand mode for mWeb
+      - Hide announcements if their symbol list does not exist
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed a minor leverage setting error
+    </div>
+  </div>
+</div>
+
+## Jan 30th, 2026 - v2.8.13
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Add a new RWA tab to the Market page
+      - Add in tooltips for "hidden order", "Post Only", "IOC", "FOK" in order entry component
+      - Optimize API requests, remove redundant API request.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fix deposit button display logic on mWeb
+      - Fix network switching issues with Privy login
+    </div>
+  </div>
+</div>
+
+## Jan 16th, 2026 - v2.8.12
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Fixes** - Fixed a bug where Vault page tab couldn't be opened under certain scenarios.
+    </div>
+  </div>
+</div>
+
+## Jan 14th, 2026 - v2.8.11
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Implemented a feature in the order book to show the buy vs sell order ratio, allowing users to quickly see which side has more orders.
+      - Added clear explanations about liquidation fees in both the order entry form and position list.
+      - Support for a new message type: "Community Vote" for announcements.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed a bug with clearing leverage input.
+    </div>
+  </div>
+</div>
+
+## Dec 19th, 2025 - v2.8.10
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Display est.pnl in reverse position modal.
+      - MWeb – Show "Deposit" CTA when available balance is zero.
+      - Liq. price display optimization for overflowing text.
+      - Update position liquidation price calculation.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed issue where Solana wallet disconnects on page refresh.
+    </div>
+  </div>
+</div>
+
+## Dec 19th, 2025 - v2.8.9
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Users can now search by address or account ID to locate an account when withdrawing to LiqZero accounts (Internal transfer).
+      - Support for withdrawals to external Web3 wallets has been added. (Note: Builders must submit an application to enable this feature.)
+      - Enhanced the Reverse Position feature to handle additional edge cases (outside allowed range) and provide clearer user guidance.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed an issue where the main account could not properly manage or edit sub-account positions.
+      - Fixed a PnL calculation error on the Portfolio page.
+    </div>
+  </div>
+</div>
+
+## Dec 9th, 2025 - v2.8.8
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Added Convert and Transfer tabs in Portfolio history.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed TradingView symbol inconsistency issues.
+      - Fixed behavior when Reduce-Only is enabled: TP/SL toggle should remain visible instead of hidden.
+      - Fixed an issue where withdraw token options were not displayed.
+    </div>
+  </div>
+</div>
+
+## Dec 2nd, 2025 - v2.8.6
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Features** - One-click reverse position: allows users to instantly close their current open
+      position and open an opposite position of the same size with a single action. - Optimize
+      deposit / withdraw UX (friendly message for limits). - Prevent users from setting a stop loss
+      (SL) too close to liquidation price. - Update the vaults APY display.
+    </div>
+  </div>
+</div>
+
+## Nov 25th, 2025 - v2.8.4
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Kline optimization – expanded historical data.
+      - Close/Cancel all or specific-symbol positions and pending orders.
+      - Added deposit button next to available balance.
+      - Removed deprecated account-level leverage display.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed announcement read-state updates.
+      - Fixed vault balance check for withdrawals.
+      - Fixed PnL / notional display styling in position list.
+    </div>
+  </div>
+</div>
+
+## Nov 12th, 2025 - v2.8.2
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Deposit UX enhancement: prioritize tokens with existing balances.
+      - Friendly message for insufficient gas.
+      - Display hints for yield-bearing collateral (e.g., YUSD).
+      - Announcement UI enhancements.
+      - One-click close all positions.
+      - Display annualized funding rate.
+      - Wallet connect: prioritize wallet options based on selected network.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fix PnL calculation: should exclude transfer-ins.
+      - Fix mark price and 24h change figure flickering issue.
+      - Fix SL calculation (positive/negative sign conversion issue).
+    </div>
+  </div>
+</div>
+
+## Oct 21st, 2025 - v2.8.1
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Optimized error messages for withdrawals.
+      - Added quick options in the Limit Close modal.
+      - Enhanced TP/SL form UI.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Fixed mweb styling issues.
+      - Fixed estimated value calculation in Convert.
+      - Fixed ROI calculation in shared PnL cards.
+    </div>
+  </div>
+</div>
+
+## Oct 15th, 2025 - v2.8.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Support RWA markets.
+      - Support ordering by initial margin.
+      - Remember bar settings for next order when user sets order quantity using the bar.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Fixes**
+      - Withdrawing to another account no longer requires limiting it by the vault balance.
+    </div>
+  </div>
+</div>
+
+## Sep 30th, 2025 - v2.7.4
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Added Asset section to the trading page.
+      - Moved sound notification settings to the Settings page (builders can still choose to display the toggle in the order entry panel).
+      - Updated leverage scale display for improved clarity.
+      - Added more user-friendly deposit error messages.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Resolved issue with announcement content rolling.
+    </div>
+  </div>
+</div>
+
+## Sep 24th, 2025 - v2.7.3
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Features** - Enable Vaults SDK support for Solana accounts. - Display message for minimum
+      withdrawal amount. - Remove max account leverage setting (migrated to symbol-level leverage).
+    </div>
+  </div>
+</div>
+
+## Sep 22nd, 2025 - v2.7.2
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Features**
+      - Sorting preferences for Positions and Position History are now remembered.
+      - Enhanced transaction notifications — click to dismiss.
+      - Drag to adjust order entry layout.
+      - Update decimal places and rounding rules in Markets UI.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed black screen issue caused by cache.
+      - Fix wallet switching issues.
+      - Fixed unresponsive WalletConnect click.
+    </div>
+  </div>
+</div>
+
+## Sep 19th, 2025 - v2.7.1
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **Bug Fixes** - Fixed ROI / PnL calculation.
+    </div>
+  </div>
+</div>
+
+## Sep 16th, 2025 - v2.7.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - Support adjust leverage by symbol to provide better flexibility.
+    </div>
+  </div>
+
+<div style={{ display: "table-row", width: "auto" }}>
+  <Chip type="update" />
+  <div
+    style={{
+      float: "left",
+      display: "table-column",
+      paddingLeft: "30px",
+      width: "calc(80% - 30px)"
+    }}
+  >
+    **Enhancements** - Make dragging to adjust TP/SL on chart smoother. - Announcement UI
+    enhancement. - Advanced market UI options (Left / Top / Bottom / Hide).
+  </div>
+</div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed MWeb order time display issue.
+    </div>
+  </div>
+</div>
+
+## Sep 9th, 2025 - v2.6.3
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - **Trailing stop orders**: A new order type that activates once the market reaches the set trigger price. After activation, it tracks the extreme price and triggers when the market retraces by the specified trailing amount.
+      - **Enhanced liquidation info**: Displays more detailed account status data at the time of liquidation.
+      - **Chart indicators on mWeb**: Users can now add indicators (e.g., volume) to charts on mobile web.
+      - **Order API improvements**: Passes order_tag to distinguish orders from different routes.
+      - **Orderbook preferences**: Remembers the user’s preferred orderbook granularity per token.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed orderbook average price calculation.
+      - Fixed orderbook display flickering issues.
+    </div>
+  </div>
+</div>
+
+## Sep 2nd, 2025 - v2.6.2
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - Edit TP/SL on pending orders.
+      - Added PnL information to mWeb portfolio.
+      - Vaults page available on mWeb.
+      - Added 0.5 step size to ETH aggregation.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed issue with TP/SL edit validation triggering too early
+      - Fixed issue with undefined symbol in Order Book quotes
+      - Fixed issue with editing scaled order
+      - Fixed issue with orderbook avg price calculation
+    </div>
+  </div>
+</div>
+
+## Aug 26th, 2025 - v2.6.1
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - Setting TP/SL directly from the TradingView chart.
+      - Configuration option to toggle sound alerts on/off.
+    </div>
+  </div>
+
+<div style={{ display: "table-row", width: "auto" }}>
+  <Chip type="update" />
+  <div
+    style={{
+      float: "left",
+      display: "table-column",
+      paddingLeft: "30px",
+      width: "calc(80% - 30px)"
+    }}
+  >
+    **UI Enhancements** - Minimize mode: market bar can collapse to its smallest size.
+  </div>
+</div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed missing data in portfolio PnL chart.
+    </div>
+  </div>
+</div>
+
+## Aug 19th, 2025 - v2.6.0
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - TP/SL with Limit Orders: 
+        - Users can now set Partial TP/SL or Full Position TP/SL.
+        - Users can choose to execute TP/SL with either a market order or a limit order.
+        - <b>Note:</b> Full Position TP/SL only supports Market Orders, while Partial TP/SL supports both Market and Limit Orders.
+      - Leaderboard campaigns: Added support for one-click “Join.”
+      - Order Fill Notifications: Added sound alerts when orders are filled (configurable from settings).
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **UI/UX Enhancements**
+      - Scaled order: Updated “Upper / Lower Price” to “Start / End Price” for better clarity.
+      - Transactions: Display estimated time for pending transactions.
+      - Deposit & Approval: Smoother experience for repeated approvals and deposits.
+    </div>
+  </div>
+</div>
+
+## Jul 29th, 2025 - v2.5.3
+
+<div style={{ display: "table", width: "100%" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - Config option for custom perp symbol list
+      - Improved close position UI
+      - MWeb market close: added quantity selector
+      - Real-time validation for price/quantity
+      - Show leverage next to each position
+      - Guide user to use PWA
+      - Quick mid-price button for limit orders
+      - ROI added to PnL card (Position history)
+      - Auto-match collateral with deposit asset
+      - Show fee in MWeb order history
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed issue placing orders with “max qty”
+      - Fixed withdrawal issue with max available
+      - Corrected abstract wallet address display
+      - Fixed wallet connectivity issues
+      - RPC retry mechanism for improved reliability
+      - Fixed WebSocket connection issues
+    </div>
+  </div>
+</div>
+
+## Jul 22nd, 2025 - v2.5.2
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - Full-Screen Mode: Expand the trading chart for a maximized viewing experience.
+      - Configurable Slippage & Fee Display: Builders can now choose whether to display slippage and fees.
+      - Enhanced Header Navigation: Introduced a “More” menu for greater flexibility in customizing the navigation bar.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Auto-clear validation errors on order type change.
+      - Fixed incorrect sorting in the funding rate comparison section.
+    </div>
+  </div>
+</div>
+
+## Jul 16th, 2025 - v2.5.1
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)"
+      }}
+    >
+      **New Features** - Multi-Collateral Support: Users can now deposit multiple assets as
+      collateral for trading([about
+      multi-collateral](https://orderly.network/docs/introduction/trade-on-orderly/multi-collateral)).
+      - Market UI Enhancements: Added sorting by symbol and volume across all market-related
+      components. - Order Book Precision Control: Builders can now configure the default number of
+      decimals displayed on the order book per symbol. - Customizable Header Navigation: Builders
+      can now configure custom header navigation items to better tailor the interface to their
+      needs.
+    </div>
+  </div>
+</div>
+
+## Jul 7th, 2025 - v2.4.1
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - Scaled Order: Traders can now place a series of limit orders across a defined price range for scaled entries or exits. Supports quick distribution setup with flat, ascending, descending, or custom skew.
+      - Configurable Sidebar (mweb): Added support for a customizable sidebar to enable quick access to frequently used pages.
+    </div>
+  </div>
+
+<div style={{ display: "table-row", width: "auto" }}>
+  <Chip type="update" />
+  <div
+    style={{
+      float: "left",
+      display: "table-column",
+      paddingLeft: "30px",
+      width: "calc(80% - 30px)"
+    }}
+  >
+    **UI/UX Enhancements** - Added user guidance when the favorites list is empty. - Leverage UI is
+    now displayed at the top by default for improved visibility. - Improved error messaging when
+    users exceed the maximum close size limit. - Updated trading volume color to enhance visual
+    clarity.
+  </div>
+</div>
+
+<div style={{ display: "table-row", width: "auto" }}>
+  <Chip type="new" />
+  <div
+    style={{
+      float: "left",
+      display: "table-column",
+      paddingLeft: "30px",
+      width: "calc(80% - 30px)"
+    }}
+  >
+    **Builder features** - Added a configuration option to enable social login methods (Privy
+    Wallet).
+  </div>
+</div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Resolved issues related to Solana wallet connection and network switching.
+    </div>
+  </div>
+</div>
+
+## Jul 4th, 2025 - v2.3.2
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - Internal Transfers via Account ID: Enables users to perform internal transfers by withdrawing directly to another LiqZero account using the `account_id`.
+    </div>
+  </div>
+
+<div style={{ display: "table-row", width: "auto" }}>
+  <Chip type="update" />
+  <div
+    style={{
+      float: "left",
+      display: "table-column",
+      paddingLeft: "30px",
+      width: "calc(80% - 30px)"
+    }}
+  >
+    **UI/UX Enhancements** - Removed decimal places from the Total (USDC) column in the order book
+    for improved readability. - Updated default order size decimal settings for better clarity: -
+    BTC: 1 decimal place - ETH: 0.1 decimal place - Funding Comparison: Added Open Interest display.
+    - Language Selector added to the MWeb navigation bar. - One-Click Network Switch from Wallet
+    Prompt: Users can now switch networks directly from the wallet prompt message when required.
+  </div>
+</div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed an issue where users were unable to edit their referral code on mweb.
+    </div>
+  </div>
+</div>
+
+## Jun 20th, 2025 - v2.3.0
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New Features**
+      - Users can now create sub-accounts to manage trading strategies or asset allocations separately.
+      - The fee rate is now displayed directly in the Trading Panel.
+      - Users can view estimated slippage and configure a maximum slippage threshold in the Trading Panel.
+      - Adjusted affiliate UI to support automated configuration, improving user onboarding.
+      - Display funding rate spread in the markets page to highlight arbitrage opportunities.
+      - Redesigned the leaderboard to support campaign-based views and display campaign-specific data.
+      - Markets page is now available on mobile.
+      - Users can set the default orderbook view (e.g., Total BTC, Total USDC, Quantity BTC) on mobile.
+    </div>
+  </div>
+
+<div style={{ display: "table-row", width: "auto" }}>
+  <Chip type="update" />
+  <div
+    style={{
+      float: "left",
+      display: "table-column",
+      paddingLeft: "30px",
+      width: "calc(80% - 30px)"
+    }}
+  >
+    **UI/UX Enhancements** - Improved default volume color in TradingView charts for better clarity.
+    - Refined layout for a cleaner, more readable trading chart.
+  </div>
+</div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed Solana wallet connect issue after repeated login/logout.
+      - Fixed max account leverage not reflecting user settings.
+      - Corrected estimated liquidation price for low-price coins.
+      - Updated decimal precision for contract interactions.
+    </div>
+  </div>
+</div>
+
+## May 30th, 2025 - v2.2.0
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New features**
+      - Introduced a new Portfolio page in the mobile UI. Added a navigation bar for seamless page switching.
+      - Integrated Abstract and Abstract Global Wallet.
+      - Increased maximum account leverage to 100x, and updated the leverage UI accordingly.
+    </div>
+  </div>
+
+<div style={{ display: "table-row", width: "auto" }}>
+  <Chip type="update" />
+  <div
+    style={{
+      float: "left",
+      display: "table-column",
+      paddingLeft: "30px",
+      width: "calc(80% - 30px)"
+    }}
+  >
+    **UI/UX Enhancements** - Improved the symbol search algorithm to prioritize prefix matches,
+    enabling faster and more accurate results.
+  </div>
+</div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Fixed an issue on mobile where pull-to-refresh on the leaderboard failed to load new data and caused UI misalignment when not logged in.
+    </div>
+  </div>
+</div>
+
+## May 26th, 2025 - v2.1.3
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **UI/UX Enhancements**
+      - Added sorting functionality to the Funding Rate Comparison section, allowing users to rank markets by rate values.
+      - Replacing “Buy/Sell” with “Long/Short” for improved clarity and alignment with common trading language.
+      - Sorting preference is now preserved when collapsing and expanding the market tab.
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+      - Resolved an issue where error messages were not being displayed properly.
+    </div>
+
+  </div>
+</div>
+
+## May 19th, 2025 - v2.1.2
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New default supported languages**
+      - Русский (ru) — Russian
+      - Bahasa Indonesia (id) — Indonesian
+      - Türkçe (tr) — Turkish
+      - Italiano (it) — Italian
+      - Português (pt) — Portuguese
+      - Українська (uk) — Ukrainian
+      - Polski (pl) — Polish
+      - Nederlands (nl) — Dutch
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **UI/UX Enhancements**
+      - Clicking on the order book now sets the price and automatically switches the order type to Limit
+      - Order input is preserved after submission
+      - Integrated Announcement API with support for type and updated time
+      - Redesigned language selection modal for improved usability
+      - Added toggle to switch display between Coin and USDC in the order book
+      - Referral code input now auto-capitalizes to prevent lowercase input issues
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+
+      - Take-Profit offset (%) now updates with market price changes
+      - Fixed portfolio page UI alignment (content now aligned to the top)
+    </div>
+
+  </div>
+</div>
+
+## Apr 24th, 2025 - v2.1.1
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New default supported languages**
+      - 日本語 (ja) — Japanese
+      - Español (es) — Spanish
+      - 한국어 (ko) — Korean
+      - Tiếng Việt (vi) — Vietnamese
+      - Deutsch (de) — German
+      - Français (fr) — French
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **UI Enhancements**
+      - Improved wallet connect modal styling
+      - Enhanced announcement UI:
+        - Added full text display option
+        - Implemented rolling display for announcements
+        - Auto-dismiss announcements on user interaction
+      - Added time filter shortcuts for order history
+      - Increased maximum trading chart height
+      - Displayed user data in first row of leaderboard
+      - Removed swap/trade toggle from SDK for streamlined interface
+    </div>
+  </div>
+</div>
+
+## Apr 10th, 2025 - v2.1.0
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Wallet & Authentication Overhaul**
+      
+      - Redesigned wallet connect modal UI with dual wallet connection support (EVM / Solana)
+      - Added email and social login capabilities through Privy integration
+      - Implemented embedded wallet creation functionality for both EVM and Solana
+      - Flexible configuration options for builders to customize supported wallet types
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Trading Leaderboard & Internationalization**
+
+      - Comprehensive trading leaderboard showing past, ongoing, and upcoming campaigns
+      - Real-time trading volume rankings for competitive user engagement
+      - Full i18n support with English and Chinese languages included by default
+      - Customizable localization tools for builders to add and manage translations
+      - New announcement UI for platform-wide notifications
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Bug Fixes**
+
+      - Fixed hostname display in link device modal to use current hostname
+    </div>
+
+  </div>
+</div>
+
+## Feb 27th, 2025 - v2.0.5
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Network Enhancements**
+      
+      - Added Monad testnet support
+      - Improved Solana RPC stability using LiqZero backend proxy
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **UI Improvements and Bug Fixes**
+
+      - Added navigation bar for tablet-sized displays (768-1024px)
+      - Enhanced platform figures with LiqZero logo integration
+      - Fixed critical trading issues:
+        - Corrected estimated liquidation price calculations
+        - Resolved position closing and direction switching errors
+        - Fixed position data handling for edge cases
+        - Corrected network display issues in mobile web
+
+    </div>
+
+  </div>
+</div>
+
+## Feb 14th, 2025 - v2.0.4
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Builder Configuration Improvements**
+      
+      - Added ability for builders to set default network
+      - Enhanced network menu UI with dynamic testnet tab visibility
+      - Removed story testnet environment
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **UI/UX Enhancements**
+
+      - Improved fee display with negative values and color-coding for Liquidator and Insurance Fund fees
+      - Added order timestamps to portfolio "all" orders tab
+      - Enhanced PnL sharing functionality in position history
+      - Fixed critical issues with PnL display, TVL calculations, and estimated liquidation price
+    </div>
+
+  </div>
+</div>
+
+## Feb 8th, 2025 - v2.0.3
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Ledger Support for Solana**
+      
+      Added support for Ledger hardware wallet message signing on Solana network, enhancing security options for Solana users.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **UI/UX Improvements**
+
+      - Enhanced market tabs interface for better navigation
+      - Improved chain icon loading states
+      - Better QR code device linking with higher camera resolution and 30-day expiry
+      - Clearer messaging for TP/SL orders, specifying Mark price as trigger price and Market order execution
+      - Various bug fixes and performance improvements
+
+    </div>
+
+  </div>
+</div>
+
+## Jan 17th, 2025 - v2.0.2
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **QR Code Device Linking**
+      
+      Introducing QR code functionality to seamlessly link desktop and mobile devices, enhancing cross-device user experience.
+    </div>
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Platform Enhancements**
+
+      - Added builder controls for country and IP restrictions
+      - Enhanced network menu UI for better usability
+      - Improved TP/SL order messaging with clear mark price trigger explanations
+      - Added symbol search functionality to funding rate page
+      - Fixed regional number formatting to handle decimal separators consistently
+
+    </div>
+
+  </div>
+</div>
+
+## May 19th, 2024 - v1.5.4
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.5.4**
+
+      Adding component IDs to component SDK for more customization options.
+
+    </div>
+
+  </div>
+
+</div>
+
+## May 17th, 2024 - v1.5.3
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.5.3**
+
+      Bug fixes.
+
+    </div>
+
+  </div>
+
+</div>
+
+## May 16th, 2024 - v1.5.2
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.5.2**
+
+     Bug fixes.
+
+    </div>
+
+  </div>
+
+</div>
+
+## May 15th, 2024 - v1.5.1
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.5.1**
+
+      Bug fixes
+
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.5.1**
+
+      * The SDK now supports the use order/position line features, even when using the free Advanced TradingView version.
+
+      <Note>
+      TradingView v27^ is required to integrate hoooks v1.5.0^
+      </Note>
+
+    </div>
+
+  </div>
+
+</div>
+
+## Apr 29th, 2024 - v1.4.3
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.4.3**
+
+      Fixes for some production bugs related to TP/SL, referral and PnL card sharing.
+
+      Referral hooks are now a part of the hooks package.
+
+    </div>
+
+  </div>
+
+</div>
+
+## Apr 26th, 2024 - v1.4.0
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.4.0**
+
+      Long awaited TP/SL orders are here. Introducing a new set of hooks for take profit and stop loss orders. Detailed documentation [here](/sdks/hooks/orders/use-tp-sl)
+
+    </div>
+
+  </div>
+
+</div>
+
+## Apr 21st, 2024 - v1.3.2
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.3.2**
+
+      Pricing display issue with long-tail assets and performance improvements
+
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **New referral module @liqzero.network/referral v0.1.2**
+
+      **New hooks:**
+
+      - useComission
+
+      - useDaily
+
+      - useRefereeHistory
+
+      - useRefereeInfo
+
+      **Three new referral program page components**
+
+      ### Dashboard page:
+
+      <Frame>
+        <img src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/referral/dashboard.png" />
+      </Frame>
+
+      ### Affiliate page:
+
+      <Frame>
+        <img src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/referral/affiliate.png" />
+      </Frame>
+
+      ### Trader page:
+
+      <Frame>
+        <img src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/referral/trader.png" />
+      </Frame>
+
+    </div>
+
+  </div>
+
+</div>
+
+## Apr 2nd, 2024 - v1.2.0
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.2.0**
+
+      **The following issues are fixed:**
+
+      - Orderbook price getting stuck with drastic price changes.
+
+      - Incorrect decimals when calling API during order placement.
+
+      - `null` error when setting limit price outside of price range when closing a position.
+
+      - Frontend validation produces inaccurate numbers when editing stop-limit orders.
+
+      - Decimal digits for qty, price, and trigger price are incorrect in the edit order popup.
+
+      - Incorrect decimal digits for estimated liquidation price in order entry.
+
+      - Updates to PnL card with design enhancements.
+
+    </div>
+
+  </div>
+
+</div>
+
+## Mar 19th, 2024 - v1.1.9
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.1.9**
+
+      **The following issues are fixed:**
+
+      - Updated logic for pending orders.
+
+      - Minor dependency issues.
+
+    </div>
+
+  </div>
+
+</div>
+
+## Mar 20th, 2024 - v1.1.8
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.1.7**
+
+      -  Minor internal issues fixed.
+
+    </div>
+
+  </div>
+
+</div>
+
+## Mar 19th, 2024 - v1.1.7
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.1.7**
+
+      **The following issues are fixed:**
+
+      -  Dependency issues at runtime.
+
+    </div>
+
+  </div>
+
+</div>
+
+## Mar 19th, 2024 - v1.1.6
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.1.6**
+
+      **Fixes:**
+
+      - fixed wrong calculations of estLiqPrice and estLeverage.
+
+      - Enhanced Position and Order list update frequency.
+
+      - Minor UI issue fixes.
+
+      **New:**
+
+      - PnL card sharing: a PnL card can be generated based on user's positions.
+
+      ```JS
+      () => {
+        const { ref, copy, download, toDataURL, toBlob} = usePoster({
+          // backgroundColor: "#0b8c70",
+          // fontFamily: "Manrope",
+          backgroundImg: "/path/image.png",
+          color: "rgba(255, 255, 255, 0.98)",
+          profitColor: "rgb(0,181,159)",
+          lossColor: "rgb(255,103,194)",
+          brandColor: "rgb(0,181,159)",
+          data: {
+            message: "I am the best trader.",
+            domain: "broker.com",
+            updateTime: "2022-JAN-01 23:23",
+            position: {
+                symbol: "BTC-PERP",
+                currency: "USDC",
+                side: "LONG",
+                leverage: 20,
+                pnl: -1032.23,
+                ROI: -10.25,
+                informations: [
+                  { title: "Open Price", value: "59,129.12313" },
+                  { title: "Opened at", value: "Jan-01 23:23" },
+                  { title: "Mark price", value: "59,129.12313" },
+                  { title: "Quantity", value: "2" },
+                ],
+            },
+          },
+          layout: {},
+        });
+
+        return <canvas ref={ref} width={550} height={300} />;
+      };
+
+````
+    Either default layout can be used or one can be provided via `layout` parameter. Sample code:
+
+    ```JS
+    export const DefaultLayoutConfig: PosterLayoutConfig = {
+      domain: {
+        fontSize: 13,
+        // color: undefined,
+        position: {
+          left: 20,
+          bottom: 17,
+        },
+      },
+      message: {
+        fontSize: 20,
+        color: "white",
+        textBaseline: "top",
+          position: {
+            left: 20,
+            top: 16,
+          },
+      },
+      position: {
+        fontSize: 20,
+        color: "rgba(255,255,255,0.98)",
+        position: {
+          left: 20,
+          top: 70,
+        },
+      },
+      unrealizedPnl: {
+        fontSize: 36,
+        color: "rgba(255,255,255,0.5)",
+        secondaryColor: "rgba(255,255,255,0.5)",
+        position: {
+          left: 20,
+          top: 110,
+        },
+      },
+      informations: {
+        fontSize: 12,
+        color: "rgba(255, 255, 255, 0.8)",
+        labelColor: "rgba(255,255,255,0.36)",
+        position: {
+          left: 20,
+          top: 150,
+        },
+      },
+
+      updateTime: {
+        fontSize: 10,
+        color: "rgba(255,255,255,0.5)",
+        textAlign: "end",
+        position: {
+          right: 15,
+          bottom: 17,
+        },
+      },
+    };
+
+    ```
+
+
+    </div>
+  </div>
+
+</div>
+
+
+## Mar 5th, 2024 - Patch Update
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.1.4**
+
+      - removed LZ scan library, no @axios dependency required.
+
+      - fixed token approval issues.
+
+      - update to `useOrderbookStream` hook to add `padding` param to not return anything if the orderbook depth is not enough.
+
+      ```JS
+      const [data] = useOrderBookStream('[symbol]', undefined, {level:10, padding:false}
+      //if 'padding' is true, the hook will return NaN to
+      //fill the data to specified level if not enough depth
+      ```
+      - fixed WS connection issues.
+
+    </div>
+  </div>
+
+</div>
+
+
+## Feb 22nd, 2024 - Minor Update
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.1.3**
+
+
+**Fixes:**
+
+- The issue of incorrect Liq. price when reading margin data, now we will pass null when it's loading.
+- The issue of Orderbook display.
+- The issue of fetching incorrect symbol for mark price / symbol infos when switching symbols.
+- Numerous UI issues in the desktop SDK.
+
+**Optimizations:**
+
+- Reduced the number of API calls made during open/cancel order operations to avoid triggering rate limits.
+- Improved the order entry experience.
+
+**New Features:**
+
+
+        - Added stop order functionality in the desktop and mobile web UI.
+
+        - Added order/position lines in the desktop web kline.
+
+    </div>
+  </div>
+
+</div>
+
+
+## Feb 7th, 2024 - Major Update
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      **Updates to @liqzero.network/hook v1.1.2**
+
+      We are excited to announce the release of version 1.1.2 of the @liqzero.network/hook SDK. This update introduces significant changes and new features designed to enhance your development experience and the capabilities of your applications. Below is an overview of the key updates:
+
+      `useOrderEntry` Hook Enhancements:
+
+        - **Parameter Adjustments:** Now accepts an object of type `OrderEntity` with mandatory fields: `order_type`, `side`, and `symbol`.
+
+
+        - **New Return Values:** Includes `estLiqPrice` (Estimated Liquidation Price), `estLeverage` (Leverage change post-position opening), `formattedOrder` (Formatted order data), and `metaState` (Validation results and form status).
+
+        - **New `submit()` Function:** A parameter-free function to create orders via API, aiming to replace `onSubmit` in future releases.
+
+        `useWithdraw` Hook Update:
+
+        - **New `availableWithdraw` Field:** Indicates the direct withdrawal amount available without needing to settle PnL, calculated based on the unsettledPnL and freeCollateral.
+
+        `useDeposit` Hook Improvements:
+
+        - **New Return Fields:** `depositFee`, `setQuantity(quantity: number)`, and `quantity` for enhanced deposit management.
+
+        - **Simplified `deposit()` Function:** No parameters required for operation.
+
+        **Testnet Transition:** Switch from Arbitrum Goerli to Arbitrum Sepolia.
+
+        **Stop Limit/Stop Market Support:**
+
+        - Two new order types: `STOP_MARKET` and `STOP_LIMIT`
+
+        - Introduction of Algo orders (stop loss) with two new methods: `updateAlgoOrder(orderId: string, order: OrderEntity)` and `cancelAlgoOrder(orderId: string, symbol?: string)`.
+
+        - Additional return parameters to include Algo order related properties.
+
+    </div>
+  </div>
+
+</div>
+````

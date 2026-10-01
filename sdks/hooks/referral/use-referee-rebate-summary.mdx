@@ -1,0 +1,19 @@
+---
+title: "useRefereeRebateSummary"
+description: "Hook to get daily referee rebate statistics over a date range."
+---
+
+Provide statistics on referee rebates per date, based on start and end date.
+
+- [Tech docs](/sdks/tech-doc/modules/orderly_network_hooks#userefereerebatesummary)
+
+```ts
+const {
+  data: distributionData,
+  mutate,
+  isLoading
+} = useRefereeRebateSummary({
+  startDate,
+  endDate
+});
+```

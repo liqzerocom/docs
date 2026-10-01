@@ -1,0 +1,144 @@
+---
+title: "Setup"
+description: "How to install, configure, and connect wallet adapters with the LiqZero React hooks SDK."
+---
+
+You can use `@orderly.network/hooks` in two simple steps!
+
+<Steps>
+  <Step title="Installation">
+Inside your React project directory, run the following to install the SDK. You will also very likely need our Types SDK:
+
+```sh
+npm install @orderly.network/types @orderly.network/hooks
+```
+
+  </Step>
+
+  <Step title="Add LiqZeroConfigProvider">
+Add the `OrderlyConfigProvider` component to your project, wrapping the root components.
+
+    <Tabs>
+      <Tab title="Default">
+
+We recommend that you use the default config in the newly created project and provide your own `brokerId`. Start from [Builder Onboarding](/introduction/getting-started/builder-onboarding) to set up your builder identity. If you are using LiqZero One, continue from [https://dex.orderly.network/](https://dex.orderly.network/).
+
+```tsx
+import type { FC, PropsWithChildren } from "react";
+import { OrderlyConfigProvider } from "@orderly.network/hooks";
+
+const brokerId = "<your id>";
+
+export const App: FC<PropsWithChildren> = ({ children }) => {
+  return (
+    <OrderlyConfigProvider brokerId={brokerId} networkId="mainnet">
+      {children}
+    </OrderlyConfigProvider>
+  );
+};
+```
+
+      </Tab>
+
+      <Tab title="Custom">
+
+If you are using an existing project and have already implemented the LiqZero Key creation process, or have to modify the creation process for your own use cases, you can use your own `configStore` or `keyStore` via their respective property within `OrderlyConfigProvider`.
+
+```tsx
+import type { FC, PropsWithChildren } from "react";
+import { OrderlyConfigProvider } from "@orderly.network/hooks";
+import type { ConfigStore, OrderlyKeyStore } from "@orderly.network/core";
+
+const myConfigStore: ConfigStore = new YourConfigStore();
+const myKeyStore: OrderlyKeyStore = new YourKeyStore();
+
+export const App: FC<PropsWithChildren> = ({ children }) => {
+  const brokerId = "<your id>";
+  return (
+    <OrderlyConfigProvider configStore={myConfigStore} keyStore={myKeyStore} networkId="mainnet">
+      {children}
+    </OrderlyConfigProvider>
+  );
+};
+```
+
+The respective interfaces the need to be implemented are:
+
+- [ConfigStore](/sdks/tech-doc/interfaces/orderly_network_core.ConfigStore)
+- [LiqZeroKeyStore](/sdks/tech-doc/interfaces/orderly_network_core.OrderlyKeyStore)
+
+</Tab>
+    </Tabs>
+
+  </Step>
+
+  <Step title="Setup complete!">
+
+You can now use all the provided hooks within `@orderly.network/hooks`!
+
+```tsx
+import { useAccount } from "@orderly.network/hooks";
+
+export const UserInfo = () => {
+  const { account, state } = useAccount();
+
+  return (
+    <div>
+      <div>Address: {state.address}</div>
+    </div>
+  );
+};
+```
+
+  </Step>
+</Steps>
+
+## Environments
+
+The `networkId` property within `OrderlyConfigProvider` can be set to `mainnet` or `testnet`. The default is `mainnet`. It is not possible to change the network during runtime. If you want to do so anyway, you need to reload the page.
+
+```tsx
+import type { FC, PropsWithChildren } from "react";
+import { OrderlyConfigProvider } from "@orderly.network/hooks";
+
+const brokerId = "<your id>";
+
+export const App: FC<PropsWithChildren> = ({ children }) => {
+  return (
+    <OrderlyConfigProvider brokerId={brokerId} networkId="testnet">
+      {children}
+    </OrderlyConfigProvider>
+  );
+};
+```
+
+## Wallet Integration with LiqZero Provider
+
+The LiqZero Provider enables seamless integration with different blockchain wallets.
+It supports both EVM-compatible chains and Solana through dedicated wallet adapters.
+Here's how to set up the provider with both ecosystems:
+
+```tsx
+import type { FC, PropsWithChildren } from "react";
+import { OrderlyConfigProvider } from "@orderly.network/hooks";
+import { DefaultEVMWalletAdapter } from "@orderly.network/default-evm-adapter";
+import { DefaultSolanaWalletAdapter } from "@orderly.network/default-solana-adapter";
+import { EthersProvider } from "@orderly.network/web3-provider-ethers";
+
+const brokerId = "<your id>";
+
+export const App: FC<PropsWithChildren> = ({ children }) => {
+  return (
+    <OrderlyConfigProvider
+      brokerId={brokerId}
+      networkId="testnet"
+      walletAdapters={[
+        new DefaultEVMWalletAdapter(new EthersProvider()),
+        new DefaultSolanaWalletAdapter()
+      ]}
+    >
+      {children}
+    </OrderlyConfigProvider>
+  );
+};
+```

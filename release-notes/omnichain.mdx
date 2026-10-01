@@ -1,0 +1,1662 @@
+---
+title: Omnichain
+description: "Release notes for the Omnichain platform"
+icon: "layer-group"
+---
+
+import { Chip } from "/snippets/chip.mdx";
+
+<div className="omnichain-release-notes-marker" />
+
+## Sep 6th, 2026 (Scheduled Maintenance)
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Mainnet: Sep 6th, 2026 04:00-04:45 UTC+8
+      - Downtime: Mainnet services will be unavailable during this maintenance window
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - **Limit-price support for position TP/SL orders:** Position-level take-profit and stop-loss orders can now be configured to place a reduce-only limit order once the trigger price is reached. Existing market-based position TP/SL behavior remains unchanged
+      - **`accruedFundingFee` in Position WebSocket updates:** [Position WebSocket messages](/build-on-omnichain/websocket-api/private/position-push) now include the `accruedFundingFee` field, enabling integrators to receive accrued funding-fee data alongside position updates
+      - **Multi-collateral support in isolated margin:** Eligible collateral assets can now support isolated-margin trading, including accounts that hold supported non-USDC collateral. Isolated margin remains denominated and accounted for in USDC. If opening a position would cause the USDC borrowing amount to exceed 50,000 USDC, automatic collateral conversion is triggered to reduce the borrowing amount
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - **Pending-order amendment protection:** Each pending order can be successfully amended up to 1,000 times. Further amendment requests are rejected without changing the existing order; cancel, fill, and settlement flows are unaffected
+      - **More consistent collateral and withdrawal checks:** Improved alignment between risk-engine withdrawal validation and position-service free-collateral calculations
+      - **Isolated-margin risk handling improvements:** Improved risk calculations for isolated-order amendments, pending-order cleanup, liquidation-lock checks, and isolated-margin operations
+      - **Risk-engine performance improvements:** Enhanced selected risk-engine processing paths and runtime handling to improve efficiency and resilience under load
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="bug" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - **Multilevel referral rebate consistency:** Fixed an issue where a referred user without a claimed referral code could retain an outdated rebate configuration after an upstream affiliate's maximum rebate rate was reduced. A subsequent increase could produce an invalid negative upstream rebate split
+    </div>
+
+  </div>
+</div>
+
+## Jul 14th, 2026
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Jul 10th, 2026 06:00 UTC
+      - Mainnet: Jul 14th, 2026 05:15 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Conditional maker rebate eligibility is evaluated per trade:
+        - If the user's maker fee is zero or positive, LiqZero funds no maker rebate. Any positive maker fee collected is Builder revenue
+        - If the user's maker fee is negative, LiqZero funds the trader rebate up to the Builder's tier cap. The funded amount is passed through to the trader and is not Builder revenue
+    </div>
+
+  </div>
+</div>
+
+## Jun 30th, 2026
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Jun 30th, 2026 06:00 UTC
+      - Mainnet: Jun 30th, 2026 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Pre-TGE market support through Perp Anything
+      - Separate risk parameters for RWA markets during off-market sessions
+      - Affiliate direct-referee remarks
+      - Builder daily revenue history public API
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Referral commission adjustment improvements
+      - Referral and distributor codes extended to 15 characters
+      - Admin API query improvements with optional account filters and 180-day query limits
+      - Perp Anything and Builder Oracle workflow improvements
+    </div>
+
+  </div>
+</div>
+
+## Jun 2nd, 2026
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: May 29th, 2026 06:00 UTC
+      - Mainnet: Jun 2nd, 2026 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - FX PERPS support for HKD and KRW, plus Hong Kong and Korean stocks
+    </div>
+
+  </div>
+</div>
+
+## Mar 10th, 2026
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Mar 6th, 2026 06:00 UTC
+      - Mainnet: Mar 10th, 2026 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Isolated margin support
+    </div>
+
+  </div>
+</div>
+
+## Jan 27th, 2026
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Jan 23rd, 2026 06:00 UTC
+      - Mainnet: Jan 27th, 2026 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Multilevel referral program
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - USD1 collateral listing
+      - SOL withdrawal to Ceffu support
+      - Cross-chain deposit disable/re-enable functionality
+      - Point system documentation
+      - System robustness improvements including database optimizations and rebalance enhancements
+      - Performance improvements and bug fixes
+    </div>
+
+  </div>
+</div>
+
+## Dec 23rd, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Dec 19th, 2025 06:00 UTC
+      - Mainnet: Dec 23rd, 2025 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Vanguard referral program
+      - Gold/Silver price feed integration
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Zero downtime deployment
+      - RWA base fee updates
+      - System robustness improvements including trading checksum and reconciliation enhancements
+      - WebSocket execution report symbol filtering
+      - Batch update leverage functionality
+      - Performance improvements and bug fixes
+    </div>
+
+  </div>
+</div>
+
+## Nov 19th, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Nov 18th, 2025 06:00 UTC
+      - Mainnet: Nov 20th, 2025 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Permissioned Vaults support
+      - Staking Revamp with buyback mechanism
+      - YUSD collateral support on BNB Chain
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Vault rebalance API enhancements
+      - Trading bug fixes including funding rate and engine improvements
+      - System robustness improvements and settlement risk considerations
+      - RWA volume API support
+      - SDK API enhancements including chain info filtering and TradingView kline historical data
+      - Performance improvements and bug fixes
+    </div>
+
+  </div>
+</div>
+
+## Oct 14th, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Oct 16th, 2025 06:00 UTC
+      - Mainnet: Oct 16th, 2025 18:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - RWA (Real World Assets) Trading
+      - OmniVault SEI network support
+      - CCTP v2 upgrade
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Minimum trading fees configuration at builder level
+      - Position history updates for bankrupt cases
+      - Enhanced liquidation message notifications
+      - Tokenomics API updates for total and circulating supply
+      - Strategy Vault enhancements including new endpoints and status logic
+      - Trading enhancements and system improvements
+      - Security enhancements and documentation updates
+    </div>
+
+  </div>
+</div>
+
+## Sep 13th, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Sep 10th, 2025 06:00 UTC
+      - Mainnet: Sep 12th, 2025 21:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Multi-collateral support on Solana Chain
+      - Custom leverage per symbol
+      - Internal transfer enhancements with wallet signature
+      - ADL enhancements for insurance fund protection
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Security enhancements including withdrawal checks and monitoring
+      - Referral code sub-accounts volume support
+      - Custom builder tier
+      - Enhanced liquidation info and multi-collateral improvements
+      - Solana dex account deposit/withdraw for Strategy Vault
+      - Campaign enhancements and builder whitelist withdrawal
+      - Documentation updates and bug fixes
+    </div>
+
+  </div>
+</div>
+
+## Aug 12th, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Aug 8th, 2025 07:00 UTC
+      - Mainnet: Aug 11th, 2025 21:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Ceffu (OmniVault) integration
+      - OmniVault SP sub-accounts support
+      - DEX account deposit/withdraw for Strategy Vault
+      - Trading blacklist functionality
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - User fee rate API updates
+      - Valor claim history endpoint
+      - Trading system enhancements and bug fixes
+    </div>
+
+  </div>
+</div>
+
+## Jul 10th, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Jul 2nd, 2025 10:00 UTC
+      - Mainnet: Jul 10th, 2025 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Multi-Collateral support
+      - Sub-accounts aggregate API
+      - Campaign signup API
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Performance improvements and bug fixes
+    </div>
+
+  </div>
+</div>
+
+## Jun 3rd, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: May 30th, 2025 06:00 UTC
+      - Mainnet: Jun 3rd, 2025 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Sub-accounts support
+      - Added Abstract and Plume mainnet support
+      - TP/SL with limit order type
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Strategy Vault upgrades including new endpoints and status handling
+      - Auto-generated referral codes can now be edited before any users bind to them
+      - Fixed next funding time calculation
+      - Performance improvements and bug fixes
+    </div>
+
+  </div>
+</div>
+
+## Apr 29th, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Apr 25th, 2025 06:00 UTC
+      - Mainnet: Apr 29th, 2025 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Added Solana staking and trading rewards functionality
+      - Implemented global max OI cap per market pair for improved risk management
+      - Released public builder leaderboard for increased transparency
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Strategy Vault optimizations:
+        - Improved APY formula and calculation
+        - Added 30-day APY metric to vault info
+        - Enhanced TVL and PnL data accuracy
+        - Added minimum withdrawal amount functionality
+        - Implemented PnL maximum drawdown tracking
+      - Updated Builder Daily API with additional metrics
+      - Enhanced Reduce Only (RO) order logic for improved reliability
+      - Added support for automatic generated referral codes
+      - Improved announcement API with support for types and update times
+      - Added realized PnL tracking to builder daily reporting
+      - Enhanced referral API with sorting capabilities
+    </div>
+
+  </div>
+</div>
+
+## Apr 1st, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Mar 28th, 2025 06:00 UTC
+      - Mainnet: Apr 1st, 2025 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Market maker reward leaderboard
+      - Added filtering capability for Builder Admin to view non-default users
+    </div>
+
+  </div>
+</div>
+
+## Feb 25th, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Feb 21st, 2025 06:00 UTC
+      - Mainnet: Feb 25th, 2025 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Added support for Monad testnet
+      - Added Ledger support for Solana network
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Updated API domain
+      - Implemented chain-specific trading volume attribution
+      - Updated tiered base fee structure for builders
+      - Upgraded to Pyth Lazer for price feeds
+    </div>
+
+  </div>
+</div>
+
+## Jan 21st, 2025
+
+<div style={{ display: "table", width: "auto" }}>
+ <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Jan 17th, 2025 06:00 UTC
+      - Mainnet: Jan 21st, 2025 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - `GET /v1/referral/rebate_summary` add a new field traded_referral to track referral trades during the specified date
+
+      - `GET v1/public/market_making_rewards/leaderboard` support all markets, and add est_score in the response, est_score = final Q score
+
+      - Roadmap page
+
+      - update MM Reward Multiplier
+
+      - minor improvements and fixes
+    </div>
+
+  </div>
+
+</div>
+
+## Dec 24th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+ <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Dec 20th, 2024 06:00 UTC
+      - Mainnet: Dec 24th, 2024 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Morph support
+
+      - Story supported
+
+      - \$ORDER OFT and Staking on Avalanche
+
+      - Price source from Hyperliquid
+
+      - new query parameters for liquidation API
+
+      - minor improvements and fixes
+    </div>
+
+  </div>
+  
+</div>
+
+## Nov 26th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+ <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Nov 22nd, 2024 06:00 UTC
+      - Mainnet: Nov 26th, 2024 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Avalanche support
+
+      - Solana Mainnet supported
+
+      - Reward Switch to esORDER
+
+      - Pyth Integration
+
+      - add pending treasury info to Valor pool info API
+
+      - minor improvements and fixes
+    </div>
+
+  </div>
+  
+</div>
+
+## Oct 29th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+ <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Oct 25th, 2024 06:00 UTC
+      - Mainnet: Oct 29th, 2024 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Solana testnet support
+
+      - minor improvements and fixes
+    </div>
+
+  </div>
+  
+</div>
+
+## Sep 24th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Sep 20th, 2024 06:00 UTC
+      - Mainnet: Sep 24th, 2024 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Funding rate history comparison API
+
+      - Position History API
+
+      - Fund transfer between accounts
+
+      - unsettled PnL now considered in withdrawal checks
+    </div>
+
+  </div>
+  
+</div>
+
+## Aug 27th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Aug 23rd, 2024 06:00 UTC
+      - Mainnet: Aug 27th, 2024 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - The \$ORDER token has been released. Please check the [\$ORDER token overview](/introduction/tokenomics/overview-of-order)
+
+      - Trading rewards APIs
+
+      - Market making rewards APIs
+
+      - Staking & VALOR APIs
+
+      - Minor bugfixes and improvements
+    </div>
+
+  </div>
+  
+</div>
+
+## Jul 30th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Jul 26th, 2024 06:00 UTC
+      - Mainnet: Jul 30th, 2024 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - New endpoint /v1/public/futures_market to get market volume filtered by builder
+
+      - New endpoint /v1/public/balance/stats to get TVL (total balance & unsettled PnL) by builder
+
+      - New endpoint /v1/public/campaign/check to verify that given address meets certain constraints in specific campaign
+
+      - Minor bugfixes and improvements
+    </div>
+
+  </div>
+  
+</div>
+
+## Jun 25th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: Jun 21st, 2024 06:00 UTC
+      - Mainnet: Jun 25th, 2024 06:00 UTC
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Adding optional `level` parameter to /v1/order POST body, which allows to use the price of bid0 to bid4 or ask0 to ask4
+
+      - Adding optional `post_only_adjust` parameter to /v1/order POST body. Default value is false. If it is set to true, then it will adjust price to 1 tick close to current best price. Only supported for `POST_ONLY` type orders
+
+      - New endpoint /v1/get_broker to fetch all builders where given address has been registered
+
+      - Performance improvements
+    </div>
+
+  </div>
+  
+</div>
+
+
+## May 28th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+    <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="times" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Testnet: May 24th, 2024 06:00 UTC
+      - Mainnet: May 28th, 2024 06:00 UTC
+
+    </div>
+
+  </div>
+
+    <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Expanded to Mantle with USDC.e support
+
+    </div>
+
+  </div>
+
+    <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+
+      - Added WebSocket topic for maintenance status
+      - Added optional `order_tag` parameter to `/v1/public/campaign/user`
+      - Added optional sorting parameters to `/v1/volume/broker/daily`
+      - Removed `fee` from referral API responses
+      - Added sort parameter to the `GET` referee endpoint
+
+      - Performance improvements
+
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+## Apr 16th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+    <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added bracket orders with stop loss and take profit alongside primary trades
+
+    </div>
+
+  </div>
+
+    <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Order APIs now return realized PnL per position for orders that close or reduce open positions
+
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added WebSocket topics `{broker_id}${symbol}@ticker` and `{broker_id}$tickers` to query builder volume per market
+      - Added two endpoints for verifying and checking referral codes
+
+      </div>
+
+  </div>
+
+</div>
+
+
+## Mar 12th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+      <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Builders can choose which chains they operate on
+      - Supported builders for each chain can be retrieved through `GET /v1/public/chain_info`
+
+    </div>
+
+  </div>
+
+    <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Rebates for trades with specific `order_tag` values can now be automated through the referral system
+
+    </div>
+
+  </div>
+
+    <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added max slippage settings for market orders
+      - Unfilled quantity outside the configured slippage is canceled
+
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added `order_tag` filtering to `GET /v1/orders` and `GET /v1/algo/orders`
+      - Added referrer and referee rebate fields to `GET /v1/referral/info`
+      - Added referral-code referee volume and fees to `GET /v1/referral/rebate_summary`
+      - Added maker and taker volume breakdown to `GET /v1/volume/broker/daily`
+      - Added total fees and builder rebate retrieval to `GET /v1/volume/broker/daily`
+      - Added `user_address` and `account_id` filters to `GET /v1/referral/admin_info`
+      - Added referral rebate split updates through `POST /v1/referral/edit_split`
+      - Added total referrer and referee rebate fields to `GET /v1/referral/admin_info`
+      - Added deposit, withdrawal, start account value, and end account value fields to campaign APIs
+      - Increased `GET /v1/volume/broker/daily` update frequency from daily to hourly
+      - Added address to `GET /v1/volume/broker/daily`
+
+      </div>
+
+  </div>
+
+</div>
+
+
+## Feb 5th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added referral code generation and sharing
+      - Added referral system endpoints under the [Referral Program](/build-on-omnichain/restful-api/private/create-referral-code) section
+      - Added referral system documentation
+
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added Custom Trading Fee System for builder-specific fee structures
+      - Added fee setting endpoints under the [Fee Setting](/build-on-omnichain/restful-api/private/update-user-fee-rate) section
+      - Deprecated fee tiers from `/v1/public/fee_futures/program`, `/v1/broker/user_info`, and `account` WebSocket
+      - Added volume-based fee rate setting tool on [GitHub](https://github.com/OrderlyNetwork/orderly-evm-broker-fee-admin)
+      - Added [custom fee documentation](/build-on-omnichain/user-flows/custom-fees)
+      </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added stop loss, take profit, and positional stop loss/take profit order types
+      - Added Mark Price trigger support
+      - Added automatic TP/SL cancellation when positions close
+      - Added full-position and partial-position TP/SL management
+      - Amended algo order endpoints to support the new order types
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added Delegate Signer support for Smart Contract trading
+      - Added EIP-712 signature types for Delegate Signer functions
+      - Added Delegate Signer on-chain function and APIs
+      - Added [Delegate Signer documentation](/build-on-omnichain/user-flows/delegate-signer)
+    </div>
+
+  </div>
+
+</div>
+
+
+## Jan 4th, 2024
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added create, edit, cancel, and get algo order APIs
+      - STOP orders are supported for now
+
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added deposit and withdrawal fees for cross-chain message costs
+      - Added `withdraw_fee` to `GET /v1/public/token`
+      - Added `allowCrossChainWithdrawal` to `POST /v1/withdraw_request`
+      - Added `PENDING_REBALANCE` withdrawal status in REST and WSS
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="new" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added get account details API: `GET /v1/public/account`
+      - Added get user statistics API: `GET /v1/client/statistics/daily`
+      - Added get user fee tier API: `GET /v1/broker/user_info`
+    </div>
+
+  </div>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added `liquidation_tier` parameter for each symbol
+      - Added `symbols` array and high/low risk perps in `POST /v1/liquidation`
+    </div>
+
+  </div>
+
+</div>
+
+
+## Oct 13th, 2023
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added get vault chain info API
+      - Added `tag` parameter for adding LiqZero Key
+      - Changed symbol format in get user info API from `BTC` to `PERP_BTC_USDC`
+    </div>
+
+  </div>
+
+</div>
+
+
+## Sep 21st, 2023
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added Claim from insurance fund endpoint
+      - Added `max_notional` to Get Insurance Fund Info and Get Account Information responses
+      - Added `futures_tier` to Get Account Information response
+    </div>
+
+  </div>
+
+</div>
+
+
+## Aug 10th, 2023
+
+<div style={{ display: "table", width: "auto" }}>
+
+  <div style={{ display: "table-row", width: "auto" }}>
+    <Chip type="update" />
+    <div
+      style={{
+        float: "left",
+        display: "table-column",
+        paddingLeft: "30px",
+        width: "calc(80% - 30px)",
+      }}
+    >
+      - Added Get PnL Settlement History API
+      - Added Liquidations on Account WebSocket API
+      - Added reduce-only order type
+      - Added `limit_price` to Claim Liquidated Positions API
+      - Updated `/insurancefund` endpoint to `/insurance_fund`
+      - Made `symbol` optional in Get Liquidated Positions of Account API
+    </div>
+
+  </div>
+
+</div>

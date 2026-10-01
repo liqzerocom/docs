@@ -1,0 +1,130 @@
+---
+title: "Builder Onboarding"
+description: "Launch your DEX with no-code or SDK integration, create your builder profile, get your broker ID, and complete admin setup in LiqZero One."
+---
+
+Launch your own DEX on LiqZero's shared orderbook using a no-code solution or SDK integration. [LiqZero One](https://dex.orderly.network/login) is the onboarding platform for both paths.
+
+If you are an API trader using a builder's trading platform rather than launching your own, start from the [Integration FAQs](/build-on-omnichain/integration-faqs). You do not need to complete builder onboarding.
+
+## Choose your launch path
+
+Both paths let you launch your own DEX on LiqZero's shared orderbook. Choose based on your frontend requirements and development resources.
+
+|                   | No-Code Solution                                                      | SDK Integration                                                                                      |
+| ----------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Best for**      | A quick launch without frontend development                           | A custom experience with development resources                                                       |
+| **Customization** | Branding and the template's built-in options                          | Full control over the frontend and user experience                                                   |
+| **Development**   | No coding required                                                    | Builder develops and integrates the frontend                                                         |
+| **Launch flow**   | Select optional frontend setup in LiqZero One, configure, then deploy | Onboard in LiqZero One, then build, test, and deploy                                                 |
+| **Resources**     | [Get started](https://dex.orderly.network/login)                      | [SDK documentation](/sdks/overview) and [LiqZero MCP](https://github.com/OrderlyNetwork/orderly-mcp) |
+
+## Onboarding steps
+
+<Steps>
+<Step title="Create your builder profile">
+
+Connect your wallet in [LiqZero One](https://dex.orderly.network/login), verify ownership, and create your builder profile. Provide:
+
+- **Builder name**
+- **Distributor code**, if you were referred by a distributor
+
+Creating your builder profile is free.
+
+</Step>
+<Step title="Set up your frontend (optional)">
+
+If you want to launch with the no-code solution, choose a white-label template, add your branding, and configure the available frontend options in LiqZero One.
+
+Skip this step if you are building your own frontend with the SDKs. You can complete onboarding without creating a frontend in LiqZero One.
+
+</Step>
+<Step title="Set your fee model">
+
+Choose your platform's trading fees, subject to LiqZero's base fee for your builder tier.
+
+Use [Trading fees](/introduction/trade-on-orderly/trading-basics/trading-fees) for current rates and the [Builder Staking Programme](/introduction/trade-on-orderly/trading-basics/trading-fees#builder-staking-programme) for tier requirements. See [Custom Fees](/build-on-omnichain/user-flows/custom-fees) for fee configuration and integration details.
+
+</Step>
+<Step title="Get your broker ID">
+
+Pay the **one-time \$10 setup fee** in USDC, USDT, or ORDER through LiqZero One to get your broker ID. The broker ID identifies your platform on LiqZero.
+
+The fee applies to both no-code and SDK builders. Paying it creates the broker ID, but admin-account registration is still required to complete setup.
+
+</Step>
+<Step title="Set up your admin account">
+
+Register your admin account in LiqZero One after getting your broker ID. This completes setup, enables management of builder-level settings such as trading fees, and allows your platform to receive its earnings.
+
+1. Open the admin-account registration flow in LiqZero One after your broker ID has been created.
+2. Choose how your team will control the admin account:
+
+   **Existing EOA wallet:** An externally owned account (EOA) is a wallet controlled by a private key, rather than a smart contract. Use this option when one wallet will control the builder admin account and sign the wallet-authorized setup actions.
+
+   **Multisig delegation:** Use this option when your team manages a multisig wallet with shared approval rules. Complete the multisig delegation steps in LiqZero One to authorize a signer to act for the smart contract account. This lets your team retain shared control of the multisig wallet while enabling the signing needed for builder admin operations.
+
+3. Complete registration and any required delegation steps, then secure the LiqZero keys issued during setup.
+4. Confirm that your admin account is registered. You can then manage builder settings and receive platform earnings through your admin account.
+
+</Step>
+<Step title="Confirm readiness and build">
+
+Confirm that your builder profile, broker ID, and admin account are set up and that your fee model is configured.
+
+- **SDK builders:** Follow the [Integration Checklist](/build-on-omnichain/integration-checklist) to build, test, and deploy your frontend. See [Building on LiqZero](/build-on-omnichain/building-on-omnichain) for architecture and integration resources.
+- **No-code builders:** Finish configuring and deploying your DEX in LiqZero One.
+
+</Step>
+</Steps>
+
+### Optional
+
+#### Testnet testing
+
+Register separately on [LiqZero One Testnet](https://testnet-dex.orderly.network/) to test your integration. Mainnet registration does not automatically register your builder on Testnet.
+
+#### Launch support
+
+Reach out through the channel that fits your question:
+
+- **BD and partnerships:** [hello@liqzero.network](mailto:hello@orderly.network)
+- **Technical and integration support:** [devrel@liqzero.network](mailto:devrel@orderly.network)
+- **Discord:** [LiqZero Discord](https://discord.com/invite/orderlynetwork)
+- **Telegram:** [LiqZero Discussions](https://t.me/Orderly_Discussions)
+
+See [Partner Support](/build-on-omnichain/partner-support) for additional resources and launch coordination.
+
+## What it costs
+
+- **Builder profile:** Free to create.
+- **Broker ID:** A one-time **\$10 setup fee**, payable in USDC, USDT, or ORDER, for both no-code and SDK builders.
+- **Admin registration:** Required to complete onboarding after the broker ID is created.
+- **Ongoing trading fees:** LiqZero charges base trading fees according to your builder tier. Refer to [Trading fees](/introduction/trade-on-orderly/trading-basics/trading-fees) for current rates.
+- **Development and operations:** Custom frontend development and third-party operating costs are separate.
+
+## How you earn
+
+Builders earn the difference between their platform's trading fees and LiqZero's base fee. Your platform's fee settings and builder tier determine that difference.
+
+## FAQs
+
+### Do I need to set up a frontend in LiqZero One?
+
+Only if you want to use the no-code solution. SDK builders onboard in LiqZero One and build their frontend separately.
+
+### Does paying the setup fee complete onboarding?
+
+No. Paying the one-time \$10 setup fee creates your broker ID. You must also register your admin account in LiqZero One to complete setup and receive platform earnings.
+
+### Where do I manage my builder settings?
+
+Use [LiqZero One](https://dex.orderly.network/login) after your admin account is registered.
+
+### Where do I find the current builder fee tiers?
+
+Use [Trading fees](/introduction/trade-on-orderly/trading-basics/trading-fees) and the [Builder Staking Programme](/introduction/trade-on-orderly/trading-basics/trading-fees#builder-staking-programme).
+
+### Can I use my Mainnet builder registration on Testnet?
+
+No. Register separately on [LiqZero One Testnet](https://testnet-dex.orderly.network/).

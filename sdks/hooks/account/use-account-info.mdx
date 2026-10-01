@@ -1,0 +1,33 @@
+---
+title: "useAccountInfo"
+description: "Hook to fetch basic account information like fee rates, leverage, and account mode from the API."
+---
+
+Fetch basic account information from API.
+
+- [Tech docs](/sdks/tech-doc/modules/orderly_network_hooks#useaccountinfo)
+
+This hooks returns the data provided by the [account information endpoint](/build-on-omnichain/restful-api/private/get-account-information).
+
+### Example
+
+```tsx
+const { data: account, error, isLoading } = useAccountInfo();
+if (account == null || isLoading) {
+  return "Loading...";
+}
+
+const {
+  account_id,
+  email,
+  account_mode,
+  max_leverage,
+  taker_fee_rate,
+  maker_fee_rate,
+  futures_taker_fee_rate,
+  futures_maker_fee_rate,
+  maintenance_cancel_orders,
+  imr_factor,
+  max_notional
+} = account;
+```

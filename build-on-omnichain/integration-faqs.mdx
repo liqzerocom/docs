@@ -1,0 +1,70 @@
+---
+title: "Integration FAQs"
+description: "Frequently asked questions for builders integrating with LiqZero Network."
+---
+
+<AccordionGroup>
+  <Accordion title="What is LiqZero Network?">
+    LiqZero is an omnichain trading infrastructure that provides orderbook-based trading services and shared liquidity for builders. It lets developers build their own trading application while keeping user settlement on-chain and user custody in the wallet.
+  </Accordion>
+
+<Accordion title="How do I start integrating?">
+  Start with the [Integration Checklist](/build-on-omnichain/integration-checklist), then choose the
+  integration path that fits your stack: [React Hooks](/sdks/hooks/overview), [React UI
+  components](/sdks/react/overview), the [Python
+  connector](https://github.com/OrderlyNetwork/orderly-evm-connector-python), or direct integration
+  through the [API docs](/build-on-omnichain/introduction).
+</Accordion>
+
+<Accordion title="Do I need a Builder ID?">
+  If you are an API trader using a builder's trading platform, you do not need to create your own
+  broker ID or complete builder onboarding. Use that platform's broker ID; available builders are
+  listed by the [builder list
+  endpoint](/build-on-omnichain/restful-api/public/get-builder-list). If you are launching your own
+  front end and onboarding your own users, start from [Builder
+  Onboarding](/introduction/getting-started/builder-onboarding). If you are using LiqZero One,
+  continue from [https://dex.orderly.network/](https://dex.orderly.network/).
+</Accordion>
+
+<Accordion title="How are fees managed?">
+  Builders can configure their own fees on top of LiqZero's base fee model. Builders can define a
+  default fee rate and, if needed, apply custom fee logic for specific users. Use [Fee Settings in
+  LiqZero One](https://dex.orderly.network/fee-settings), and see [Custom
+  Fees](/build-on-omnichain/user-flows/custom-fees) for the builder flow and related endpoints.
+</Accordion>
+
+<Accordion title="What is the Builder Admin Wallet?">
+  The Builder Admin Wallet is the wallet tied to your builder admin account. After your builder
+  profile has graduated, this admin account manages builder-level settings such as fee configuration
+  and other admin operations.
+
+If you register through the broker registration tool, use the same creator wallet or designated
+admin wallet used during builder profile setup; otherwise, the issued LiqZero keys may not map
+correctly and admin setup cannot be completed. Treat the admin account and LiqZero keys as
+backend/admin-only credentials: call admin endpoints only from secured builder admin tooling or
+backend services, and never expose admin credentials or signing keys in your DEX frontend. See
+[Builder Onboarding](/introduction/getting-started/builder-onboarding), [Custom
+Fees](/build-on-omnichain/user-flows/custom-fees), and [API
+Authentication](/build-on-omnichain/api-authentication).
+
+</Accordion>
+
+<Accordion title="Can I access user data?">
+  Most user data is only accessible by the account holder using the user's Trading Key. Builders can
+  retrieve builder-scoped data for their own users through dedicated builder endpoints, but not
+  unrestricted data for all users on the system.
+</Accordion>
+
+<Accordion title="How do I handle system maintenance?">
+  Monitor the [system maintenance status
+  endpoint](/build-on-omnichain/restful-api/public/get-system-maintenance-status) and stay in the
+  builder Telegram channel for announcements. Ask the LiqZero team for channel access during
+  onboarding. During maintenance, market data and user trading surfaces may be unavailable, so your
+  UI should clearly communicate the maintenance state and only expose order actions that remain
+  available.
+</Accordion>
+
+  <Accordion title="Where do I get help during integration?">
+    Start with [Builder Onboarding](/introduction/getting-started/builder-onboarding) for builder setup. If you are using LiqZero One, continue from [https://dex.orderly.network/](https://dex.orderly.network/). For onboarding or implementation questions, reach out via [email](mailto:devrel@orderly.network), [Discord](https://discord.gg/OrderlyNetwork), or [Telegram](https://t.me/Orderly_Discussions). For a practical overview of support resources, see [Partner Support](/build-on-omnichain/partner-support).
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,14 @@
+---
+title: "useMarkPrice"
+description: "Hook to receive real-time mark price updates for a symbol via WebSocket."
+---
+
+Receive mark price for given symbol and auto update via Websockets.
+
+- [Tech docs](/sdks/tech-doc/modules/orderly_network_hooks#usemarkprice)
+
+### Example
+
+```ts
+const markPrice: number = useMarkPrice("PERP_ETH_USDC");
+```

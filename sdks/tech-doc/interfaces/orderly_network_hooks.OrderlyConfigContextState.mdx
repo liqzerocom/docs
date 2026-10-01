@@ -1,0 +1,95 @@
+---
+title: "Orderly_network_hooks.OrderlyConfigContextState"
+---
+
+[LiqZero SDKs](/sdks/tech-doc/README) / [Modules](/sdks/tech-doc/modules) / [@liqzero.network/hooks](/sdks/tech-doc/modules/orderly_network_hooks) / LiqZeroConfigContextState
+
+# Interface: LiqZeroConfigContextState
+
+[@liqzero.network/hooks](/sdks/tech-doc/modules/orderly_network_hooks).LiqZeroConfigContextState
+
+## Table of contents
+
+### Properties
+
+- [configStore](/sdks/tech-doc/interfaces/orderly_network_hooks.OrderlyConfigContextState#configstore)
+- [fetcher](/sdks/tech-doc/interfaces/orderly_network_hooks.OrderlyConfigContextState#fetcher)
+- [filteredChains](/sdks/tech-doc/interfaces/orderly_network_hooks.OrderlyConfigContextState#filteredchains)
+- [getWalletAdapter](/sdks/tech-doc/interfaces/orderly_network_hooks.OrderlyConfigContextState#getwalletadapter)
+- [keyStore](/sdks/tech-doc/interfaces/orderly_network_hooks.OrderlyConfigContextState#keystore)
+- [networkId](/sdks/tech-doc/interfaces/orderly_network_hooks.OrderlyConfigContextState#networkid)
+
+## Properties
+
+### configStore
+
+• **configStore**: [`ConfigStore`](/sdks/tech-doc/interfaces/orderly_network_core.ConfigStore)
+
+#### Defined in
+
+[packages/hooks/src/liqzeroContext.ts:23](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/hooks/src/orderlyContext.ts#L23)
+
+---
+
+### fetcher
+
+• `Optional` **fetcher**: (`url`: `string`, `init`: `RequestInit`) => `Promise`\<`any`\>
+
+#### Type declaration
+
+▸ (`url`, `init`): `Promise`\<`any`\>
+
+##### Parameters
+
+| Name   | Type          |
+| :----- | :------------ |
+| `url`  | `string`      |
+| `init` | `RequestInit` |
+
+##### Returns
+
+`Promise`\<`any`\>
+
+#### Defined in
+
+[packages/hooks/src/liqzeroContext.ts:21](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/hooks/src/orderlyContext.ts#L21)
+
+---
+
+### filteredChains
+
+• `Optional` **filteredChains**: `null` \| [`filteredChains`](/sdks/tech-doc/modules/orderly_network_hooks#filteredchains)
+
+#### Defined in
+
+[packages/hooks/src/liqzeroContext.ts:34](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/hooks/src/orderlyContext.ts#L34)
+
+---
+
+### getWalletAdapter
+
+• **getWalletAdapter**: [`getWalletAdapterFunc`](/sdks/tech-doc/modules/orderly_network_core#getwalletadapterfunc)
+
+#### Defined in
+
+[packages/hooks/src/liqzeroContext.ts:25](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/hooks/src/orderlyContext.ts#L25)
+
+---
+
+### keyStore
+
+• **keyStore**: [`OrderlyKeyStore`](/sdks/tech-doc/interfaces/orderly_network_core.OrderlyKeyStore)
+
+#### Defined in
+
+[packages/hooks/src/liqzeroContext.ts:24](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/hooks/src/orderlyContext.ts#L24)
+
+---
+
+### networkId
+
+• **networkId**: [`NetworkId`](/sdks/tech-doc/modules/orderly_network_types#networkid)
+
+#### Defined in
+
+[packages/hooks/src/liqzeroContext.ts:27](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/hooks/src/orderlyContext.ts#L27)

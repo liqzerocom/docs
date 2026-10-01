@@ -1,0 +1,13 @@
+---
+title: "Recipe: Quick start checklist"
+description: "1. pnpm add -g @liqzero.network/devkit (or pnpm dlx @liqzero.network/devkit --help)."
+---
+
+1. `pnpm add -g @orderly.network/devkit` (or `pnpm dlx @orderly.network/devkit --help`).
+2. **`orderly-devkit skills install`** — optional without an AI agent; **recommended** with Cursor/Claude/Codex (four LiqZero plugin skills).
+3. **`orderly-devkit mcp install`** — recommended for accurate `@orderly.network/*` API lookup while coding.
+4. `orderly-devkit create plugin` — complete prompts (or **`Skills-first`** flow: [skills-first workflow](/build-on-omnichain/builder-marketplace/skills-first)).
+5. `cd <target-dir> && pnpm install && pnpm run build`.
+6. In host: add `plugins={[registerYourPlugin()]}` on `OrderlyAppProvider`.
+
+**Full guide:** [**Skills-first**](/build-on-omnichain/builder-marketplace/skills-first) · [Getting started](/build-on-omnichain/builder-marketplace/getting-started) · [First plugin tutorial](/build-on-omnichain/builder-marketplace/first-plugin).

@@ -1,0 +1,187 @@
+---
+title: "Orderly_network_types.OrderEntity"
+---
+
+[LiqZero SDKs](/sdks/tech-doc/README) / [Modules](/sdks/tech-doc/modules) / [@liqzero.network/types](/sdks/tech-doc/modules/orderly_network_types) / OrderEntity
+
+# Interface: OrderEntity
+
+[@liqzero.network/types](/sdks/tech-doc/modules/orderly_network_types).OrderEntity
+
+## Hierarchy
+
+- **`OrderEntity`**
+
+  ↳ [`BaseAlgoOrderEntity`](/sdks/tech-doc/interfaces/orderly_network_types.BaseAlgoOrderEntity)
+
+  ↳ [`BaseAlgoOrderEntity`](/sdks/tech-doc/interfaces/orderly_network_types.BaseAlgoOrderEntity)
+
+## Table of contents
+
+### Properties
+
+- [algo_type](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#algo_type)
+- [broker_id](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#broker_id)
+- [isStopOrder](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#isstoporder)
+- [order_amount](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#order_amount)
+- [order_price](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#order_price)
+- [order_quantity](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#order_quantity)
+- [order_tag](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#order_tag)
+- [order_type](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#order_type)
+- [order_type_ext](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#order_type_ext)
+- [reduce_only](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#reduce_only)
+- [side](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#side)
+- [symbol](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#symbol)
+- [total](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#total)
+- [trigger_price](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#trigger_price)
+- [visible_quantity](/sdks/tech-doc/interfaces/orderly_network_types.OrderEntity#visible_quantity)
+
+## Properties
+
+### algo_type
+
+• `Optional` **algo_type**: [`AlgoOrderRootType`](/sdks/tech-doc/enums/orderly_network_types.AlgoOrderRootType)
+
+#### Defined in
+
+[packages/types/src/order.ts:65](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L65)
+
+---
+
+### broker_id
+
+• `Optional` **broker_id**: `string`
+
+#### Defined in
+
+[packages/types/src/order.ts:74](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L74)
+
+---
+
+### isStopOrder
+
+• `Optional` **isStopOrder**: `boolean`
+
+#### Defined in
+
+[packages/types/src/order.ts:79](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L79)
+
+---
+
+### order_amount
+
+• `Optional` **order_amount**: `number`
+
+#### Defined in
+
+[packages/types/src/order.ts:69](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L69)
+
+---
+
+### order_price
+
+• `Optional` **order_price**: `string` \| `number`
+
+#### Defined in
+
+[packages/types/src/order.ts:67](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L67)
+
+---
+
+### order_quantity
+
+• `Optional` **order_quantity**: `string` \| `number`
+
+#### Defined in
+
+[packages/types/src/order.ts:68](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L68)
+
+---
+
+### order_tag
+
+• `Optional` **order_tag**: `string`
+
+#### Defined in
+
+[packages/types/src/order.ts:81](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L81)
+
+---
+
+### order_type
+
+• **order_type**: [`OrderType`](/sdks/tech-doc/enums/orderly_network_types.OrderType)
+
+#### Defined in
+
+[packages/types/src/order.ts:64](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L64)
+
+---
+
+### order_type_ext
+
+• `Optional` **order_type_ext**: [`OrderType`](/sdks/tech-doc/enums/orderly_network_types.OrderType)
+
+#### Defined in
+
+[packages/types/src/order.ts:66](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L66)
+
+---
+
+### reduce_only
+
+• `Optional` **reduce_only**: `boolean`
+
+#### Defined in
+
+[packages/types/src/order.ts:72](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L72)
+
+---
+
+### side
+
+• **side**: [`OrderSide`](/sdks/tech-doc/enums/orderly_network_types.OrderSide)
+
+#### Defined in
+
+[packages/types/src/order.ts:73](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L73)
+
+---
+
+### symbol
+
+• **symbol**: `string`
+
+#### Defined in
+
+[packages/types/src/order.ts:62](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L62)
+
+---
+
+### total
+
+• `Optional` **total**: `string` \| `number`
+
+#### Defined in
+
+[packages/types/src/order.ts:77](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L77)
+
+---
+
+### trigger_price
+
+• `Optional` **trigger_price**: `string` \| `number`
+
+#### Defined in
+
+[packages/types/src/order.ts:80](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L80)
+
+---
+
+### visible_quantity
+
+• `Optional` **visible_quantity**: `number`
+
+#### Defined in
+
+[packages/types/src/order.ts:71](https://github.com/OrderlyNetwork/js-sdk/blob/ba995f2/packages/types/src/order.ts#L71)

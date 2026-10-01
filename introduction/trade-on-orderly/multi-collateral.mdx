@@ -1,0 +1,195 @@
+---
+title: "Multi-Collateral"
+description: "Understand supported collateral types, deposit caps, discount rates, and cross-chain rules."
+---
+
+## Collaterals
+
+Eligible collateral assets also support [Isolated Margin](/introduction/trade-on-orderly/perpetual-futures/isolated-margin#multi-collateral-support), including supported non-USDC collateral. Isolated margin remains denominated and accounted for in USDC. When projected USDC borrowing from opening an isolated-margin position exceeds the **50,000 USDC** limit, automatic conversion of collateral into USDC is triggered to reduce the borrowing amount.
+
+### Max Deposits (Global)
+
+These values represent the maximum amount of each collateral type that can be deposited across all users on a global scale for the specified blockchain network.
+
+| Collateral | Chain           | Max Collateral (global) |
+| ---------- | --------------- | ----------------------- |
+| USDT       | Arbitrum        | 2,000,000               |
+| ETH        | Arbitrum        | 1,000                   |
+| USDT       | Ethereum        | 3,000,000               |
+| ETH        | Ethereum        | 500                     |
+| ETH        | Base            | 500                     |
+| USDT       | BSC             | 4,000,000               |
+| YUSD       | Ethereum        | 500,000                 |
+| YUSD       | BSC             | 500,000                 |
+| SOL        | SOL             | 40,000                  |
+| USDT       | SOL             | 1,500,000               |
+| BNB        | BSC             | 10,000                  |
+| WBTC       | Ethereum        | 80                      |
+| USD1       | Ethereum        | 100,000                 |
+| USD1       | BSC             | 100,000                 |
+| USDG       | X Layer         | 100,000                 |
+| USDG       | Robinhood Chain | 100,000                 |
+
+### Max Deposits (User)
+
+| Collateral | Max Collateral |
+| ---------- | -------------- |
+| USDT       | 1,000,000      |
+| ETH        | 100            |
+| SOL        | 2,000          |
+| BNB        | 500            |
+| YUSD       | 50,000         |
+| WBTC       | 5              |
+| USD1       | 100,000        |
+| USDG       | 100,000        |
+
+## What is Loan-to-value (LTV)?
+
+Loan-to-Value (LTV) is a key risk metric that measures the ratio of your negative USDC value, which includes your negative balance (`USDC_balance`) and unrealized PnL (`upnl`), to your collateral's value. On LiqZero, LTV replaces traditional credit scores to determine your borrowing power in our asset-backed lending system. A lower LTV signifies a safer loan.
+
+By maintaining a healthy LTV, you can maximize the loan you can access while enhancing the safety of your position against market volatility. This empowers you to borrow with confidence. Your collateral is held securely by LiqZero until the loan is repaid, providing a clear and powerful way for you to leverage your holdings.
+
+<img src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/multi-collateral/ltv.jpg" alt="LTV" />
+
+### How to calculate LTV
+
+```
+LTV = ( abs(min(USDC Balance, 0)) + abs(min(upnl, 0)) ) / [ sum( max(Collateral Quantity, 0) × Index Price × Weight ) + max(upnl, 0) ]
+```
+
+| Term                | Definition                                                |
+| ------------------- | --------------------------------------------------------- |
+| USDC Balance        | The total absolute USDC balance that has been borrowed    |
+| min(upnl, 0)        | Unrealized losses from cross-margin positions             |
+| Collateral Quantity | The quantity of a specific asset you hold as collateral   |
+| Index Price         | The current market price of the collateral                |
+| Weight              | The collateral weight (refer to Collateral Ratio section) |
+| max(upnl, 0)        | Unrealized profits from cross-margin positions            |
+
+The acceptable range of LTV ratio remains below 95%. Auto conversion of collateral will be triggered if the LTV ratio reaches 95% and above.
+
+---
+
+## Collateral Ratio
+
+### What is Collateral Ratio?
+
+The Collateral Ratio on LiqZero is the value at which we recognize your asset deposited as collateral, expressed as a percentage.
+
+A higher ratio provides a greater safety buffer against market fluctuations and lowers the risk of liquidation. LiqZero calculates this by assigning asset-specific "weights," where more volatile assets contribute less to the ratio than stable assets. The Collateral Ratio serves as the primary indicator of an account's financial health on the platform.
+
+<img src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/multi-collateral/collateral.jpg" alt="Collateral Ratio" />
+
+### How to Calculate Weight?
+
+```
+Weight = min (Base Weight, K / (1 + DCF * abs(Collateral Quantity * Index Price )^(4/5)))
+```
+
+where:
+
+- `DCF_i` = Discount Collateral Factor
+- `K` = 1.2
+
+| Term                | Definition                                                                 |
+| ------------------- | -------------------------------------------------------------------------- |
+| Base Weight         | The standard or default collateral weight for a specific asset             |
+| K                   | A constant system parameter set at 1.2 unless otherwise stated             |
+| DCF                 | Discount collateral factor determining weight sensitivity to position size |
+| Collateral Quantity | Quantity of the collateral deposited                                       |
+| Index Price         | Current market price of the collateral                                     |
+| ^(4/5)              | Smooths impact of large position size                                      |
+
+### Weight & Discount Collateral Factor
+
+Weight and DCF will be determined based on the table below:
+
+| Collateral | base_weight | DCF_i     |
+| ---------- | ----------- | --------- |
+| USDT       | 1           | 0.0000015 |
+| ETH        | 0.8         | 0.000007  |
+| YUSD       | 0.9         | 0.0000045 |
+| SOL        | 0.8         | 0.000007  |
+| BNB        | 0.8         | 0.000007  |
+| WBTC       | 0.8         | 0.000007  |
+| USD1       | 0.98        | 0.0000045 |
+| USDG       | 0.98        | 0.0000045 |
+
+---
+
+## Collateral Value
+
+```
+Collateral Value = min(Collateral Quantity , Collateral Cap) * Weight * Index Price
+```
+
+### Total Collateral Value
+
+```
+Total Collateral Value = sum(Collateral Value) + upnl
+```
+
+### Free Collateral
+
+```
+Free Collateral = Total Collateral Value - Total Initial Margin With Orders
+```
+
+### Total Account Value
+
+```
+Total Account Value = sum(Collateral Quantity * Index Price) + upnl
+```
+
+---
+
+## Auto Conversion (Haircuts)
+
+If your Loan-to-Value (LTV) ratio reaches the 95% threshold or a negative USDC value equivalent to -11,000, the system will automatically convert a necessary portion of your collateral into USDC. This action immediately reduces your LTV to a safer level, helping to preserve your account.
+
+This is a protective measure to manage risk. As always, remember that the lower your LTV ratio, the more secure your position is from this type of automated deleveraging. The fee for auto conversion of each collateral will follow the table below:
+
+| Collateral | Auto Conversion Fee (Haircuts) |
+| ---------- | ------------------------------ |
+| USDT       | 0.025%                         |
+| ETH        | 3.5%                           |
+| YUSD       | 0.035%                         |
+| SOL        | 3.5%                           |
+| BNB        | 3.5%                           |
+| WBTC       | 3.5%                           |
+| USD1       | 0.035%                         |
+| USDG       | 0.035%                         |
+
+---
+
+## Manual Conversion
+
+We recommend monitoring your LTV ratio to ensure it stays below the 95% and/or -11,000 USDC threshold. We permit manual conversion of collateral to assist with this maintenance via on-chain swaps.
+
+Each collateral's minimum and maximum swap amount can be found in the table below:
+
+<img src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/multi-collateral/convert.jpg" alt="Convert Rate" />
+
+### Minimum Swap Collateral Required
+
+| Collateral | Arbitrum & Base | Ethereum | Solana | BSC |
+| ---------- | --------------- | -------- | ------ | --- |
+| USDT       | 50              | 500      | 50     | 50  |
+| ETH        | 0.02            | 0.2      | --     | --  |
+| YUSD       | --              | 500      | --     | 50  |
+| SOL        | --              | --       | 2      | --  |
+| BNB        | --              | --       | --     | 0.5 |
+| WBTC       | --              | 0.005    | --     | --  |
+| USD1       | --              | 500      | --     | 500 |
+
+### Maximum Swap Collateral Threshold
+
+| Collateral | Arbitrum & Base | Ethereum  | Solana  | BSC     |
+| ---------- | --------------- | --------- | ------- | ------- |
+| USDT       | 500,000         | 1,000,000 | 500,000 | 500,000 |
+| ETH        | 100             | 500       | --      | --      |
+| YUSD       | --              | 50,000    | --      | 50,000  |
+| SOL        | --              | --        | 500     | --      |
+| BNB        | --              | --        | --      | 500     |
+| WBTC       | --              | 5         | --      | --      |
+| USD1       | --              | 10,000    | --      | 10,000  |

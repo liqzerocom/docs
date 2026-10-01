@@ -1,0 +1,62 @@
+---
+title: "Overview"
+description: "Build modern, responsive trading interfaces with LiqZero Components SDK."
+icon: "react"
+---
+
+![](https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/sdks/react/sdk-cover.webp)
+
+The LiqZero Components SDK provides a set of components needed to build a DEX UI, allowing you to quickly build a DEX on top of LiqZero.
+
+It is designed modularly and consists of various npm packages.
+Based on your needs you have to install the respective packages:
+
+| Name                                      | Description                                                |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `@orderly.network/ui`                     | Base UI component library.                                 |
+| `@orderly.network/ui-scaffold`            | Page layout components (e.g., headers, footers, sidebars). |
+| `@orderly.network/react-app`              | Providers for any React app built with LiqZero components. |
+| `@orderly.network/trading`                | Trading page components.                                   |
+| `@orderly.network/portfolio`              | Personal portfolio dashboard components.                   |
+| `@orderly.network/trading-rewards`        |                                                            |
+| `@orderly.network/affiliate`              |                                                            |
+| `@orderly.network/markets`                |                                                            |
+| `@orderly.network/ui-connector`           |                                                            |
+| `@orderly.network/ui-chain-selector`      |                                                            |
+| `@orderly.network/ui-order-entry`         |                                                            |
+| `@orderly.network/ui-orders`              |                                                            |
+| `@orderly.network/ui-positions`           |                                                            |
+| `@orderly.network/ui-tpsl`                |                                                            |
+| `@orderly.network/ui-transfer`            |                                                            |
+| `@orderly.network/ui-share`               |                                                            |
+| `@orderly.network/ui-leverage`            |                                                            |
+| `@orderly.network/wallet-connector`       |                                                            |
+| `@orderly.network/default-evm-adapter`    |                                                            |
+| `@orderly.network/default-solana-adapter` |                                                            |
+| `@orderly.network/web3-provider-ethers`   |                                                            |
+
+## Storybook
+
+You can check out our [Storybook](https://storybook.orderly.network/), which has all components included.
+
+## Features
+
+- Provides feature-complete React components, allowing you to build a DEX with little to no code
+- Full compatibility on different viewports
+- Modular design and layered, allowing you to customize according to your needs
+- i18n support
+- Customizable themes
+
+## Architecture
+
+![](https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/sdks/react/orderly-architecture.webp)
+
+`@orderly.network/react` has three layers, all of which can be used individually.
+
+- UI components: Provides basic UI components, such as buttons, input forms
+- Block components: Provides DEX related components, such as symbol chooser, orderbook, trade history components
+- Page: Provides fully functional pages, such as the trading page
+
+## Compatibility
+
+- Compatible with all modern browsers and IE11 or above

@@ -1,0 +1,39 @@
+---
+title: "Stuck/delayed withdrawals"
+description: "How to diagnose delayed or stuck withdrawals by checking LayerZero messaging and chain status."
+---
+
+<Note>
+  Withdrawals to some chains take longer (Polygon for example) because it takes longer to get to
+  transaction finality. Withdrawals are not instant and may take a few minutes.
+</Note>
+
+If users are having issues with withdrawals please do the following:
+
+<Steps>
+  <Step title="First Step">
+    Check our [Dune dashboard](https://dune.com/orderly_network/orderly-support-dashboard) and check
+    if withdrawal went through to any chain. Sometimes users request withdrawal to the wrong chain.
+
+    <Note>
+    Make sure to refresh the dashboard before checking.
+    </Note>
+
+  </Step>
+  <Step title="Second Step">
+  If that wasn't successful, please go to [LayerZero explorer](https://layerzeroscan.com/) and select "Source: LiqZero" to check for any cross-chain message delays.
+
+A list of messages appears with LiqZero as the source chain for any withdrawals we have received and processed.
+
+- If a message is in-flight and was created 10+ min ago, the withdrawal is being delayed because of LayerZero cross-chain messaging.
+
+ </Step>
+  <Step title="Third Step">
+  If the above steps weren't successful, please send a message to LiqZero with
+
+- User's address
+- Withdrawal amount
+- Approximate time the withdrawal was requested
+
+ </Step>
+</Steps>

@@ -1,0 +1,73 @@
+---
+title: "useTPSL"
+description: "Hook for creating and managing take-profit and stop-loss (TP/SL) algo orders on positions."
+---
+
+## Create TP/SL Orders
+
+```typescript
+declare function useTPSLOrder(
+  position: Partial<API.PositionTPSLExt> &
+    Pick<API.PositionTPSLExt, "symbol" | "average_open_price" | "position_qty">,
+  options?: {
+    defaultOrder?: API.AlgoOrder;
+  }
+): [
+  ComputedAlgoOrder,
+  {
+    setValue: (key: string, value: number | string) => void;
+    setValues: (values: Partial<ComputedAlgoOrder>) => void;
+    submit: () => Promise<void>;
+    errors: ValidateError | null;
+    validate: () => Promise<
+      AlgoOrderEntity<AlgoOrderRootType.POSITIONAL_TP_SL | AlgoOrderRootType.TP_SL>
+    >;
+  }
+];
+```
+
+## Update TP/SL Order
+
+### Method One
+
+```typescript
+const [ComputedAlgoOrder, { submit }] = useTPSLOrder(position, {
+  defaultOrder // Must pass in order data
+});
+```
+
+### Method Two
+
+Using `useOrderStream` hook
+
+```typescript
+const [_, { updateTPSLOrder }] = useOrderStream();
+updateTPSLOrder(orderId, childOrders);
+```
+
+## Cancel TP/SL Order
+
+** Using useOrderStream **
+
+### Cancel all Algo orders, including POSITIONAL_TP_SL and TP_SL orders;
+
+```typescript
+const [_, { cancelAllTPSLOrders }] = useOrderStream();
+```
+
+### Cancel TP or SL order
+
+```typescript
+const [_, { cancelTPSLChildOrder }] = useOrderStream();
+
+cancelTPSLChildOrder(childOrderId, rootAlgoOrderId);
+```
+
+## Filtering TP/SL Orders
+
+```typescript
+const [orders] = useOrderStream({
+  includes: [AlgoOrderRootType.TP_SL, AlgoOrderRootType.POSITIONAL_TP_SL] // Show only TP/SL orders
+  //excludes:[AlgoOrderRootType.TP_SL, AlgoOrderRootType.POSITIONAL_TP_SL],// Do not show TP/SL orders
+});
+```

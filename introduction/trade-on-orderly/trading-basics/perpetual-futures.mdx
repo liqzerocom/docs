@@ -1,0 +1,37 @@
+---
+title: "Perpetual Futures Trading"
+description: "Get an introduction to perpetual futures trading, leverage, and settlement on LiqZero."
+---
+
+A Perpetual Futures ("perps") contract is a derivative that lets you speculate on an asset's price movement with leverage, without owning the underlying asset. Unlike traditional futures, perps have **no expiry date**.
+
+## Why trade perps instead of spot?
+
+1. **Long or short:** In the spot market, you can only profit when prices go up. With perps, you can also profit when prices fall by opening a short position.
+
+2. **Leverage:** With 10x leverage on BTC-PERP, you only need 3,000 USDC to control a 30,000 USDC position. This makes trading more capital efficient -- but leverage amplifies losses equally, so manage your risk.
+
+3. **Deeper liquidity:** Futures markets have significantly higher volume than spot, allowing you to enter and exit with less price impact.
+
+## LiqZero USDC Perpetual Futures contracts
+
+All perps on LiqZero are USDC-based. Your collateral is in USDC, and all contracts are quoted and settled in USDC.
+
+## Margin modes
+
+LiqZero supports two margin modes, both available simultaneously on every symbol:
+
+- **Cross Margin** (default): Your deposited USDC is shared across all cross-margin positions to calculate a single margin ratio. Profitable positions automatically offset losing ones.
+- **Isolated Margin**: Each position has its own dedicated margin. Losses are capped at the margin assigned to that position and do not affect the rest of your account.
+
+You specify the margin mode when placing each order. For a detailed comparison, see [Isolated Margin](/introduction/trade-on-orderly/perpetual-futures/isolated-margin).
+
+## Supported leverages
+
+Integer values from 1x to 100x (1x, 2x, 3x, ... 100x). The maximum leverage available depends on the specific market -- see [Margin, Leverage & PnL](/introduction/trade-on-orderly/perpetual-futures/margin-leverage-and-pnl) for per-market limits.
+
+## Position mode
+
+LiqZero uses one-sided position mode within each margin mode. You cannot hold both a long and a short on the same contract in the same margin mode -- opening the opposite direction will reduce or close your existing position.
+
+However, since Cross and Isolated are independent, you can hold a Cross position and an Isolated position on the same symbol at the same time (e.g., a Cross long and an Isolated short on ETH-PERP), each with independent margin and liquidation price.

@@ -1,0 +1,14 @@
+---
+title: "useMarkPricesStream"
+description: "Hook to stream mark prices for all symbols as a symbol-to-price map."
+---
+
+Get list of all mark prices in a `symbol` -> `price` map.
+
+- [Tech docs](/sdks/tech-doc/modules/orderly_network_hooks#usemarkpricesstream)
+
+### Example
+
+```ts
+const { data: markPrices }: { data: Record<string, number> } = useMarkPricesStream();
+```

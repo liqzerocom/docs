@@ -1,0 +1,133 @@
+---
+title: "Custom Fee Structure"
+description: "How builders configure custom maker/taker fee structures for their users on top of LiqZero base fees."
+---
+
+The Custom Trading Fee System allows builders to tailor fee structures for their users beyond LiqZero's standard fees, giving builders the flexibility to set fees that align with their strategies and customer profiles.
+
+## Overview of Fee Structure
+
+|                                      | LiqZero tier rate                          | Builder-set user fee                                       |
+| ------------------------------------ | ------------------------------------------ | ---------------------------------------------------------- |
+| **Taker**                            | Base fee retained by LiqZero               | Builder keeps the positive margin above LiqZero's base fee |
+| **Maker: zero or positive user fee** | No maker rebate funded                     | Builder keeps any positive maker fee collected             |
+| **Maker: negative user fee**         | Funds the trader rebate up to the tier cap | Trader receives the funded rebate                          |
+
+<Note>
+  LiqZero base fees are set by the Builder's [builder staking
+  programme](/introduction/trade-on-orderly/trading-basics/trading-fees#builder-staking-programme).
+  This tiering determines the taker base fee and maker rebate cap, with the same rates applying to
+  crypto and RWA markets. Builders can still configure different user-facing trading fees for crypto
+  and RWA trades respectively, including negative maker fees that pass a rebate through to
+  qualifying traders. Use the [Trading
+  fees](/introduction/trade-on-orderly/trading-basics/trading-fees) page for the current taker and
+  maker base fee tiers.
+</Note>
+
+## User Flow for Builders
+
+Manage default and user-level fees in [Fee Settings in LiqZero One](https://dex.orderly.network/fee-settings). The APIs below support programmatic fee management.
+
+<Steps>
+  <Step title="Determine fee tiers">
+    Decide on the logic for fee tiers based on specific criteria (e.g. volume, staked tokens), or set all users under the same fee rate.
+  </Step>
+  <Step title="Calculate fee rates">
+    Assign users to fee rates based on the chosen criteria.
+
+    LiqZero provides a [fee tier assignment tool](https://github.com/OrderlyNetwork/orderly-evm-broker-fee-admin) for volume-based tiers.
+
+    <Note>
+      The fee rate is the total charged to, or rebated to, the user. For taker fees, the user-facing
+      fee cannot be less than the LiqZero base fee. For maker fees, a negative user-facing rate is a
+      trader rebate; LiqZero funds it only up to the Builder's tier cap.
+    </Note>
+
+    <Note>
+      Custom user and default fee rates must be set in decimal-rate increments of `0.00001`, which
+      equals `0.001%` or `0.1 bps`. This precision rule applies to standard custom fee settings, not
+      order tag fee settings.
+    </Note>
+
+  </Step>
+  <Step title="Set the default fee rate">
+    Set the `default` fee rate through [POST `/v1/broker/fee_rate/default`](/build-on-omnichain/restful-api/private/update-default-builder-fee).
+  </Step>
+  <Step title="Set per-user fees">
+    Send updated fee assignments to LiqZero:
+
+    - **Users keeping their current rate (including default):** no update needed
+    - **Users reset to default:** send through [POST `/v1/broker/fee_rate/set_default`](/build-on-omnichain/restful-api/private/reset-user-fee-rate)
+    - **Users assigned a new rate:** send through [POST `/v1/broker/fee_rate/set`](/build-on-omnichain/restful-api/private/update-user-fee-rate) -- batch by `maker_fee`/`taker_fee` combination
+
+    <Note>
+      All users are assigned the default fee rate unless overridden by the builder.
+    </Note>
+
+  </Step>
+  <Step title="Retrieve fee rates">
+    - User fee rate: [GET `/v1/broker/user_info`](/build-on-omnichain/restful-api/private/get-user-fee-rates)
+    - Default fee rate: [GET `/v1/broker/fee_rate/default`](/build-on-omnichain/restful-api/private/get-default-builder-fee)
+  </Step>
+</Steps>
+
+### Conditional Maker Rebates
+
+Conditional Maker Rebates align LiqZero's protocol funding with the maker incentives that Builders actually pass through to traders. **Taker fees are unchanged.**
+
+A tier's negative base maker fee is the maximum rebate LiqZero will fund for a qualifying maker trade. It is a pass-through incentive for the trader, not revenue for the Builder.
+
+#### How it works
+
+1. **User maker fee is zero or positive:** LiqZero funds no maker rebate. If the fee is positive, the Builder keeps the maker fee collected from the trader as revenue.
+2. **User maker fee is negative:** LiqZero funds the trader's maker rebate up to the Builder's tier cap. The Builder passes the funded rebate through to the trader and does not retain it as revenue.
+
+The negative user-facing maker fee must remain within the Builder's tier cap.
+
+#### Gold tier example
+
+For a Gold-tier Builder, the maker rebate cap is **-0.10 bps**:
+
+| User maker fee | LiqZero-funded rebate | Builder outcome                                                              |
+| -------------- | --------------------- | ---------------------------------------------------------------------------- |
+| +0.10 bps      | 0 bps                 | Builder keeps +0.10 bps                                                      |
+| -0.05 bps      | -0.05 bps             | Full trader rebate is funded; Builder net maker fee is 0 bps                 |
+| -0.10 bps      | -0.10 bps             | Full trader rebate is funded at the tier cap; Builder net maker fee is 0 bps |
+
+#### Custom fee structures
+
+Eligibility is evaluated per trade, so Builders can apply different maker fees to different user groups. For example, a Builder can charge retail traders **+0.05 bps** and offer a whitelisted market maker **-0.10 bps**. LiqZero funds the rebate only for the market maker's negative-fee trades; the retail trades receive no protocol-funded maker rebate.
+
+### Maker Rebate Settlement
+
+Protocol-funded maker rebates are passed through to traders. They may appear in Builder-side fee settlement as part of the funding flow, but they are not Builder earnings. Trader rebates settle on each qualifying execution.
+
+## FAQs
+
+<AccordionGroup>
+  <Accordion title="Will there be limitations on how often fee rates can be changed?">
+    There are no inherent limitations besides API rate limits, but we recommend prudent management
+    to maintain consistency and trust with end users.
+  </Accordion>
+  <Accordion title="How to set fees for users?">
+    Builders can develop a custom tiered structure based on different parameters like volume, staked
+    tokens, etc.
+  </Accordion>
+  <Accordion title="Can I get help determining and setting fees?">
+    LiqZero provides a [fee tier assignment
+    tool](https://github.com/OrderlyNetwork/orderly-evm-broker-fee-admin) to help builders assign
+    users to volume-based tiers.
+  </Accordion>
+  <Accordion title="How do conditional maker rebates work?">
+    LiqZero funds maker rebates only when a Builder sets a negative user-facing maker fee. The
+    rebate is passed through to the trader up to the Builder's tier cap and is not Builder revenue.
+    See [Conditional Maker Rebates](#conditional-maker-rebates) for examples.
+  </Accordion>
+  <Accordion title="How are fee rebates distributed?">
+    Trader maker rebates settle on each qualifying execution. Any Builder-side settlement associated
+    with funding the rebate is a pass-through and not Builder earnings.
+  </Accordion>
+  <Accordion title="What are the fee wallet requirements?">
+    Currently EOA only, with multisig support upcoming.
+  </Accordion>
+</AccordionGroup>

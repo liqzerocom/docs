@@ -1,0 +1,168 @@
+---
+title: "Trading fees"
+description: "Understand the fee structure for traders and the Builder Staking programme."
+---
+
+# Overview
+
+Trading fees are the costs you pay when you buy, sell, or trade on an exchange. On LiqZero, fees are measured in **basis points (1 bps = 0.01%)** of your trade's total value.
+
+LiqZero Network uses a two-layer fee structure:
+
+1.  **Base fees:** The cost the **Builder** (the DEX) pays to LiqZero Network.
+2.  **User fees:** The fee the **Trader** pays to the Builder.
+
+### The dual-layer example
+
+Here's how the two layers work together in practice:
+
+- **LiqZero base taker fee:** 3 bps (0.03%)
+- **Builder custom fee:** 5 bps (0.05%)
+- **Result:** The **Trader pays 5 bps**. LiqZero retains **3 bps**, and the **Builder keeps 2 bps** as profit.
+
+### Fee types
+
+**Maker fees:** Charged when your order adds liquidity to the order book -- for example, a limit order that doesn't fill right away. Maker fees can be **negative** (rebates) for higher tiers, meaning you **receive** a rebate when your order adds liquidity.
+
+**Taker fees:** Charged when your order removes liquidity by filling immediately -- for example, a market order.
+
+**Hidden order fills:** When hidden quantity from a resting limit order is
+matched by a new incoming order, the hidden side is marked as **Taker** and
+charged the taker fee. If the incoming order is eligible to be maker, such as a
+Post Only order that matches only hidden quantity, the incoming order is marked
+as **Maker** and charged the maker fee.
+
+**Liquidation fees:** If your position gets liquidated, a liquidation fee is applied. See the [liquidation fee](https://orderly.network) docs for details.
+
+<Note>
+  Perpetual futures trading fees are charged after every trade in USDC and are **factored into the
+  position's average entry price**.
+</Note>
+
+# How fees work for Traders
+
+As a Trader, you pay a single fee per trade that's set by the Builder (the DEX you're using).
+
+- **Total fee paid:** You see one transparent fee per trade. This fee typically includes LiqZero's base fee plus the Builder's margin.
+- **How it's charged:** Fees are automatically deducted from your USDC balance when your trade executes.
+- **Maker vs Taker:** Whether you pay the maker or taker rate depends on how your order is filled. If your order sits in the book and waits, you're a **Maker**. If it fills immediately, you're a **Taker**.
+
+# How fees work for Builders
+
+LiqZero gives Builders full control over their pricing. You set your own trading fees while tapping into LiqZero's shared liquidity.
+
+- **Set your own fees:** You decide what to charge your users. The only rule: your fee must be at least as high as LiqZero's **base fee**.
+- **Keep your fee margin:** For taker fees, you retain **100% of the margin** between what you charge users and what LiqZero charges you. For maker fees, positive fees collected from traders are Builder revenue. Protocol-funded maker rebates are passed through to traders and are not Builder revenue.
+- **Base fee tiers:** The base fee LiqZero charges you depends on your tier in the Builder Staking programme.
+
+### Builder Staking programme
+
+Builders can get lower base fees and better support by hitting monthly volume targets **or** staking \$ORDER tokens. **If you qualify for different tiers through both volume and staking, you automatically get the higher tier (lower fee).** Builders are entitled to the same LiqZero base fees regardless of whether trades are on crypto or RWA markets. Builders can still configure different user-facing trading fees for crypto and RWA trades respectively.
+
+<Tabs>
+  <Tab title="Overview">
+      <img src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/getting-started/fee0708.jpg" />
+  </Tab>
+
+  <Tab title="Public">
+    **Requirements:** < 100K \$ORDER staked and < \$50M monthly aggregate volume.
+
+    | Fee type | Rate (bps) |
+    |---|---|
+    | Base taker fee (crypto and RWA) | 3.00 |
+    | Maker rebate cap (crypto and RWA) | 0.00 |
+
+    **Marketing benefits:** None
+
+    **Product & support:** SDK access & docs
+
+  </Tab>
+
+  <Tab title="Silver">
+    **Requirements:** ≥ \$50M monthly aggregate volume **or** stake 100K \$ORDER
+
+    | Fee type | Rate (bps) |
+    |---|---|
+    | Base taker fee (crypto and RWA) | 2.75 |
+    | Maker rebate cap (crypto and RWA) | -0.05 |
+
+    **Marketing benefits:**
+    - Launch RT/QT from LiqZero
+
+    **Product & support:**
+    - All Public benefits
+    - Telegram support group
+
+  </Tab>
+
+  <Tab title="Gold">
+    **Requirements:** ≥ \$200M monthly aggregate volume **or** stake 300K \$ORDER
+
+    | Fee type | Rate (bps) |
+    |---|---|
+    | Base taker fee (crypto and RWA) | 2.50 |
+    | Maker rebate cap (crypto and RWA) | -0.10 |
+
+    **Marketing benefits:**
+    - All Silver benefits
+    - Co-marketing & social support
+    - Partner intros
+
+    **Product & support:**
+    - All Silver benefits
+    - **Referral privilege:** Can **sponsor referred Builders to receive Silver-tier pricing** (subject to requirements).
+    - 24/7 tech support with SLAs
+
+  </Tab>
+
+  <Tab title="Platinum">
+    **Requirements:** ≥ \$750M monthly aggregate volume **or** stake 3M \$ORDER
+
+    | Fee type | Rate (bps) |
+    |---|---|
+    | Base taker fee (crypto and RWA) | 2.00 |
+    | Maker rebate cap (crypto and RWA) | -0.15 |
+
+    **Marketing benefits:**
+    - All Gold benefits
+    - Joint campaigns
+    - "Platinum Builder" badge on website
+
+    **Product & support:**
+    - All Gold benefits
+    - **Referral privilege:** Can **sponsor referred Builders to receive Silver or Gold-tier pricing** (subject to requirements).
+    - Dedicated account manager
+    - Product beta access
+
+  </Tab>
+
+  <Tab title="Diamond">
+    **Requirements:** ≥ \$2B monthly aggregate volume **or** stake 7M \$ORDER
+
+    | Fee type | Rate (bps) |
+    |---|---|
+    | Base taker fee (crypto and RWA) | 1.00 |
+    | Maker rebate cap (crypto and RWA) | -0.20 |
+
+    **Marketing benefits:**
+    - All Platinum benefits
+    - Flagship partner program
+    - PR & paid media
+
+    **Product & support:**
+    - All Platinum benefits
+    - **Referral privilege:** Can **sponsor referred Builders to receive Silver, Gold, or Platinum-tier pricing** (subject to requirements).
+    - Dedicated support team and product advisory board seat
+
+  </Tab>
+</Tabs>
+
+<Note>
+
+**Fee tier notes:**
+
+- **Volume calculation:** Monthly aggregate trading volume includes all activity from the Builder and their direct Builder referrals, calculated from daily snapshots to determine tier eligibility.
+- **Minimum tier assignments:** Minimum tiers may come from the distributor program or internal strategic assignments. They act as a floor, but builders can still move to higher tiers through staking or volume at the next daily refresh.
+- **Conditional maker rebates:** The negative maker rate for Silver tier and above is a cap on the rebate LiqZero will fund when the Builder passes a negative maker fee through to the trader. LiqZero funds no rebate when the trader's maker fee is zero or positive. The funded rebate belongs to the trader and is not Builder revenue. See [Conditional Maker Rebates](/build-on-omnichain/user-flows/custom-fees#conditional-maker-rebates) for examples.
+
+</Note>
