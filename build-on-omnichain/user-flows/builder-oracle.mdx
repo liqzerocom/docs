@@ -1,0 +1,410 @@
+---
+title: "Builder Oracle"
+description: "Create and operate Builder-pushed or Bring Your Own Key price sources, then use them in Perp Anything markets."
+---
+
+Builder Oracle lets Builders bring their own Index Price sources into [Perp Anything](/build-on-omnichain/perp-anything/introduction). Use it when a market needs pricing beyond LiqZero's standard exchange feeds (CEX/DEX) and platform oracle sources.
+
+This guide covers two Builder-controlled modes:
+
+| Mode                                 | Best for                                                                             | How prices reach LiqZero                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| **Builder-pushed feed**              | Builders with their own pricing model, index service, or aggregation backend.        | The Builder publishes prices to LiqZero over WebSocket.                                |
+| **Bring Your Own Key (BYOK) Oracle** | Builders that use their own account with a supported provider such as Pyth or Stork. | LiqZero uses the Builder's provider credentials to retrieve prices from that provider. |
+
+Both modes can be combined with exchange feeds (CEX/DEX) and platform oracle sources. Each selected source receives a weight in the market's Index Price configuration.
+
+## Source types and selection
+
+When configuring a Perp Anything market, Builders can select from multiple Index Price source types:
+
+| Source type | Description | Supported providers / sources |
+| :--- | :--- | :--- |
+| **CEX** | Centralized exchange price feeds supported by LiqZero. | Binance, Binance Futures, OKX, Bybit, Gate.io, KuCoin, Coinbase, MEXC, Bitget, BingX, LBank |
+| **DEX** | Decentralized exchange price feeds supported by LiqZero. | Hyperliquid |
+| **Platform oracle** | LiqZero-supported oracle sources. | Pyth, Stork |
+| **Builder Oracle** | A Builder-controlled Index Price feed published to LiqZero over WebSocket. | Custom feeds (`ORACLE_<broker_id>`) |
+| **Bring Your Own Key (BYOK)** | A Builder-owned oracle connection using the Builder's provider credentials. | Pyth (`PYTH_<broker_id>`), Stork (`STORK_<broker_id>`) |
+
+Selected sources are submitted with weights. The weights must be positive integers and sum to `100`.
+
+### Supported exchange sources
+
+LiqZero supports price feeds from centralized (CEX) and decentralized (DEX) exchanges:
+
+| Exchange | Type | Source Identifier |
+| :--- | :--- | :--- |
+| Binance | CEX | `BINANCE` |
+| Binance Futures | CEX | `BINANCE_FUTURES` |
+| OKX | CEX | `OKX` |
+| Bybit | CEX | `BYBIT` |
+| Gate.io | CEX | `GATEIO` |
+| KuCoin | CEX | `KUCOIN` |
+| Coinbase | CEX | `COINBASE` |
+| MEXC | CEX | `MEXC` |
+| Bitget | CEX | `BITGET` |
+| BingX | CEX | `BINGX` |
+| LBank | CEX | `LBANK` |
+| Hyperliquid | DEX | `HYPERLIQUID` |
+
+## Builder-pushed feeds
+
+A Builder-pushed feed is the push-based Builder Oracle mode. The Builder owns the price calculation and publishes the resulting Index Price to LiqZero.
+
+Use a Builder-pushed feed for:
+
+- an internal index service;
+- an exchange aggregation service;
+- a pricing model for a long-tail asset;
+- an RWA data-provider integration.
+
+The feed is identified as `ORACLE_<broker_id>`. New feeds are `active` and `private` by default so the Builder can test them before making them available to other Builders.
+
+### Visibility
+
+- **Private** feeds are visible only to the Builder that owns the feed.
+- **Public** feeds can be selected by other Builders.
+
+If another Builder selects a public feed, that Builder is responsible for understanding the source's availability and quality risk.
+
+### Operating responsibilities
+
+The Builder operating the feed must:
+
+- keep the WebSocket connection active during the relevant market session;
+- publish valid prices at the required frequency;
+- monitor stale data, skipped prices, and feed availability;
+- use multiple sources where possible to reduce single-source risk.
+
+If a Builder-pushed feed becomes unhealthy, affected markets can be restricted or placed into reduce-only mode according to Perp Anything risk controls.
+
+## Bring Your Own Key (BYOK) Oracle
+
+BYOK connects a supported oracle-provider account to LiqZero. The Builder does not need to operate a WebSocket publisher, but remains responsible for the provider relationship.
+
+Initial BYOK provider support includes Pyth and Stork. Chainlink support is planned for a future rollout.
+
+### How BYOK works
+
+1. Select a supported provider, such as Pyth or Stork.
+2. Submit the provider credentials through LiqZero's private API.
+3. LiqZero validates the credentials and creates a provider-specific source, such as `PYTH_<broker_id>` or `STORK_<broker_id>`.
+4. Register feeds under the BYOK provider.
+5. LiqZero retrieves prices from the provider and makes the feed available for source selection.
+
+BYOK feeds have their own status and health model. The Builder controls whether a feed is active or inactive, while LiqZero reports provider-side conditions such as missing symbols, retrieval failures, invalid keys, and quota issues.
+
+The Builder must:
+
+- keep provider credentials valid;
+- monitor key status and provider health;
+- manage which BYOK feeds are active;
+- understand provider quota, coverage, and availability constraints.
+
+## Integration flow
+
+<Note>
+  The listing endpoints in this section are not currently included in this documentation site's
+  bundled OpenAPI reference. Confirm production availability with your LiqZero integration contact
+  before implementation.
+</Note>
+
+`XYZZZ` is a fictional token used only as a placeholder. Replace it and the example source identifiers below with values available for your supported asset.
+
+<Steps>
+  <Step title="Create or update a Builder Oracle feed">
+    Use `POST /v1/broker/listing/oracle/feed` to register the feed that your listing will use.
+
+    For a Builder Oracle feed, omit `oracle`. For a BYOK feed, set `oracle` to the provider, such as `pyth` or `stork`.
+
+```json
+{
+  "base_ccy": "XYZZZ",
+  "visibility": "private",
+  "status": "active"
+}
+```
+
+    A new feed is active and private by default. Keep the feed private while testing. Change `visibility` to `public` only if you want other Builders to be able to select it.
+
+  </Step>
+
+  <Step title="Publish Builder Oracle prices">
+    Builder Oracle feeds publish Index Price updates to the dedicated oracle WebSocket endpoint.
+
+```json
+{
+  "id": "push_xyzzz_001",
+  "event": "publish",
+  "topic": "indexpricefeed",
+  "ts": 1711440000000,
+  "data": {
+    "base_ccy": "XYZZZ",
+    "price": 1.23
+  }
+}
+```
+
+    The feed uses `data.base_ccy` to match the registered feed. Builders should publish at least once per second while the market session is open.
+
+    See [Full example](#full-example) for a complete client pattern with signing, application-level ping/pong handling, and price publishing.
+
+  </Step>
+
+  <Step title="Fetch available price sources">
+    Call `GET /v1/broker/listing/index_sources` to retrieve the available source list. The response can include CEX, DEX, platform oracle, Builder Oracle, and BYOK Oracle sources.
+
+    To fetch runtime price and health details for Builder Oracle and BYOK sources, call:
+
+```http
+GET /v1/broker/listing/builder_sources?base_ccy=XYZZZ
+```
+
+    This returns active public feeds, plus the Builder's own private feeds. Other Builders cannot see or select your private feeds.
+
+  </Step>
+
+  <Step title="Complete RWA setup if needed">
+    If the market is an RWA market, complete the symbol-context and market-session steps in [RWA Markets](/build-on-omnichain/perp-anything/rwa-markets) before submitting the listing.
+
+  </Step>
+
+  <Step title="Submit the listing">
+    Submit the market with selected sources and weights through `POST /v1/broker/listing/submit`.
+
+```json
+{
+  "symbol": "XYZZZ",
+  "sources": [
+    {
+      "source": "ORACLE_woofi_pro",
+      "source_symbol": "XYZZZ",
+      "price_multiplier": 1,
+      "weight": 60
+    },
+    {
+      "source": "PYTH_woofi_pro",
+      "source_symbol": "XYZZZ",
+      "price_multiplier": 1,
+      "weight": 40
+    }
+  ]
+}
+```
+
+    This non-RWA example omits `market_session`. For an RWA symbol, follow the requirements in [RWA Markets](/build-on-omnichain/perp-anything/rwa-markets).
+
+  </Step>
+
+  <Step title="Monitor the listed market">
+    After submission, monitor source health, feed visibility, Insurance Fund balance, liquidity, and market status. If all configured Index Price sources become unavailable, the market can be placed into reduce-only mode.
+  </Step>
+</Steps>
+
+## Full example
+
+The following example separates the reusable WebSocket client from your provider logic. The SDK file signs the connection, keeps the WebSocket alive, handles reconnects, and publishes `indexpricefeed` messages. The provider file only decides which price to publish.
+
+<Warning>
+  Never hardcode production keys or secrets in source code. Load `ORDERLY_ACCOUNT_ID`,
+  `ORDERLY_KEY`, and `ORDERLY_SECRET` from a secure secret manager or environment variables.
+</Warning>
+
+`ORDERLY_KEY` is your LiqZero public key and may include the `ed25519:` prefix. `ORDERLY_SECRET` should be the base58-encoded raw Ed25519 private key without the `ed25519:` prefix.
+
+This sample reconnects after connection or runtime errors. If authentication fails repeatedly, verify the account ID, key, secret, timestamp, and WebSocket endpoint.
+
+<CodeGroup>
+```bash Shell
+# Requires Python 3.11+
+pip install websockets cryptography base58
+
+export ORDERLY_ACCOUNT_ID="0x..."
+export ORDERLY_KEY="ed25519:..."
+export ORDERLY_SECRET="..."
+export BASE_CCY="XYZZZ"
+
+python provider_ws_example.py
+
+````
+
+```py orderly_oracle_sdk.py
+import asyncio
+import base64
+import json
+import time
+import uuid
+from dataclasses import dataclass
+from urllib.parse import urlencode
+
+import base58
+import websockets
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+
+PUSH_TOPIC = "indexpricefeed"
+WS_PATH = "/v1/ws/oracle/push"
+DEFAULT_DOMAIN = "wss://ws-oracle.orderly.org"
+
+
+@dataclass
+class OracleProviderConfig:
+    account_id: str
+    orderly_key: str
+    orderly_secret: str
+    base_ccy: str
+    domain: str = DEFAULT_DOMAIN
+    reconnect_delay_s: float = 5.0
+
+
+class OracleProviderClient:
+    def __init__(self, config: OracleProviderConfig):
+        self.config = config
+        self._private_key = Ed25519PrivateKey.from_private_bytes(
+            base58.b58decode(config.orderly_secret)
+        )
+        self._connected = asyncio.Event()
+        self._running = False
+        self._task = None
+        self._ws = None
+
+    def _sign(self, message: str) -> str:
+        signature = self._private_key.sign(message.encode())
+        # Orderly WebSocket auth uses unpadded base64url signatures.
+        return base64.urlsafe_b64encode(signature).decode().rstrip("=")
+
+    def _build_url(self) -> str:
+        timestamp = str(int(time.time() * 1000))
+        query = urlencode({
+            "orderly_key": self.config.orderly_key,
+            "timestamp": timestamp,
+            "sign": self._sign(timestamp),
+        })
+        return f"{self.config.domain}{WS_PATH}/{self.config.account_id}?{query}"
+
+    async def _receive_loop(self):
+        async for raw in self._ws:
+            message = json.loads(raw)
+            if message.get("event") == "ping":
+                await self._ws.send(json.dumps({"event": "pong"}))
+            elif message.get("event") == "publish" and not message.get("success"):
+                print("publish rejected", message)
+
+    async def _connect_once(self):
+        async with websockets.connect(self._build_url()) as ws:
+            self._ws = ws
+            auth = json.loads(await ws.recv())
+            if not auth.get("success"):
+                raise RuntimeError(f"auth failed: {auth.get('errorMsg')}")
+            print(f"authenticated; publishing {self.config.base_ccy}")
+            self._connected.set()
+            await self._receive_loop()
+
+    async def _run_forever(self):
+        while self._running:
+            try:
+                await self._connect_once()
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                print(f"oracle websocket error: {error}; reconnecting...")
+            finally:
+                self._connected.clear()
+                self._ws = None
+
+            if self._running:
+                await asyncio.sleep(self.config.reconnect_delay_s)
+
+    async def start(self):
+        if self._task is not None:
+            return
+        self._running = True
+        self._task = asyncio.create_task(self._run_forever())
+
+    async def stop(self):
+        self._running = False
+        if self._ws is not None:
+            await self._ws.close()
+        if self._task is not None:
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+            self._task = None
+
+    async def push_price(self, price: float, wait_timeout: float = 10.0) -> bool:
+        try:
+            await asyncio.wait_for(self._connected.wait(), timeout=wait_timeout)
+        except asyncio.TimeoutError:
+            return False
+
+        payload = {
+            "id": uuid.uuid4().hex[:8],
+            "event": "publish",
+            "topic": PUSH_TOPIC,
+            "ts": int(time.time() * 1000),
+            "data": {
+                "base_ccy": self.config.base_ccy,
+                "price": round(price, 8),
+            },
+        }
+        ws = self._ws
+        if ws is None:
+            return False
+        await ws.send(json.dumps(payload))
+        return True
+
+    async def __aenter__(self):
+        await self.start()
+        return self
+
+    async def __aexit__(self, *exc):
+        await self.stop()
+````
+
+```py provider_ws_example.py
+import asyncio
+import os
+
+from orderly_oracle_sdk import OracleProviderClient, OracleProviderConfig
+
+
+PUSH_INTERVAL_S = 1
+
+
+async def get_latest_price_from_your_source() -> float:
+    # Replace this with your own price source, such as your index service,
+    # broker backend, RWA data provider, or exchange aggregation job.
+    raise NotImplementedError("connect your production price source here")
+
+
+async def run():
+    config = OracleProviderConfig(
+        account_id=os.environ["ORDERLY_ACCOUNT_ID"],
+        orderly_key=os.environ["ORDERLY_KEY"],
+        orderly_secret=os.environ["ORDERLY_SECRET"],
+        base_ccy=os.getenv("BASE_CCY", "XYZZZ"),
+        domain=os.getenv("ORACLE_WS_DOMAIN", "wss://ws-oracle.orderly.org"),
+    )
+
+    async with OracleProviderClient(config) as client:
+        while True:
+            price = await get_latest_price_from_your_source()
+            if await client.push_price(price):
+                print(f"pushed {config.base_ccy} @ {price}")
+            await asyncio.sleep(PUSH_INTERVAL_S)
+
+
+asyncio.run(run())
+```
+
+</CodeGroup>
+
+## Related pages
+
+- [Introduction](/build-on-omnichain/perp-anything/introduction)
+- [Market Operations](/build-on-omnichain/perp-anything/market-operations)
+- [RWA Markets](/build-on-omnichain/perp-anything/rwa-markets)
+- [Supported Markets](/introduction/trade-on-orderly/supported-markets)
+- [Mark Price, Index Price, and Last Price](/introduction/trade-on-orderly/perpetual-futures/mark-price-index-price-and-last-price)

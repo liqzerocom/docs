@@ -1,0 +1,106 @@
+---
+title: "Affiliate & Referral Program (Legacy)"
+description: "Explore the legacy documentation for the LiqZero referral ecosystem for Builders, Affiliates, and Traders."
+---
+
+## Overview
+
+The referral system is a crucial component of the LiqZero ecosystem, designed to incentivize user growth and engagement through a structured rewards program.
+
+A builder can choose to share part of its builder fees to incentivize a distributor, affiliate, or referrer for bringing in new traders.
+The ecosystem consists of three key participants:
+
+1.  **The Builder (DEX):** The DEX built on LiqZero. Builders determine the fee structures and maximum rebate limits.
+2.  **The Referrer (Affiliate):** A user (e.g., a KOL, influencer, or community leader) who invites others to trade. They can modify the fee split between themselves and the trader, but not the maximum rebate limit.
+3.  **The Referee (Trader):** The new user who signs up using a referral code.
+
+## Legacy and multilevel affiliate programs
+
+LiqZero supports a legacy single-level affiliate program and a multilevel affiliate program. The key differences are:
+
+| Details                      | Legacy                                                                                                        | Multilevel                                                                                                                                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Referral network**         | Single-level, with direct referrals only                                                                      | Up to 15 levels, with direct and indirect referrals                                                                                                                                                         |
+| **Referral commission**      | Affiliates earn commission from direct referees only                                                          | Affiliates can earn commission from direct and indirect referees down the referral chain. The builder selects how the commission basis is calculated.                                                       |
+| **Commission configuration** | The builder decides a single-level commission of up to 100%                                                   | The builder assigns affiliates a total commission rate and may configure a minimum pass-down rate for direct-referral earnings                                                                              |
+| **Referral code creation**   | Primarily created by the builder or qualified affiliates that meet the applicable trading volume requirements | Qualified affiliates can create one active referral code after meeting the applicable trading volume requirements. Only auto-generated codes can be changed, and only while no users are bound to the code. |
+
+### Coexistence and migration
+
+The multilevel affiliate program supersedes the legacy program for new activations:
+
+- New builders, and existing builders that have not enabled the legacy program, use the multilevel program when they enable affiliate referrals. The legacy program is not available to them.
+- Builders already using the legacy program can continue using it or upgrade to the multilevel program. The upgrade is irreversible.
+- After an upgrade, existing legacy referral codes remain valid and continue to generate commission, but no new legacy referral codes can be created.
+- Affiliates should check with their DEX to confirm which program is active. When a DEX upgrades, eligible affiliates can create a multilevel referral code while continuing to earn from existing legacy codes.
+
+For multilevel program configuration and commission guidance, see the [Builder's Quick Guide](/introduction/be-a-broker/orderly-dex-affiliate-program-brokers-quick-guide) and [Affiliate's Quick Guide](/introduction/be-a-broker/orderly-dex-affiliate-program-affiliates-quick-guide).
+
+## How It Works
+
+### 1. The Binding Process
+
+The binding is established when a new user (Referee) connects to a Builder and enters a referral code. Their account is permanently bound to the Referrer. A bound referral code cannot be removed or modified after binding.
+
+<img src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/be-a-broker/affiliate-referral-program/bind-ref-code.png" width="70%" />
+
+### 2. The Reward Split
+
+When a Referee executes a trade, the trading fee is split automatically. LiqZero Network retains a base protocol fee, and the remaining **Builder Fee** is distributed among the Builder, Referrer, and Referee based on the configured rebate settings.
+
+- **Referrer Rebate:** Commission earned by the affiliate for inviting the user.
+- **Referee Rebate:** A discount returned to the trader, incentivizing them to use the referral code.
+- **Builder Revenue:** The remaining portion of the fee retained by the platform.
+
+## Example Calculation
+
+The following example demonstrates how fees flow between parties.
+
+**Scenario:**
+
+- **LiqZero Base Fee:** Depends on the Builder's current fee tier. This tiering applies only to the Builder's base fee paid to LiqZero.
+- **Example taker trade:** If LiqZero's base taker fee is 3 bps and the Builder charges a 6 bps user-facing taker fee, the Builder's net profit is 3 bps.
+- **Example maker trade:** A negative tier rate is the maximum rebate LiqZero will fund when the Builder passes a negative maker fee through to the trader. The funded rebate is not Builder revenue. If the Builder charges the trader a zero or positive maker fee, LiqZero funds no maker rebate; any positive maker fee collected is Builder revenue.
+
+**Referral Configuration:**
+The Builder generates a code for a KOL with an **80% Max Rebate**, split **50:50** between the Referrer and Referee.
+
+| Party                    | Share of Net Profit | Calculation                                     |
+| :----------------------- | :------------------ | :---------------------------------------------- |
+| **Total Net Profit**     | **100%**            | **3 bps in this example**                       |
+| **Referee (Trader)**     | 40%                 | Receives 40% of the 3 bps profit as a discount. |
+| **Referrer (Affiliate)** | 40%                 | Receives 40% of the 3 bps profit as commission. |
+| **Builder**              | 20%                 | Retains the remaining 20% of the 3 bps profit.  |
+
+**In Dollar Terms:**
+If a user generates **\$10 USDC** in _Net Builder Fees_:
+
+1.  **\$4.00** is returned to the Trader (Referee).
+2.  **\$4.00** is credited to the Affiliate (Referrer).
+3.  **\$2.00** is retained by the Builder.
+
+## Configuration for Builders
+
+Builders manage referral codes and rebate rates in [LiqZero One Affiliate](https://dex.orderly.network/affiliate).
+
+### Setup Fields
+
+Common referral-code settings include:
+
+1.  **User Address:** The wallet address of the Affiliate (Referrer) who will own this code.
+2.  **Referral Code:** The unique string traders will enter (e.g., `REFFCODE1`).
+3.  **Max Rebate:** The total percentage of the Builder's Net Profit allocated for rebates (e.g., 80%).
+4.  **Split Slider:** Determines how the rebate is divided:
+    - **Referrer Rebate:** The percentage of the rebate the Affiliate keeps.
+    - **Referee Rebate:** The percentage of the rebate returned to the Trader.
+
+## Distribution
+
+Rewards are calculated automatically by the LiqZero protocol.
+
+- **Frequency:** Rewards are typically distributed **daily**.
+- **Currency:** Payouts are settled in **USDC**.
+
+## Auto referral system
+
+Similar to the affiliate system, the auto-referral system grants traders a referral code once they reach a specific trading volume. This means that instead of manual entry, traders are automatically assigned a code based on their trading activity.

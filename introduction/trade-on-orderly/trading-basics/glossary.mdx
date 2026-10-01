@@ -1,0 +1,40 @@
+---
+title: "Glossary"
+description: "Review definitions of key trading terms used across LiqZero, from order book to ADL."
+---
+
+**Order Book:** A live list of all open buy and sell orders for an asset, sorted by price. It shows you what other traders are willing to pay or accept.
+
+**Liquidity:** How much of an asset is available to trade. Higher liquidity means you can buy or sell more easily without moving the price.
+
+**Spread:** The gap between the highest buy price (bid) and the lowest sell price (ask). A smaller spread usually means a more liquid market.
+
+**Basis Point (BP):** A tiny unit of measurement: 1 basis point = 0.01%. Used to express fees and rate changes precisely.
+
+**Taker Fee:** The fee you pay when your order fills immediately, removing liquidity from the order book (e.g., a market order).
+
+**Maker Fee:** The fee or rebate applied when your order adds liquidity to the order book by waiting to be filled (e.g., a limit order that doesn't match right away). Builders set the user-facing maker fee. When that fee is negative, LiqZero can fund the trader rebate up to the Builder's tier cap. The funded rebate is passed through to the trader and is not Builder revenue.
+
+**Unsettled PnL:** Profit or loss from a perp position that hasn't been settled yet. Settlement transfers USDC between winning and losing positions.
+
+**Maintenance Margin:** The minimum collateral you must keep in your account to avoid liquidation. If your margin drops below this level, your position gets liquidated.
+
+**Initial Margin:** The collateral required to open a new position. The exact amount depends on the market and the leverage you choose.
+
+**Funding Fee:** A periodic payment between long and short traders that keeps perp prices close to the actual market price of the underlying asset. Learn more [here](/introduction/trade-on-orderly/perpetual-futures/funding-rate).
+
+**Cost Position:** Your average entry price plus any fees you've paid (trading fees, funding fees). This is what's used to calculate your unrealized PnL.
+
+**Mark Price:** A fair-value estimate for a perp contract, calculated from prices across multiple spot exchanges. It's designed to be stable and resistant to manipulation, and it's the price used to determine liquidations. Learn more [here](/introduction/trade-on-orderly/perpetual-futures/mark-price-index-price-and-last-price#mark-price).
+
+**Index Price:** The volume-weighted average price of an asset across major spot exchanges. Learn more [here](/introduction/trade-on-orderly/perpetual-futures/mark-price-index-price-and-last-price#index-price).
+
+**Last Price:** Simply the most recent price at which a trade was executed.
+
+**Open Interest:** The total number of outstanding perp contracts that haven't been closed. It's a measure of how active a market is, denominated in USDC.
+
+**Liquidation:** When your collateral falls too low to support your position, the system forcibly closes it to prevent further losses.
+
+**Auto De-leveraging (ADL):** A safety mechanism that kicks in when normal liquidation can't fully close a position. It automatically reduces opposing positions to keep the system solvent. Learn more [here](/introduction/trade-on-orderly/perpetual-futures/insurance-fund-and-adl#adl-auto-deleveraging).
+
+**Insurance Fund:** A reserve pool that covers losses when a liquidated position can't be fully absorbed by liquidators. It's funded by liquidation fees and by LiqZero. Learn more [here](/introduction/trade-on-orderly/perpetual-futures/insurance-fund-and-adl).

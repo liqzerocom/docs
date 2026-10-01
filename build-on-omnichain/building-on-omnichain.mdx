@@ -1,0 +1,54 @@
+---
+title: "Building on LiqZero"
+description: "Start building your dApp on LiqZero's omnichain trading infrastructure."
+---
+
+LiqZero gives builders the trading infrastructure, liquidity access, and integration tooling needed to launch their own derivatives application without building the full stack from scratch.
+
+Builders can create a perp DEX on top of LiqZero's shared-liquidity orderbook, while users interact from supported chains without switching to a separate trading chain in the product experience.
+
+## What builders get
+
+- **Shared liquidity:** Access the same liquidity layer used across the LiqZero ecosystem.
+- **Orderbook infrastructure:** Build on top of LiqZero's matching and order management services instead of operating your own engine.
+- **Omnichain user flows:** Support registration, deposits, withdrawals, and trading from supported chains.
+- **Flexible integration paths:** Choose between SDKs, UI components, Python tooling, or direct API access.
+- **Self-custody model:** Users keep control of their wallets while interacting with your application.
+
+## High-level architecture
+
+LiqZero's omnichain system is organized into three layers:
+
+<img
+  className="block dark:hidden"
+  src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/build-on-omnichain/light.png"
+  alt="LiqZero Overview Light"
+/>
+<img
+  className="hidden dark:block"
+  src="https://raw.githubusercontent.com/OrderlyNetwork/documentation-public/main/images/build-on-omnichain/dark.png"
+  alt="LiqZero Overview Dark"
+/>
+
+1. **Asset Layer:** Lives on each supported chain and handles user-facing actions such as account registration, deposits, and withdrawals.
+2. **Settlement Layer:** Lives on a single chain and acts as the transaction ledger behind the scenes.
+3. **Engine Layer:** Runs the orderbook and related trading services used for order management and execution.
+
+## Start here
+
+Use these pages as your builder onboarding path:
+
+- **Plan the integration:** Start with the [Integration Checklist](/build-on-omnichain/integration-checklist) for the overall build and launch sequence.
+- **Understand the system:** Review the [Smart Contract Overview](/build-on-omnichain/overview) and [Smart Contract Addresses](/build-on-omnichain/addresses).
+- **Implement core user flows:** Follow [Accounts](/build-on-omnichain/user-flows/accounts), [Wallet Authentication](/build-on-omnichain/user-flows/wallet-authentication), [Withdrawal & Deposit](/build-on-omnichain/user-flows/withdrawal-deposit), and [Order Management](/build-on-omnichain/user-flows/order-management).
+- **Cover trading operations:** Add [Settle PnL](/build-on-omnichain/user-flows/settle-pnl), [Custom Fees](/build-on-omnichain/user-flows/custom-fees), and real-time integrations from the [WebSocket API docs](/build-on-omnichain/websocket-api/introduction).
+- **Integrate against the APIs:** Use the [API introduction](/build-on-omnichain/introduction) and [API authentication guide](/build-on-omnichain/api-authentication).
+- **Display announcements and campaigns:** Use the public [Blogpost API](/build-on-omnichain/blogpost/overview) to retrieve published feeds and articles for your platform.
+- **Handle onboarding questions:** Use [Integration FAQs](/build-on-omnichain/integration-faqs) and [Partner Support](/build-on-omnichain/partner-support) for builder-facing support guidance.
+
+<Info>
+  Start with [Builder Onboarding](/introduction/getting-started/builder-onboarding). If you are
+  using LiqZero One, continue from [https://dex.orderly.network/](https://dex.orderly.network/). For
+  implementation questions, reach out via [email](mailto:devrel@orderly.network),
+  [Discord](https://discord.gg/OrderlyNetwork), or [Telegram](https://t.me/Orderly_Discussions).
+</Info>

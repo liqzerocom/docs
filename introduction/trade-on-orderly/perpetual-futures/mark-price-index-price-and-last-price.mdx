@@ -1,0 +1,188 @@
+---
+title: "Mark Price, Index Price, and Last Price"
+description: "Learn how LiqZero computes Mark Price, Index Price, and Last Price with manipulation safeguards."
+---
+
+When trading perpetual futures, you will see three different prices: the Index Price, the Mark Price, and the Last Price. Each serves a different purpose, and understanding them will help you make sense of how your positions are valued and when liquidations might happen.
+
+- **Index Price** is a fair market price for the underlying asset, calculated from multiple major exchanges. It answers the question: "What is this asset actually worth right now?"
+- **Mark Price** is LiqZero's best estimate of what the perpetual futures contract itself is worth. It is used for calculating your unrealized PnL and determining liquidations.
+- **Last Price** is simply the most recent price at which the contract was traded on LiqZero.
+
+The Mark Price is the most important of the three for your account health, because it is what LiqZero uses to decide whether your positions should be liquidated. It is designed to be resistant to manipulation and short-term volatility.
+
+## Index Price
+
+For a given contract, the Index price is the volume-weighted average of the underlying asset prices listed on major spot exchanges.
+
+Because no single exchange should have the power to move this price on its own, LiqZero applies several safeguards to prevent manipulation, outages, or connectivity problems from distorting the Index Price:
+
+1. If, for any source, the price deviates by more than **5%** from the median price of all sources, LiqZero caps/floors the value at +/- 5%. Once the source price falls within the 5% range, its original value will be taken.
+
+2. If multiple sources show a deviation of more than 5% from the median, LiqZero will use the median instead of the volume-weighted average.
+
+3. If a specific source is not sending any price for over **10 seconds**, it will be disregarded from the Index Price calculation completely.
+
+### How the weights are calculated
+
+The weights used in the Index Price calculation are updated every 5 minutes. They are based on how much trading volume each exchange had over the past 4 hours. Exchanges with more volume have more influence on the Index Price.
+
+```
+Weight (CEX_i) = Volume (CEX_i) / Total Volume (CEXes)
+where:
+    Volume (CEX_i) refers to the 4-hour trading volume of the CEX i
+    Total Volume (CEXes) refers to the sum of the 4-hour trading volume accross all relevant CEXes for the specific pair
+```
+
+### Backup oracle
+
+In addition to LiqZero's in-house oracle, [Stork](https://www.stork.network/) serves as a backup oracle, verifying the index price for all pairs listed on LiqZero.
+Stork is an ultra-low-latency (sub-millisecond), decentralized hybrid oracle network designed for EVM-compatible price feeds. Stork prioritizes performance, using ultra-fast WebSockets across multiple regions and node providers to ensure LiqZero's reference prices are available for verification in real-time, at the millisecond level, similar to the data speeds used in traditional finance trading venues.
+
+### Exchange sources per trading pair
+
+The tables below show which exchanges are used as price sources for each trading pair. An "X" means that exchange is included in the Index Price calculation for that pair.
+
+| Symbol   | Binance | OKX | Huobi | Gateio | Bybit | Kucoin | MEXC | Bitget | BingX | LBank | Binance Futures | Pyth |
+| -------- | ------- | --- | ----- | ------ | ----- | ------ | ---- | ------ | ----- | ----- | --------------- | ---- |
+| 1000BONK | X       | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| 1000PEPE | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| 1000SHIB | X       | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| AAVE     | X       | X   |       | X      | X     | X      | X    |        |       |       |                 |      |
+| ADA      | X       | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| APT      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| ARB      | X       | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| ASTER    | X       |     |       | X      |       |        | X    |        | X     |       |                 |      |
+| AVAX     | X       | X   |       | X      | X     | X      | X    |        |       |       |                 |      |
+| AXS      | X       | X   |       |        | X     |        | X    | X      |       |       |                 |      |
+| BASED    |         | X   | X     |        | X     | X      | X    |        | X     |       |                 |      |
+| BCH      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| BERA     | X       | X   |       | X      |       | X      | X    | X      |       |       |                 |      |
+| BIO      | X       | X   |       | X      |       | X      | X    | X      | X     |       |                 |      |
+| BNB      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| BTC      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| CAKE     | X       |     |       | X      | X     | X      |      | X      | X     |       |                 |      |
+| CRV      | X       | X   |       | X      | X     | X      | X    |        |       |       |                 |      |
+| DASH     | X       |     |       |        |       | X      | X    |        |       |       |                 |      |
+| DOGE     | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| DOT      | X       | X   |       |        | X     | X      | X    | X      |       |       |                 |      |
+| EDGE     |         |     |       | X      | X     |        | X    |        |       |       | X               |      |
+| ENA      | X       |     |       | X      | X     | X      |      |        |       |       |                 |      |
+| ETH      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| ETHFI    | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| FARTCOIN |         |     |       | X      |       | X      | X    | X      |       |       |                 |      |
+| FET      | X       | X   |       | X      | X     | X      | X    | X      | X     |       |                 |      |
+| GOAT     |         |     |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| HBAR     | X       | X   |       | X      | X     | X      | X    |        |       |       |                 |      |
+| HYPE     |         |     |       | X      |       | X      | X    | X      |       |       |                 |      |
+| ICP      | X       | X   |       | X      | X     | X      |      | X      |       |       |                 |      |
+| INJ      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| IP       |         | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| JUP      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| LDO      | X       | X   |       | X      | X     | X      | X    |        |       |       |                 |      |
+| LINEA    | X       | X   |       |        | X     | X      | X    | X      |       |       |                 |      |
+| LINK     | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| LIT      |         |     |       | X      |       |        |      |        |       |       | X               | X    |
+| LTC      | X       | X   |       | X      | X     |        | X    | X      |       |       |                 |      |
+| M        |         |     |       | X      |       |        | X    |        |       |       | X               |      |
+| MEGA     | X       | X   |       | X      | X     | X      |      | X      |       |       |                 |      |
+| MERL     |         | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| MNT      |         |     |       | X      | X     | X      |      |        | X     |       |                 |      |
+| MON      |         |     |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| MORPHO   | X       | X   |       | X      |       | X      | X    | X      |       |       |                 |      |
+| NEAR     | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| ONDO     | X       | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| OP       | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| ORDER    |         |     |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| PENDLE   | X       | X   |       | X      | X     | X      | X    |        | X     |       |                 |      |
+| PENGU    | X       | X   |       | X      | X     | X      | X    | X      | X     |       |                 |      |
+| POL      | X       | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| PUMP     | X       | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| RAY      | X       | X   |       | X      |       | X      | X    | X      | X     |       |                 |      |
+| S        | X       |     |       |        | X     |        | X    | X      |       |       |                 |      |
+| SEI      | X       |     |       | X      | X     | X      |      |        |       |       |                 |      |
+| SKR      |         |     |       | X      | X     | X      | X    |        |       |       |                 |      |
+| SOL      | X       | X   |       | X      | X     | X      | X    |        |       |       |                 |      |
+| SPX      |         |     |       | X      | X     | X      | X    |        | X     |       | X               |      |
+| SUI      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| TAO      | X       |     |       | X      |       | X      | X    | X      |       |       |                 |      |
+| TIA      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| TRUMP    | X       | X   |       | X      | X     | X      | X    | X      | X     |       |                 |      |
+| TRX      | X       | X   |       | X      | X     | X      | X    | X      |       |       |                 |      |
+| UNI      | X       | X   |       | X      |       | X      |      | X      |       |       |                 |      |
+| USELESS  |         |     |       |        |       | X      | X    |        |       | X     |                 |      |
+| VIRTUAL  | X       |     |       | X      | X     | X      | X    | X      | X     |       |                 |      |
+| WIF      | X       |     |       | X      |       | X      | X    |        |       |       |                 |      |
+| WLD      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| WLFI     | X       | X   |       |        | X     |        | X    | X      |       |       |                 |      |
+| WOO      | X       | X   |       |        | X     | X      |      |        |       |       |                 |      |
+| XMR      |         |     | X     |        |       | X      | X    |        |       |       |                 |      |
+| XPL      | X       | X   |       |        | X     |        | X    | X      | X     | X     |                 |      |
+| XRP      | X       | X   |       | X      | X     | X      |      |        |       |       |                 |      |
+| ZEC      | X       |     |       |        |       | X      | X    |        |       |       |                 |      |
+| ZEN      | X       |     |       |        | X     | X      | X    |        |       |       |                 |      |
+| ZRO      | X       | X   |       | X      | X     | X      | X    |        |       |       |                 |      |
+
+
+| RWA    | Pyth | Finage | Trademade | Chainlink | Hyperliquid Perp | Binance Futures Index |
+| ------ | ---- | ------ | --------- | --------- | ---------------- | --------------------- |
+| SPX500 |      | X      | X         |           | X                |                       |
+| NAS100 |      | X      | X         |           | X                |                       |
+| XAU    | X    |        |           |           | X                | X                     |
+| XAG    | X    |        |           |           | X                | X                     |
+| GOOGL  | X    |        |           | X         |                  |                       |
+| TSLA   | X    |        |           | X         |                  |                       |
+| NVDA   | X    |        |           | X         |                  |                       |
+| BZ     |      |        |           |           | X                | X                     |
+| CL     |      |        |           |           | X                | X                     |
+| EURUSD | X    | X      | X         |           |                  |                       |
+| USDJPY | X    | X      | X         |           |                  |                       |
+
+## Mark Price
+
+The Mark Price is the price LiqZero uses to value your perpetual futures positions. It is designed to be a stable, manipulation-resistant estimate of what the contract is actually worth. LiqZero uses the Mark Price (not the Last Price) for calculating unrealized PnL and triggering liquidations, because it is less volatile and harder to manipulate.
+
+### How it is calculated
+
+The Mark Price is built in two steps. First, LiqZero computes a Median Price from three components:
+
+```
+Median Price = Median(P1, P2, Futures Price)
+where:
+    P1 = Index Price * (1 + Last Funding Rate * Time until next Funding / dt)
+    P2 = Index Price + 15 Minute Moving Average[Basis]
+    Futures Price = Median(Bid0, Ask0, Last_Price)
+
+Last Funding Rate is expressed on a 8h basis
+Basis = Median(Bid0, Ask0) - Index Price, calculated as a snapshot every minute
+dt = Funding Period = 8 hours
+
+```
+
+Then LiqZero applies a cap so the Mark Price cannot deviate too far from the Index Price. This cap is defined by a "Factor" and the cap/floor funding rates (see the Funding Rate section for details):
+
+```
+Mark Price = Clamp(Median Price, Index Price * (1 + Factor * Cap Funding), Index Price * (1 + Factor * Floor_funding))
+
+cap_funding and floor_funding depend on the perpetual market (cf Funding Rate section)
+```
+
+| Perp Market     | Factor | Max Mark Price Deviation from Index Price |
+| --------------- | ------ | ----------------------------------------- |
+| BTC             | 10     | 3%                                        |
+| ETH             | 8      | 3%                                        |
+| Others (crypto) | 7      | 5.25%                                     |
+
+### RWA symbols
+
+For RWA symbols, the Factor automatically adjusts based on whether the underlying market is open. During OFF_MARKET hours (when the underlying market is closed), the Factor uses a higher value to accommodate the wider mark-to-index basis under reduced liquidity and a frozen Index Price.
+
+| Asset Class     | Symbols                                            | ON_MARKET Factor | OFF_MARKET Factor | ON_MARKET Max Deviation | OFF_MARKET Max Deviation |
+| --------------- | -------------------------------------------------- | ---------------- | ----------------- | ----------------------- | ------------------------ |
+| Equity / Energy | SPX500, NAS100, NVDA, TSLA, GOOGL, CL, BZ          | 1.5              | 7.5               | 0.3%                    | 1.5%                     |
+| Metals          | XAU, XAG                                           | 2                | 10                | 0.2%                    | 1.0%                     |
+| FX              | EURUSD, USDJPY                                     | 1.5              | 7.5               | 0.3%                    | 1.5%                     |
+
+## Last Price
+
+The Last Price is the simplest of the three. It is just the most recent price at which someone bought or sold the perpetual futures contract on LiqZero. While it reflects real trading activity, it can be more volatile and easier to manipulate than the Mark Price, which is why it is not used for liquidation decisions.

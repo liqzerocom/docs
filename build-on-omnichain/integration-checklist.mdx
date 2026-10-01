@@ -1,0 +1,155 @@
+---
+title: "Integration Checklist"
+description: "A structured guide for builders integrating with LiqZero Network."
+---
+
+Use this checklist to plan, implement, and launch a builder integration on LiqZero. The goal is to cover the required user flows first, then add the operational pieces needed for a stable launch.
+
+## Phase 1: Planning & Setup
+
+Before writing code, align the product scope and technical setup with the LiqZero team.
+
+- **Choose an integration path:** Pick the stack that matches your product and team.
+  - [React Hooks](/sdks/hooks/overview)
+  - [React UI components](/sdks/react/overview)
+  - [Python connector](https://github.com/OrderlyNetwork/orderly-evm-connector-python)
+  - Direct API access through the [EVM API docs](/build-on-omnichain/introduction)
+- **Set up builder identity:** Start from [Builder Onboarding](/introduction/getting-started/builder-onboarding). If you are using LiqZero One, go to [https://dex.orderly.network/](https://dex.orderly.network/) to create your builder ID and continue onboarding.
+- **Review system design:** Read the [Building on LiqZero](/build-on-omnichain/building-on-omnichain), [Smart Contract Overview](/build-on-omnichain/overview), and [Smart Contract Addresses](/build-on-omnichain/addresses) pages.
+- **Define launch scope:** Confirm your core user flows, testnet plan, support process, and go-to-market milestones before development starts.
+
+## Phase 2: Core Implementation
+
+Implement the flows that every trading integration needs.
+
+- **[Account registration](/build-on-omnichain/user-flows/accounts):** Let users create and activate their LiqZero account.
+- **[Wallet authentication and LiqZero Keys](/build-on-omnichain/user-flows/wallet-authentication):** Set up authentication for signed API access and trading actions.
+- **[Deposit and withdrawal](/build-on-omnichain/user-flows/withdrawal-deposit):** Support funding and withdrawal flows from supported chains.
+- **[Order management](/build-on-omnichain/user-flows/order-management):** Implement order placement, cancellation, and order state handling.
+- **Market and symbol data:** Integrate market metadata, prices, orderbook data, and trade updates from the [WebSocket API](/build-on-omnichain/websocket-api/introduction) and relevant REST endpoints such as [available symbols](/build-on-omnichain/restful-api/public/get-available-symbols).
+
+<Note>
+  **Reduce-Only Orders:** Use the `reduce-only` flag for orders intended to close or reduce a
+  position. This helps avoid cases where a closing order could otherwise increase Initial Margin
+  Requirements (IMR) and fail because the account does not have enough margin.
+</Note>
+
+## Phase 3: Advanced Features & Optimization
+
+Add the pieces that make the integration operationally complete.
+
+- **[Settle PnL](/build-on-omnichain/user-flows/settle-pnl):** Handle realized PnL settlement as part of the account lifecycle.
+- **[Custom fees](/build-on-omnichain/user-flows/custom-fees):** Configure default builder fees and user-level fee logic in [Fee Settings in LiqZero One](https://dex.orderly.network/fee-settings).
+- **User data surfaces:** Display balances, positions, trade history, and account data using endpoints such as [Get account information](/build-on-omnichain/restful-api/private/get-account-information).
+- **Regulatory controls:** Implement the geo-blocking and compliance checks required for your product and jurisdiction.
+
+## Phase 4: Testing & Launch Preparation
+
+Verify the integration end to end before going live.
+
+- **Validate on testnet:** Run through registration, authentication, deposits, withdrawals, trading, and settlement on testnet before launch.
+- **Prepare for maintenance:** Use the [system maintenance status endpoint](/build-on-omnichain/restful-api/public/get-system-maintenance-status), ask the LiqZero team for builder Telegram channel access, and make sure your UI handles maintenance windows clearly, including any order actions that remain available.
+- **Review support and launch readiness:** Make sure your team has clear ownership for user support, incident communication, and launch coordination with LiqZero.
+
+<Warning>
+  During system maintenance, market data and user positions will be unavailable. Open positions
+  remain open and can still be liquidated if market conditions change after trading resumes.
+</Warning>
+
+## AI & API Quick Reference
+
+Use this section as a compact implementation reference after you have confirmed the integration scope above.
+
+### Core Terms
+
+- **Builder ID (`broker_id`):** The identifier assigned to your platform during onboarding. It is required in registration and LiqZero Key setup flows.
+- **LiqZero Key:** An on-chain registered Ed25519 keypair. Use the private key only in the client or backend component that signs private REST and WebSocket requests.
+- **Strategy Vault vs. OmniVault:** Strategy Vault is the underlying smart contract and clearing infrastructure. OmniVault is the official protocol-level vault implementation built on top of it.
+
+### REST Authentication
+
+Private REST requests are signed with the LiqZero Key. For the full spec, see [API Authentication](/build-on-omnichain/api-authentication).
+
+Required headers:
+
+```http
+orderly-account-id: <account_id>
+orderly-key: ed25519:<public_orderly_key>
+orderly-timestamp: <current_epoch_ms>
+orderly-signature: <computed_signature_base64url>
+```
+
+Signature message:
+
+```txt
+orderly-timestamp + METHOD + PATH_WITH_QUERY + BODY_STRING
+```
+
+The path must include query parameters if they exist, for example `/v1/order?symbol=PERP_ETH_USDC`. Omit `BODY_STRING` for requests without a body.
+
+### Minimal Signing Examples
+
+```ts TypeScript
+import { ed25519 } from "@noble/curves/ed25519";
+import { base58 } from "@scure/base";
+
+type SignParams = {
+  method: "GET" | "POST" | "PUT" | "DELETE";
+  path: string;
+  body?: Record<string, unknown>;
+  timestamp: number;
+  orderlySecret: string;
+};
+
+export function generateOrderlySignature({
+  method,
+  path,
+  body,
+  timestamp,
+  orderlySecret
+}: SignParams): string {
+  const bodyString = body ? JSON.stringify(body) : "";
+  const message = `${timestamp}${method}${path}${bodyString}`;
+  const privateKey = base58.decode(orderlySecret);
+  const signatureBytes = ed25519.sign(new TextEncoder().encode(message), privateKey);
+
+  return Buffer.from(signatureBytes).toString("base64url");
+}
+```
+
+```python Python
+import json
+from base58 import b58decode
+from base64 import urlsafe_b64encode
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+
+def generate_orderly_signature(method: str, path: str, body: dict | None, timestamp: int, orderly_secret: str) -> str:
+    body_string = json.dumps(body) if body else ""
+    message = f"{timestamp}{method}{path}{body_string}"
+    private_key = Ed25519PrivateKey.from_private_bytes(b58decode(orderly_secret))
+    signature = private_key.sign(message.encode("utf-8"))
+
+    return urlsafe_b64encode(signature).decode("utf-8").rstrip("=")
+```
+
+### Core REST Endpoints
+
+| Endpoint | Method | Auth Level | Key Input Parameters | Purpose |
+| --- | --- | --- | --- | --- |
+| `/v1/register_account` | `POST` | Public wallet signature | `broker_id`, `chain_id`, `user_address` | Registers a user address to the LiqZero account ledger. |
+| `/v1/orderly_key` | `POST` | Public wallet signature | `broker_id`, `orderly_key`, `key_expiration` | Authorizes an Ed25519 public key for the account. |
+| `/v1/order` | `POST` | Private LiqZero Key | `symbol`, `side`, `order_type`, `order_price`, `order_quantity` | Creates a limit or market order. |
+| `/v1/order` | `DELETE` | Private LiqZero Key | `order_id`, `symbol` | Cancels a specific order. |
+| `/v1/order/cancel_all_after` | `POST` | Private LiqZero Key | `trigger_in` | Dead man's switch for automatic order cancellation. |
+| `/v1/positions` | `GET` | Private LiqZero Key | - | Retrieves active positions and unrealized PnL. |
+| `/v1/client/holding` | `GET` | Private LiqZero Key | - | Retrieves collateral balances. |
+
+### WebSocket Authentication & Heartbeat
+
+Private WebSocket authentication also uses the LiqZero Key. For the full spec, see [WebSocket Authentication](/build-on-omnichain/websocket-api/authentication).
+
+- **Testnet:** `wss://testnet-ws-private-evm.orderly.org/v2/ws/private/stream/<account_id>`
+- **Mainnet:** `wss://ws-private-evm.orderly.org/v2/ws/private/stream/<account_id>`
+- **Signature message:** the timestamp only, because method, path, and body are blank for WebSocket authentication.
+- **Heartbeat:** send `{"event":"ping"}` regularly and expect a `pong` response.

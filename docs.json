@@ -38,41 +38,89 @@
             "groups": [
               {
                 "group": "Getting started",
-                "pages": []
+                "pages": [
+                  "introduction/getting-started/what-is-orderly",
+                  "introduction/getting-started/roadmap",
+                  "introduction/getting-started/builder-onboarding"
+                ]
               },
               {
                 "group": "$ORDER tokenomics",
                 "pages": [
+                  "introduction/tokenomics/overview-of-order",
+                  "introduction/tokenomics/distribution-and-emission-schedule",
                   {
                     "group": "$ORDER staking",
-                    "pages": []
-                  }
+                    "pages": [
+                      "introduction/tokenomics/order-staking/staking",
+                      "introduction/tokenomics/order-staking/staking-information"
+                    ]
+                  },
+                  "introduction/tokenomics/esorder",
+                  "introduction/tokenomics/addresses"
                 ]
               },
               {
                 "group": "Markets & trading",
                 "pages": [
+                  "introduction/trade-on-orderly/trade-on-orderly",
+                  "introduction/trade-on-orderly/trading-basics/orderbook-design",
                   {
                     "group": "Trading basics",
-                    "pages": []
+                    "pages": [
+                      "introduction/trade-on-orderly/trading-basics/glossary",
+                      "introduction/trade-on-orderly/trading-basics/perpetual-futures",
+                      "introduction/trade-on-orderly/trading-basics/accounts",
+                      "introduction/trade-on-orderly/trading-basics/order-types",
+                      "introduction/trade-on-orderly/trading-basics/trading-fees"
+                    ]
                   },
                   {
                     "group": "Perpetual futures basics",
-                    "pages": []
-                  }
+                    "pages": [
+                      "introduction/trade-on-orderly/perpetual-futures/formulas-definitions",
+                      "introduction/trade-on-orderly/perpetual-futures/margin-leverage-and-pnl",
+                      "introduction/trade-on-orderly/perpetual-futures/isolated-margin",
+                      "introduction/trade-on-orderly/perpetual-futures/mark-price-index-price-and-last-price",
+                      "introduction/trade-on-orderly/perpetual-futures/orders-price-limits",
+                      "introduction/trade-on-orderly/perpetual-futures/funding-rate",
+                      "introduction/trade-on-orderly/perpetual-futures/liquidations",
+                      "introduction/trade-on-orderly/perpetual-futures/insurance-fund-and-adl"
+                    ]
+                  },
+                  "introduction/trade-on-orderly/supported-markets",
+                  "introduction/trade-on-orderly/permissionless-vault",
+                  "introduction/trade-on-orderly/supported-chains",
+                  "introduction/trade-on-orderly/multi-collateral",
+                  "introduction/trade-on-orderly/builders",
+                  "introduction/trade-on-orderly/emergency-exit-offboarding-tool"
                 ]
               },
               {
                 "group": "Affiliate program",
-                "pages": []
+                "pages": [
+                  "introduction/be-a-broker/orderly-dex-affiliate-program-affiliates-quick-guide",
+                  "introduction/be-a-broker/orderly-dex-affiliate-program-brokers-quick-guide",
+                  "introduction/be-a-broker/affiliate-referral-program"
+                ]
               },
               {
                 "group": "Builder programs",
-                "pages": []
+                "pages": [
+                  "introduction/orderly-one/builder-guidelines",
+                  "introduction/orderly-one/supplemental-terms-for-dexes",
+                  "introduction/orderly-one/vanguard-distributor-program"
+                ]
               },
               {
                 "group": "Security, legal & FAQ",
-                "pages": []
+                "pages": [
+                  "introduction/faqs",
+                  "introduction/delisting-standards",
+                  "introduction/security",
+                  "introduction/terms-of-service",
+                  "introduction/privacy-policy"
+                ]
               }
             ]
           },
@@ -81,41 +129,93 @@
             "groups": [
               {
                 "group": "Builder quickstart",
-                "pages": []
+                "pages": [
+                  "build-on-omnichain/building-on-omnichain",
+                  "build-on-omnichain/overview",
+                  "build-on-omnichain/addresses",
+                  "build-on-omnichain/integration-checklist"
+                ]
               },
               {
                 "group": "Partner onboarding & support",
-                "pages": []
+                "pages": [
+                  "build-on-omnichain/partner-support",
+                  "build-on-omnichain/integration-faqs"
+                ]
               },
               {
                 "group": "Core integration flows",
-                "pages": []
+                "pages": [
+                  "build-on-omnichain/user-flows/accounts",
+                  "build-on-omnichain/user-flows/wallet-authentication",
+                  "build-on-omnichain/user-flows/withdrawal-deposit",
+                  "build-on-omnichain/user-flows/deposit-by-transfer",
+                  "build-on-omnichain/user-flows/settle-pnl",
+                  "build-on-omnichain/user-flows/order-management",
+                  "build-on-omnichain/user-flows/isolated-margin",
+                  "build-on-omnichain/user-flows/custom-fees",
+                  "build-on-omnichain/user-flows/order-enum-integration-guide",
+                  "build-on-omnichain/user-flows/delegate-signer",
+                  "build-on-omnichain/user-flows/algo-order-samples",
+                  "build-on-omnichain/user-flow-walkthrough",
+                  "build-on-omnichain/user-flows/internal-transfer"
+                ]
               },
               {
                 "group": "Perp Anything",
-                "pages": []
+                "pages": [
+                  "build-on-omnichain/perp-anything/introduction",
+                  "build-on-omnichain/perp-anything/market-operations",
+                  "build-on-omnichain/user-flows/builder-oracle",
+                  "build-on-omnichain/perp-anything/rwa-markets",
+                  "build-on-omnichain/perp-anything/pre-tge-listing"
+                ]
               },
               {
                 "group": "Builders Marketplace",
                 "pages": [
+                  "build-on-omnichain/builder-marketplace/introduction",
                   {
                     "group": "Plugin Developer Handbook",
                     "pages": [
+                      "build-on-omnichain/builder-marketplace/plugin-developer-handbook",
+                      "build-on-omnichain/builder-marketplace/getting-started",
+                      "build-on-omnichain/builder-marketplace/skills-first",
                       {
                         "group": "Tutorials",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/builder-marketplace/first-plugin",
+                          "build-on-omnichain/builder-marketplace/integrate-host",
+                          "build-on-omnichain/builder-marketplace/marketplace-submission",
+                          "build-on-omnichain/builder-marketplace/multi-interceptor-targets"
+                        ]
                       },
                       {
                         "group": "How-to guides",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/builder-marketplace/plugin-types",
+                          "build-on-omnichain/builder-marketplace/interceptor-strategies",
+                          "build-on-omnichain/builder-marketplace/host-integration-patterns",
+                          "build-on-omnichain/builder-marketplace/usage-prompt-and-readme"
+                        ]
                       },
                       {
                         "group": "Reference",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/builder-marketplace/cli-reference",
+                          "build-on-omnichain/builder-marketplace/interceptors",
+                          "build-on-omnichain/builder-marketplace/runtime-injector-targets",
+                          "build-on-omnichain/builder-marketplace/manifest-and-submit",
+                          "build-on-omnichain/builder-marketplace/mcp-sdk-docs",
+                          "build-on-omnichain/builder-marketplace/agent-skills-alignment"
+                        ]
                       },
                       {
                         "group": "Recipes",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/builder-marketplace/quickstart-recipe",
+                          "build-on-omnichain/builder-marketplace/marketplace-submit-recipe"
+                        ]
                       }
                     ]
                   }
@@ -123,22 +223,53 @@
               },
               {
                 "group": "API fundamentals",
-                "pages": []
+                "pages": [
+                  "build-on-omnichain/introduction",
+                  "build-on-omnichain/api-authentication",
+                  "build-on-omnichain/error-codes"
+                ]
               },
               {
                 "group": "Public Info API",
                 "pages": [
+                  "build-on-omnichain/public-info-api/overview",
                   {
                     "group": "Market data",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/public-info-api/market/candles",
+                      "build-on-omnichain/public-info-api/market/funding-comparison",
+                      "build-on-omnichain/public-info-api/market/funding-rate-history",
+                      "build-on-omnichain/public-info-api/market/liquidations",
+                      "build-on-omnichain/public-info-api/market/market-detail",
+                      "build-on-omnichain/public-info-api/market/market-summary",
+                      "build-on-omnichain/public-info-api/market/market-trades",
+                      "build-on-omnichain/public-info-api/market/orderbook"
+                    ]
                   },
                   {
                     "group": "Account data",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/public-info-api/account/account-state",
+                      "build-on-omnichain/public-info-api/account/accounts",
+                      "build-on-omnichain/public-info-api/account/agent-context",
+                      "build-on-omnichain/public-info-api/account/fee-rate",
+                      "build-on-omnichain/public-info-api/account/funding-payments",
+                      "build-on-omnichain/public-info-api/account/historical-orders",
+                      "build-on-omnichain/public-info-api/account/open-orders",
+                      "build-on-omnichain/public-info-api/account/order-status",
+                      "build-on-omnichain/public-info-api/account/portfolio",
+                      "build-on-omnichain/public-info-api/account/position-context",
+                      "build-on-omnichain/public-info-api/account/trades",
+                      "build-on-omnichain/public-info-api/account/user-deposits-withdrawals",
+                      "build-on-omnichain/public-info-api/account/whale-context"
+                    ]
                   },
                   {
                     "group": "Platform data",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/public-info-api/platform/platform-positions",
+                      "build-on-omnichain/public-info-api/platform/top-addresses"
+                    ]
                   }
                 ]
               },
@@ -147,15 +278,35 @@
                 "pages": [
                   {
                     "group": "Builder info",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/get-builder-volume",
+                      "build-on-omnichain/restful-api/public/get-builder-daily-volume",
+                      "build-on-omnichain/restful-api/public/get-builder-daily-revenue-settlement-history-public",
+                      "build-on-omnichain/restful-api/public/get-daily-conversion-volume",
+                      "build-on-omnichain/restful-api/public/get-historical-conversion-volume",
+                      "build-on-omnichain/restful-api/public/get-builder-list",
+                      "build-on-omnichain/restful-api/public/get-builder-stats",
+                      "build-on-omnichain/restful-api/public/get-supported-chains-per-builder",
+                      "build-on-omnichain/restful-api/public/get-market-volume-by-builder",
+                      "build-on-omnichain/restful-api/public/get-tvl-by-builder"
+                    ]
                   },
                   {
                     "group": "System info",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/get-system-maintenance-status",
+                      "build-on-omnichain/restful-api/public/get-vault-balance",
+                      "build-on-omnichain/restful-api/public/get-insurance-fund-info",
+                      "build-on-omnichain/restful-api/public/get-announcements",
+                      "build-on-omnichain/restful-api/public/get-announcements-v2",
+                      "build-on-omnichain/restful-api/public/get-ip-info"
+                    ]
                   },
                   {
                     "group": "USDC faucet",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/get-faucet-usdctestnet-only"
+                    ]
                   }
                 ]
               },
@@ -164,31 +315,79 @@
                 "pages": [
                   {
                     "group": "Registration",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/check-if-account-exists",
+                      "build-on-omnichain/restful-api/public/check-if-wallet-is-registered",
+                      "build-on-omnichain/restful-api/public/check-if-address-is-registered",
+                      "build-on-omnichain/restful-api/public/get-registration-nonce",
+                      "build-on-omnichain/restful-api/public/register-account"
+                    ]
                   },
                   {
                     "group": "Key management",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/get-orderly-key",
+                      "build-on-omnichain/restful-api/public/add-orderly-key",
+                      "build-on-omnichain/restful-api/private/remove-orderly-key",
+                      "build-on-omnichain/restful-api/private/get-current-orderly-key-info",
+                      "build-on-omnichain/restful-api/private/get-orderly-key-ip-restriction",
+                      "build-on-omnichain/restful-api/private/set-orderly-key-ip-restriction",
+                      "build-on-omnichain/restful-api/private/reset-orderly-key-ip-restriction"
+                    ]
                   },
                   {
                     "group": "Account/user info",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/get-user-daily-volume",
+                      "build-on-omnichain/restful-api/private/get-user-volume-statistics",
+                      "build-on-omnichain/restful-api/private/get-user-statistics",
+                      "build-on-omnichain/restful-api/private/get-account-overview-info",
+                      "build-on-omnichain/restful-api/private/get-account-information",
+                      "build-on-omnichain/restful-api/private/get-user-daily-statistics"
+                    ]
                   },
                   {
                     "group": "Account notifications",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/get-all-notifications",
+                      "build-on-omnichain/restful-api/private/get-unread-notifications",
+                      "build-on-omnichain/restful-api/private/set-read-status-of-notifications",
+                      "build-on-omnichain/restful-api/private/set-read-status-of-all-notifications"
+                    ]
                   },
                   {
                     "group": "Account config",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/get-leverage-setting",
+                      "build-on-omnichain/restful-api/private/get-all-leverage-settings",
+                      "build-on-omnichain/restful-api/private/update-leverage-setting",
+                      "build-on-omnichain/restful-api/private/get-margin-modes",
+                      "build-on-omnichain/restful-api/private/update-margin-mode",
+                      "build-on-omnichain/restful-api/private/add-or-reduce-position-margin",
+                      "build-on-omnichain/restful-api/public/get-max-leverage-setting",
+                      "build-on-omnichain/restful-api/public/get-leverage-configuration",
+                      "build-on-omnichain/restful-api/private/configure-auto-cancel-during-maintenance"
+                    ]
                   },
                   {
                     "group": "Delegate signer",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/delegate-signer",
+                      "build-on-omnichain/restful-api/public/add-delegate-signer-orderly-key",
+                      "build-on-omnichain/restful-api/private/delegate-signer-settle-pnl",
+                      "build-on-omnichain/restful-api/private/delegate-signer-withdraw-request"
+                    ]
                   },
                   {
                     "group": "Sub-account",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/add-sub-account",
+                      "build-on-omnichain/restful-api/private/get-sub-account-list",
+                      "build-on-omnichain/restful-api/private/update-sub-account",
+                      "build-on-omnichain/restful-api/private/get-aggregate-positions",
+                      "build-on-omnichain/restful-api/private/get-aggregate-holding",
+                      "build-on-omnichain/restful-api/private/settle-sub-account-pnl"
+                    ]
                   }
                 ]
               },
@@ -197,23 +396,63 @@
                 "pages": [
                   {
                     "group": "Order management",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/create-order",
+                      "build-on-omnichain/restful-api/private/batch-create-order",
+                      "build-on-omnichain/restful-api/private/create-algo-order",
+                      "build-on-omnichain/restful-api/private/edit-order",
+                      "build-on-omnichain/restful-api/private/edit-algo-order",
+                      "build-on-omnichain/restful-api/private/cancel-order",
+                      "build-on-omnichain/restful-api/private/cancel-algo-order",
+                      "build-on-omnichain/restful-api/private/cancel-order-by-client_order_id",
+                      "build-on-omnichain/restful-api/private/cancel-algo-order-by-client_order_id",
+                      "build-on-omnichain/restful-api/private/cancel-all-pending-algo-orders",
+                      "build-on-omnichain/restful-api/private/cancel-all-pending-orders",
+                      "build-on-omnichain/restful-api/private/cancel-all-after"
+                    ]
                   },
                   {
                     "group": "Liquidations",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/get-positions-under-liquidation",
+                      "build-on-omnichain/restful-api/public/get-liquidated-positions-info",
+                      "build-on-omnichain/restful-api/private/get-liquidated-positions-by-liquidator",
+                      "build-on-omnichain/restful-api/private/get-liquidated-positions-of-account",
+                      "build-on-omnichain/restful-api/private/claim-liquidated-positions",
+                      "build-on-omnichain/restful-api/private/claim-insurance-fund"
+                    ]
                   },
                   {
                     "group": "Assets/withdraw/settle PnL",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/get-asset-history",
+                      "build-on-omnichain/restful-api/private/get-current-holding",
+                      "build-on-omnichain/restful-api/private/get-withdrawal-nonce",
+                      "build-on-omnichain/restful-api/private/create-withdraw-request",
+                      "build-on-omnichain/restful-api/private/get-settle-pnl-nonce",
+                      "build-on-omnichain/restful-api/private/request-pnl-settlement",
+                      "build-on-omnichain/restful-api/private/get-pnl-settlement-history",
+                      "build-on-omnichain/restful-api/private/create-internal-transfer",
+                      "build-on-omnichain/restful-api/private/create-internal-transfer-with-wallet-signature",
+                      "build-on-omnichain/restful-api/private/get-transfer-nonce",
+                      "build-on-omnichain/restful-api/private/get-internal-transfer-history",
+                      "build-on-omnichain/restful-api/private/get-receiver-address"
+                    ]
                   },
                   {
                     "group": "Positions",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/get-all-positions-info",
+                      "build-on-omnichain/restful-api/private/get-lite-positions-info",
+                      "build-on-omnichain/restful-api/private/get-one-position-info",
+                      "build-on-omnichain/restful-api/private/get-position-history"
+                    ]
                   },
                   {
                     "group": "Funding",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/get-funding-fee-history"
+                    ]
                   }
                 ]
               },
@@ -222,7 +461,11 @@
                 "pages": [
                   {
                     "group": "Account",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/get-strategy-vault-nonce-for-account-transaction",
+                      "build-on-omnichain/restful-api/public/create-strategy-vault-depositwithdrawal-request-with-account",
+                      "build-on-omnichain/restful-api/public/get-account’s-strategy-vault-transaction-history"
+                    ]
                   }
                 ]
               },
@@ -231,11 +474,24 @@
                 "pages": [
                   {
                     "group": "Staking",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/get-wallets-current-staked-balance",
+                      "build-on-omnichain/restful-api/private/get-unstaking-order-details",
+                      "build-on-omnichain/restful-api/public/get-staking-overview",
+                      "build-on-omnichain/restful-api/private/get-esorder-vesting-list"
+                    ]
                   },
                   {
                     "group": "VALOR",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/get-valor-batch-info",
+                      "build-on-omnichain/restful-api/public/get-valor-pool-info",
+                      "build-on-omnichain/restful-api/private/get-valor-redeem-info",
+                      "build-on-omnichain/restful-api/public/get-valor2-pool-info",
+                      "build-on-omnichain/restful-api/public/get-valor2-batch-info",
+                      "build-on-omnichain/restful-api/private/get-valor2-redeem-info",
+                      "build-on-omnichain/restful-api/public/get-valor2-revenue-buyback"
+                    ]
                   }
                 ]
               },
@@ -244,34 +500,73 @@
                 "pages": [
                   {
                     "group": "Blogpost",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/blogpost/overview",
+                      "build-on-omnichain/blogpost/markdown-guide",
+                      "build-on-omnichain/blogpost/list-published-blogposts",
+                      "build-on-omnichain/blogpost/get-published-blogpost"
+                    ]
                   },
                   {
                     "group": "User data",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/private/get-builders-users-volumes",
+                      "build-on-omnichain/restful-api/private/get-builders-leaderboard"
+                    ]
                   },
                   {
                     "group": "Trading campaigns",
-                    "pages": []
+                    "pages": [
+                      "build-on-omnichain/restful-api/public/get-campaign-ranking",
+                      "build-on-omnichain/restful-api/public/get-campaign-statistics",
+                      "build-on-omnichain/restful-api/public/get-campaign-user-info",
+                      "build-on-omnichain/restful-api/public/get-detailed-campaign-info"
+                    ]
                   },
                   {
                     "group": "Referral program",
                     "pages": [
                       {
                         "group": "Referral code management (legacy)",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/restful-api/public/check-referral-code",
+                          "build-on-omnichain/restful-api/public/verify-referral-code",
+                          "build-on-omnichain/restful-api/private/bind-referral-code",
+                          "build-on-omnichain/restful-api/private/edit-referral-code"
+                        ]
                       },
                       {
                         "group": "User statistics (legacy)",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/restful-api/private/get-referral-info",
+                          "build-on-omnichain/restful-api/private/get-referee-info",
+                          "build-on-omnichain/restful-api/private/get-referral-history",
+                          "build-on-omnichain/restful-api/private/get-referral-rebate-summary",
+                          "build-on-omnichain/restful-api/private/get-referee-rebate-summary",
+                          "build-on-omnichain/restful-api/private/get-referee-history",
+                          "build-on-omnichain/restful-api/private/get-distribution-history"
+                        ]
                       },
                       {
                         "group": "Referral admin (legacy)",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/restful-api/private/create-referral-code",
+                          "build-on-omnichain/restful-api/private/get-referral-code-info",
+                          "build-on-omnichain/restful-api/private/update-referral-code",
+                          "build-on-omnichain/restful-api/private/edit-referral-code-split",
+                          "build-on-omnichain/restful-api/private/edit-referral-description",
+                          "build-on-omnichain/restful-api/private/builder-admin-update-auto-referral"
+                        ]
                       },
                       {
                         "group": "Multilevel referral",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/restful-api/public/check-multilevel-referral-code",
+                          "build-on-omnichain/restful-api/public/verify-multilevel-referral-code",
+                          "build-on-omnichain/restful-api/private/bind-multilevel-referral-code",
+                          "build-on-omnichain/restful-api/private/edit-multilevel-referral-code",
+                          "build-on-omnichain/restful-api/private/get-multilevel-referral-history"
+                        ]
                       }
                     ]
                   },
@@ -280,11 +575,17 @@
                     "pages": [
                       {
                         "group": "Builder info",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/restful-api/private/get-builder-fee-tier-information",
+                          "build-on-omnichain/restful-api/private/get-builders-daily-revenue-settlement-history"
+                        ]
                       },
                       {
                         "group": "User data",
-                        "pages": []
+                        "pages": [
+                          "build-on-omnichain/restful-api/private/get-account-information-1",
+                          "build-on-omnichain/restful-api/private/get-current-holding-1"
+                        ]
                       },
                       {
                         "group": "Multilevel referral admin",

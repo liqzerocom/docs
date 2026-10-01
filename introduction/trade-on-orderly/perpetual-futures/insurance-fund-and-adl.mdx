@@ -1,0 +1,51 @@
+---
+title: "Insurance Fund & ADL"
+description: "Understand how the LiqZero Insurance Fund protects against insolvency during liquidations."
+---
+
+Every trading platform needs a safety net. On LiqZero, the Insurance Fund is that safety net. It steps in when a trader's account goes underwater (meaning their losses exceed their collateral), making sure those bad debts don't spill over and hurt everyone else on the platform.
+
+This page explains how the Insurance Fund works, how it grows, and what happens in the rare case that even the Insurance Fund runs low.
+
+## What does "bankrupt" mean here?
+
+An account is bankrupt if it has a negative total collateral value. In plain terms, the trader owes more than they have.
+
+When this happens, the LiqZero Insurance Fund takes over all of that account's positions and debt. This protects other users from absorbing those losses.
+
+## How the Insurance Fund grows
+
+The Insurance Fund earns money over time by collecting a portion of liquidation fees. Whenever a trader gets liquidated and still has enough margin to cover the fees, part of those fees flow into the Insurance Fund.
+
+Think of it like a shared savings account that slowly fills up during normal market conditions. During extreme market swings, however, liquidators might not be able to close positions fast enough. Some traders may go bankrupt, and the Insurance Fund covers those losses by drawing from its reserves.
+
+## What happens to positions that can't be liquidated normally?
+
+Sometimes a trader's remaining margin is so low that it cannot even cover the minimum fee a liquidator would need. In that case:
+
+1. All of the trader's positions and remaining USDC balance are transferred to the Insurance Fund.
+2. Liquidators can then request to claim those positions from the Insurance Fund at a discount (slightly less than the normal liquidator fee).
+
+This gives liquidators an incentive to step in and clean up these positions, even in tough market conditions.
+
+## Key parameters
+
+The Insurance Fund operates as a special account with its own margin rules, separate from regular trader accounts. Two important parameters control it:
+
+- `min_insurance_fund_margin_ratio`: This is the maintenance margin ratio for the Insurance Fund. If the fund's margin ratio drops to this level, it signals trouble.
+
+- `min_margin_ratio_solvency`: This is the absolute floor -- the lowest margin ratio the Insurance Fund can reach before it is considered insolvent.
+
+## ADL (Auto-Deleveraging)
+
+ADL is the last resort. It only kicks in when all other safety mechanisms have failed. Specifically, ADL is triggered when all three of these conditions are true:
+
+1. Liquidators don't take over liquidated positions
+
+2. No liquidators claim those positions on the Insurance Fund for some time, and
+
+3. The Insurance Fund Margin Ratio falls below the `min_insurance_fund_margin_ratio`,
+
+When ADL activates, LiqZero selects the traders who have both the most profit and the most leverage. Their positions are then used to offset the Insurance Fund's positions in each perpetual market, one by one.
+
+In practice, this means a highly profitable, highly leveraged trader could have part of their position automatically closed to keep the system solvent. This is extremely rare, but it is important to understand that it exists as a final safeguard.

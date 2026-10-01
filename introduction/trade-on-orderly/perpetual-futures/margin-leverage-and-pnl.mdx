@@ -1,0 +1,201 @@
+---
+title: "Margin, Leverage & PnL"
+description: "Explore notional value, margin ratio, leverage tiers, and unrealized PnL on LiqZero."
+---
+
+This page covers the core concepts you need to understand before trading perpetual futures on LiqZero: how much your positions are worth (notional value), how much collateral you need (margin), and how profits and losses are tracked (PnL).
+
+## Notional Value
+
+The notional value of a position is simply how much that position is worth in USDC terms. For example, if you hold 0.5 BTC and the current Mark Price is 60,000 USDC, your notional value is 30,000 USDC.
+
+```
+Notional Value = Position Qty * Mark Price
+```
+
+## Account Margin Ratio
+
+Your Account Margin Ratio is the single most important number for understanding your account's health. It tells you the ratio between your total collateral (your USDC balance plus any unrealized profit or loss) and the total size of your open positions.
+
+For an account having positions on multiple contracts:
+
+```
+Account Margin Ratio = Total Collateral Value / Sum(Abs(Position Notional i))
+```
+
+A higher margin ratio means lower risk. When you have no open positions, the default margin ratio is 1000%. As you take on larger positions or your collateral decreases, this ratio drops. If it drops too low, you face liquidation.
+
+## Initial Margin Ratio
+
+The Initial Margin Ratio (IMR) is the minimum margin ratio your account needs in order to open new positions or make withdrawals. Think of it as the entry requirement -- if your margin ratio is below the IMR, the system will not let you take on more risk.
+
+Each perpetual futures market has its own **Base IMR**, and the maximum leverage for that market is simply 1 divided by the Base IMR. For example, a Base IMR of 1% means up to 100x leverage.
+
+```
+IMR i = Max(1 / Max Account Leverage, Base IMR i, IMR Factor i * Abs(Position Notional i)^(4/5))
+```
+
+**IMR Factors** are coefficients that kick in for large positions. The bigger your position, the more margin you need relative to its size. This means your effective leverage decreases as your position grows, which protects both you and the platform from oversized risk.
+
+## Maintenance Margin Ratio
+
+The Maintenance Margin Ratio (MMR) is the absolute minimum margin ratio your account must maintain. If your Account Margin Ratio drops below the MMR, your positions will be liquidated.
+
+The MMR is always lower than the IMR, which creates a buffer zone. You will first lose the ability to open new positions (when you drop below IMR) before you face liquidation (when you drop below MMR).
+
+```
+MMR i = Max(Base MMR i, Base MMR i / Base IMR i * IMR Factor i * Abs(Position Notional i)^(4/5))
+```
+
+<Note>
+  We will gradually decrease Base IMR and Base MMR and increase maximum leverage for major markets
+  after launch.
+</Note>
+
+The table below shows the margin parameters for every perpetual market on LiqZero. The "Base IMR" column also shows the maximum leverage in parentheses.
+
+| Perp Market   | Base IMR (max leverage) | Base MMR | IMR Factor   |
+| ------------- | ----------------------- | -------- | ------------ |
+| BTC-PERP      | 1% (100x)               | 0.6%     | 0.0000000910 |
+| ETH-PERP      | 1% (100x)               | 0.6%     | 0.0000001724 |
+| SOL-PERP      | 1% (100x)               | 0.6%     | 0.0000010667 |
+| BNB-PERP      | 2% (50x)                | 1%       | 0.0000020000 |
+| XRP-PERP      | 2% (50x)                | 1%       | 0.0000016949 |
+| DOGE-PERP     | 2% (50x)                | 1%       | 0.0000022530 |
+| 1000BONK-PERP | 5% (20x)                | 2.5%     | 0.0000071400 |
+| 1000PEPE-PERP | 5% (20x)                | 2.5%     | 0.0000033766 |
+| 1000SHIB-PERP | 5% (20x)                | 2.5%     | 0.0000022222 |
+| ADA-PERP      | 5% (20x)                | 2.5%     | 0.0000022222 |
+| AVAX-PERP     | 5% (20x)                | 2.5%     | 0.0000022222 |
+| BZ-PERP       | 5% (20x)                | 2.5%     | 0.0000000001 |
+| CL-PERP       | 5% (20x)                | 2.5%     | 0.0000000001 |
+| EURUSD-PERP   | 5% (20x)                | 2.5%     | 0.0000000001 |
+| FARTCOIN-PERP | 5% (20x)                | 2.5%     | 0.0000035767 |
+| GOOGL-PERP    | 5% (20x)                | 2.5%     | 0.0000000001 |
+| HYPE-PERP     | 5% (20x)                | 2.5%     | 0.0000020000 |
+| LINK-PERP     | 5% (20x)                | 2.5%     | 0.0000018182 |
+| LTC-PERP      | 5% (20x)                | 2.5%     | 0.0000022222 |
+| NAS100-PERP   | 5% (20x)                | 2.5%     | 0.0000000001 |
+| NEAR-PERP     | 5% (20x)                | 2.5%     | 0.0000029600 |
+| NVDA-PERP     | 5% (20x)                | 2.5%     | 0.0000000001 |
+| PENGU-PERP    | 5% (20x)                | 2.5%     | 0.0000092820 |
+| POL-PERP      | 5% (20x)                | 2.5%     | 0.0000019314 |
+| SEI-PERP      | 5% (20x)                | 2.5%     | 0.0000018182 |
+| SPX500-PERP   | 5% (20x)                | 2.5%     | 0.0000000001 |
+| SUI-PERP      | 5% (20x)                | 2.5%     | 0.0000028100 |
+| TRX-PERP      | 5% (20x)                | 2.5%     | 0.0000028100 |
+| TSLA-PERP     | 5% (20x)                | 2.5%     | 0.0000000001 |
+| USDJPY-PERP   | 5% (20x)                | 2.5%     | 0.0000000001 |
+| XAG-PERP      | 5% (20x)                | 2.5%     | 0.0000000001 |
+| XAU-PERP      | 5% (20x)                | 2.5%     | 0.0000000001 |
+| AAVE-PERP     | 10% (10x)               | 5%       | 0.0000046867 |
+| APT-PERP      | 10% (10x)               | 5%       | 0.0000020800 |
+| ARB-PERP      | 10% (10x)               | 5%       | 0.0000021481 |
+| ASTER-PERP    | 10% (10x)               | 5%       | 0.0000020800 |
+| AXS-PERP      | 10% (10x)               | 5%       | 0.0000092820 |
+| BASED-PERP    | 10% (10x)               | 5%       | 0.0000220307 |
+| BCH-PERP      | 10% (10x)               | 5%       | 0.0000018182 |
+| BERA-PERP     | 10% (10x)               | 6%       | 0.0000073100 |
+| BIO-PERP      | 10% (10x)               | 5%       | 0.0000075320 |
+| CAKE-PERP     | 10% (10x)               | 5%       | 0.0000035767 |
+| CRV-PERP      | 10% (10x)               | 5%       | 0.0000084000 |
+| DASH-PERP     | 10% (10x)               | 5%       | 0.0000033766 |
+| DOT-PERP      | 10% (10x)               | 5%       | 0.0000020000 |
+| EDGE-PERP     | 10% (10x)               | 5%       | 0.0000124488 |
+| ENA-PERP      | 10% (10x)               | 5%       | 0.0000064014 |
+| ETHFI-PERP    | 10% (10x)               | 5%       | 0.0000071400 |
+| FET-PERP      | 10% (10x)               | 5%       | 0.0000021481 |
+| GOAT-PERP     | 10% (10x)               | 5%       | 0.0000100891 |
+| HBAR-PERP     | 10% (10x)               | 5%       | 0.0000077523 |
+| ICP-PERP      | 10% (10x)               | 5%       | 0.0000020800 |
+| INJ-PERP      | 10% (10x)               | 5%       | 0.0000021481 |
+| IP-PERP       | 10% (10x)               | 5%       | 0.0000073100 |
+| JUP-PERP      | 10% (10x)               | 5%       | 0.0000077350 |
+| LDO-PERP      | 10% (10x)               | 5%       | 0.0000021481 |
+| LIT-PERP      | 10% (10x)               | 5%       | 0.0000021481 |
+| M-PERP        | 10% (10x)               | 5%       | 0.0000058361 |
+| MEGA-PERP     | 10% (10x)               | 5%       | 0.0000567397 |
+| MERL-PERP     | 10% (10x)               | 5%       | 0.0000092820 |
+| MNT-PERP      | 10% (10x)               | 5%       | 0.0000020800 |
+| MON-PERP      | 10% (10x)               | 5%       | 0.0000074256 |
+| MORPHO-PERP   | 10% (10x)               | 5%       | 0.0000074256 |
+| ONDO-PERP     | 10% (10x)               | 5%       | 0.0000058013 |
+| OP-PERP       | 10% (10x)               | 5%       | 0.0000021481 |
+| ORDER-PERP    | 10% (10x)               | 5%       | 0.0000092820 |
+| PENDLE-PERP   | 10% (10x)               | 5%       | 0.0000074256 |
+| PUMP-PERP     | 10% (10x)               | 6%       | 0.0000020800 |
+| RAY-PERP      | 10% (10x)               | 5%       | 0.0000077350 |
+| S-PERP        | 10% (10x)               | 5%       | 0.0000024700 |
+| SKR-PERP      | 10% (10x)               | 5%       | 0.0000092820 |
+| SPX-PERP      | 10% (10x)               | 5%       | 0.0000092820 |
+| TAO-PERP      | 10% (10x)               | 5%       | 0.0000084382 |
+| TIA-PERP      | 10% (10x)               | 5%       | 0.0000080713 |
+| TRUMP-PERP    | 10% (10x)               | 6%       | 0.0000071400 |
+| UNI-PERP      | 10% (10x)               | 5%       | 0.0000020000 |
+| USELESS-PERP  | 10% (10x)               | 6%       | 0.0000084382 |
+| VIRTUAL-PERP  | 10% (10x)               | 5%       | 0.0000036538 |
+| WIF-PERP      | 10% (10x)               | 5%       | 0.0000097705 |
+| WLD-PERP      | 10% (10x)               | 5%       | 0.0000073100 |
+| WLFI-PERP     | 10% (10x)               | 5%       | 0.0000020000 |
+| WOO-PERP      | 10% (10x)               | 5%       | 0.0000091618 |
+| XMR-PERP      | 10% (10x)               | 5%       | 0.0000022222 |
+| XPL-PERP      | 10% (10x)               | 5%       | 0.0000058013 |
+| ZEC-PERP      | 10% (10x)               | 5%       | 0.0000022222 |
+| ZEN-PERP      | 10% (10x)               | 5%       | 0.0000072298 |
+| ZRO-PERP      | 10% (10x)               | 5%       | 0.0000092820 |
+| LINEA-PERP    | 20% (5x)                | 10%      | 0.0000073100 |
+
+## PnL (Profit and Loss)
+
+PnL stands for Profit and Loss. There are two types:
+
+**Unrealized PnL** is the paper profit or loss on a position you still have open. It changes constantly as the market moves. If BTC is at 62,000 and you bought at 60,000, your unrealized PnL is positive.
+
+```
+Unrealized PnL(Perp Market i) = Position Qty * (Mark Price - Position Average Entry Price)
+```
+
+**Realized PnL** is your actual profit or loss after you close (or reduce) a position. Once a position is closed, the PnL is locked in.
+
+```
+Realized PnL(Perp Market i) = Position Qty * (Average Price - Position Average Entry Price)
+```
+
+## PnL settlement
+
+PnL settlement is the process of moving your profits or losses from your perpetual positions into your USDC balance. This is important because you cannot withdraw unrealized or unsettled profits -- you need to settle first.
+
+A few key points to understand:
+
+- **Settlement does not affect your margin ratio or open positions.** It is purely an accounting step.
+- **Settled vs. unsettled PnL is different from realized vs. unrealized PnL.** PnL becomes "realized" when you close or reduce a position. But that realized PnL stays "unsettled" until you explicitly trigger a settlement. Only after settlement does it move into your withdrawable balance.
+- **Settled PnL can be used for trading or withdrawn**, but withdrawing reduces your margin ratio.
+
+### How the settlement process works
+
+When your account (Account X) triggers a PnL settlement, LiqZero finds the accounts with the largest unsettled PnL on the opposite side. Starting with the largest, each account's unsettled PnL is offset against yours until your PnL is fully settled.
+
+**Example:** Account X has +20,000 USDC of unsettled PnL and a balance of 100 USDC. The two largest opposing accounts are Account A (-15,000 USDC) and Account B (-5,000 USDC):
+
+- First, Account X settles against Account A. Account X's balance goes up by 15,000 USDC (now 15,100 USDC), and Account A's balance goes down by 15,000 USDC. Account X still has 5,000 USDC of unsettled PnL remaining.
+
+- Then, Account X settles against Account B. Account X's balance goes up by 5,000 USDC (now 20,100 USDC), and Account B's balance goes down by 5,000 USDC. Account X now has 0 unsettled PnL. Settlement is complete.
+
+<Note>
+Settling PnL will NOT change the user's balance as displayed user balance already includes unsettled PnL in the calculation.
+
+Withdrawable balance will change after settling PnL as it doesn't include unsettled profits in the calculation.
+
+All settling PnL does is move profits into user's account so user is able to withdraw.
+
+</Note>
+
+## Max notional amount
+
+LiqZero sets a cap on how large your position can be in any single perpetual market. This is a risk management measure. These limits will be increased and/or removed after Beta launch.
+
+| Perp Market | Max Notional (USDC) |
+| ----------- | ------------------- |
+| BTC         | 5,000,000           |
+| ETH         | 5,000,000           |
+| Alts        | 2,000,000           |

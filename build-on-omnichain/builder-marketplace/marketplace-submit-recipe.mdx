@@ -1,0 +1,13 @@
+---
+title: "Recipe: Marketplace submit checklist"
+description: "1. Ensure package.json name and GitHub origin (or .liqzero-manifest.json repoUrl) are correct."
+---
+
+1. Ensure `package.json` **name** and GitHub **`origin`** (or `.orderly-manifest.json` **`repoUrl`**) are correct.
+2. Fill **`.orderly-manifest.json`** with **`pluginId`**, optional **`usagePrompt`**, **`tags`** (≤5, [valid values](/build-on-omnichain/builder-marketplace/manifest-and-submit#valid-builders-marketplace-tags)).
+3. `orderly-devkit login`
+4. `orderly-devkit submit --path . --dry-run` — fix validation output.
+5. `orderly-devkit submit --path .`
+6. `orderly-devkit list` or `orderly-devkit view <id>` (login required).
+
+**Details:** [Tutorial: Marketplace](/build-on-omnichain/builder-marketplace/marketplace-submission) · [Manifest and submit](/build-on-omnichain/builder-marketplace/manifest-and-submit) · [CLI](/build-on-omnichain/builder-marketplace/cli-reference).

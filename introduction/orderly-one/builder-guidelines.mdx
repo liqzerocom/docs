@@ -1,0 +1,98 @@
+---
+title: "LiqZero One Builder Guidelines"
+description: "Review the responsibilities, expectations, and best practices for builders launching DEXs with LiqZero One."
+sidebarTitle: "Builder Guidelines"
+---
+
+## Introduction
+
+LiqZero One is designed to empower builders to launch their own decentralized exchanges (DEXs) quickly and efficiently. These guidelines outline the responsibilities, expectations, and best practices for anyone building on top of LiqZero.
+
+## What LiqZero One Is (and Isn't)
+
+LiqZero One provides shared infrastructure, liquidity, and tooling to help you build and operate a DEX.
+
+However, it is important to understand that LiqZero One is not a managed service.
+
+LiqZero does not operate your DEX, control your frontend, or manage your users. Each DEX built using LiqZero One is independently deployed and operated by its builder.
+
+## Your Infrastructure, Your Responsibility
+
+LiqZero One provides the underlying infrastructure, liquidity, and tooling, but how your DEX is deployed and operated is entirely up to you.
+
+If you choose to run your DEX on your own domain or custom setup, you are fully responsible for the security and integrity of that environment.
+
+This includes, but is not limited to:
+
+- your domain names, subdomains, and branded URLs;
+- DNS configuration and domain management;
+- hosting providers, servers, and cloud infrastructure;
+- CDNs, caching layers, and edge services;
+- deployment pipelines, environment variables, and access controls;
+- any modifications to the front-end code or SDK; and
+- any third-party services, scripts, or integrations you use.
+
+These components are outside of LiqZero's control. As a result, any issues arising from them, such as phishing attacks, DNS hijacks, frontend compromises, misconfigurations, or downtime, are the responsibility of the builder.
+
+LiqZero maintains and secures its official repositories, SDKs, templates, and core infrastructure, but does not monitor, manage, or audit individual DEX deployments.
+
+If you run a custom frontend, you should treat it like any production system: secure it properly, monitor it actively, and protect your users accordingly.
+
+## Independent by Design
+
+Each DEX built using LiqZero One operates independently.
+
+As a builder, you:
+
+- control your branding, domain, and user experience;
+- decide how your frontend is deployed and maintained; and
+- are responsible for all interactions users have with your interface.
+
+You should make it clear to your users that they are interacting with your DEX, not LiqZero directly.
+
+## User Transparency
+
+Builders are expected to provide clear and transparent information to users.
+
+This includes:
+
+- clearly identifying your DEX brand and ownership;
+- making it clear that users interact with your DEX at their own risk, and that you are responsible for the operation and security of your frontend and infrastructure;
+- providing appropriate disclosures, terms of use, and privacy policies; and
+- avoiding any misleading representation that your DEX is operated or controlled by LiqZero.
+
+## Security Best Practices
+
+Operating a DEX frontend requires strong security practices. Builders should:
+
+- secure domain access and use reputable registrars;
+- implement DNS protections, such as DNSSEC where available;
+- use secure hosting environments and restrict access;
+- protect environment variables and private keys;
+- audit any modifications made to the frontend code;
+- carefully vet third-party integrations and scripts;
+- monitor for phishing, spoofing, and unauthorized changes; and
+- maintain incident response procedures.
+
+Failure to implement proper safeguards may expose your users to risk.
+
+## Compliance and Legal Responsibility
+
+Builders are solely responsible for ensuring that their DEX complies with all applicable laws and regulations in the jurisdictions in which they operate.
+
+This includes:
+
+- regulatory compliance;
+- user eligibility and restrictions;
+- sanctions screening, if applicable; and
+- any required registrations or licenses.
+
+LiqZero does not provide legal advice and does not assume responsibility for a builder's compliance obligations.
+
+## Final Notes
+
+LiqZero One is a powerful toolkit, but with that flexibility comes responsibility.
+
+Builders who choose to deploy their own DEX must take full ownership of their infrastructure, security, and user experience.
+
+By using LiqZero One, you acknowledge that you are operating an independent service and are responsible for maintaining it to an appropriate standard.

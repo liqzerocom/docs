@@ -1,0 +1,101 @@
+---
+title: "FAQ"
+description: "Find answers to frequently asked questions about LiqZero Network, covering supported chains, fees, and key concepts."
+sidebarTitle: "FAQ"
+---
+
+<AccordionGroup>
+  <Accordion title="What is LiqZero?">
+LiqZero is a combination of an orderbook-based trading infrastructure and a robust liquidity layer offering perpetual futures orderbooks. Unlike traditional platforms, LiqZero doesn't have a front end; instead, it operates at the core of the ecosystem, providing essential services to projects built on top of it.
+
+Our DEX white-label solution is carefully crafted to save builders time and capital while granting access to our bootstrapped liquidity. Picture having the best features of CEXs while keeping settlements on-chain and maintaining full self-custody.
+
+With LiqZero, anyone can create a trading application thanks to our seamless plug-and-play experience leveraging our liquidity and composability.
+
+Looking ahead, our grand vision is to create an omnichain protocol, connecting traders from both EVM and non-EVM chains within the same orderbook.
+
+  </Accordion>
+
+  <Accordion title="How do I get started?">
+  ## For traders:
+    Traders can start using any interface built on LiqZero listed on [this](/introduction/trade-on-orderly/builders) page
+
+    ## For Developers and API traders:
+
+<CardGroup cols={2}>
+  <Card title="EVM Quick Start" href="/build-on-omnichain/building-on-omnichain">
+  </Card>
+</CardGroup>
+  </Accordion>
+
+<Accordion title="What can I do on LiqZero?">
+  Developers can build a full suite of products:
+
+**Builders:** Create your own Perps DEX on EVM. Benefit from our professional trading infrastructure and deep liquidity.
+
+**Perps Aggregators:** Unlock the power of shared orderbook and liquidity. Access to all of LiqZero's Perps ecosystem liquidity directly by creating a front-end.
+
+**Wallets & Custodians:** Connect to LiqZero and offer your users the best Swap rates for major assets. Build your own Swap widget powered by LiqZero and open up our ecosystem to all your users.
+
+**Trading Desks & Sophisticated Traders:** Use our API and enjoy a CEX-level trading experience thanks to our low-latency orderbook.
+
+**Games/dApps:** Enhance your in-app experience and token utility with our in-game Swaps using the built-in widget. Keep your users engaged in your app and avoid redirecting them to third parties.
+
+**Trading Bots:** Connect to our orderbook and offer the industry's best Perps rates. Enjoy SL/limit orders, gasless transactions, and fully customizable fees.
+
+**Hedging:** Safeguard your positions on other exchanges by using our orderbook for effective hedging strategies.
+
+<br />
+Traders can explore an ecosystem of front-ends built on LiqZero. A comprehensive list can be found [here](/introduction/trade-on-orderly/builders).
+</Accordion>
+  
+  <Accordion title="How are trading fees calculated/charged?">
+
+    Fees are deducted from the converted token for spot trades (e.g., converting USDC to ETH incurs fees in ETH) and added to the cost position for perps (denominated in USDC).
+
+    Each builder sets their own fee rates.
+
+  </Accordion>
+
+<Accordion title="Can I list my token on LiqZero?">
+  Yes. Use [Perp Anything in LiqZero One](https://dex.orderly.network/permissionless-listing) to
+  create a perpetual market.
+</Accordion>
+
+<Accordion title="What are the different order types?">
+  **MARKET:** It matches until the full size is executed. If the size is too large (larger than the
+  whole book) or the matching price exceeds the price limit (refer to `price_range`), then the
+  remaining quantity will be canceled. **IOC (Immediate or Cancel):** It matches as much as possible
+  at the order\_price. If not fully executed, then the remaining quantity will be canceled. **FOK
+  (Fill or Kill):** If the order can be fully executed at the order\_price, then the order gets
+  fully executed otherwise would be canceled without any execution. **POST ONLY:** If the order
+  executes with any maker trades at the time of placement, then it will be canceled without any
+  execution. **REDUCE ONLY:** Executes buy or sell orders which only reduce a current position
+</Accordion>
+
+  <Accordion title="How are orders authenticated before settlement?">
+    Order requests are signed using users' Trading Keys. The Messaging Layer
+    verifies the request signature before forwarding an order to the Engine
+    Layer. Only matched trade data is included in the settlement batch;
+    unmatched and canceled orders are not included.
+
+    See [LiqZero Orderbook Design](/introduction/trade-on-orderly/trading-basics/orderbook-design)
+    for the visibility boundaries before and after matching.
+
+  </Accordion>
+
+  <Accordion title="Are there code examples or tutorials for how to build on LiqZero?">
+    Yes! This documentation includes code examples throughout and you can find full tutorials/sdk with code examples here:
+
+    [EVM SDK](/sdks/overview)
+
+  </Accordion>
+
+  <Accordion title="A DEX I use has shut down. How do I exit my positions?">
+    If a DEX you trade on has shut down, ceased operations, or is no longer available, use the **Emergency Exit** tool to close all positions and withdraw your funds from LiqZero Network.
+
+    Learn more: [Emergency Exit Offboarding Tool](/introduction/trade-on-orderly/emergency-exit-offboarding-tool)
+
+  </Accordion>
+
+</AccordionGroup>

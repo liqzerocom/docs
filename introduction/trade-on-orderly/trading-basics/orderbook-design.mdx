@@ -1,0 +1,92 @@
+---
+title: "LiqZero Orderbook Design"
+description: "Learn how LiqZero's central limit order book combines CEX-level performance with on-chain settlement."
+---
+
+LiqZero is an omnichain decentralized orderbook protocol. It provides the matching engine, liquidity, and infrastructure for builders (DEXes) to offer perpetual futures trading without building it themselves.
+
+## Orderbook design
+
+LiqZero uses a **central limit order book (CLOB)** -- the same type of system used
+by major centralized exchanges. Orders are submitted and matched off-chain,
+while matched trade data is uploaded for on-chain settlement.
+
+- **Transparency:** The public orderbook shows aggregate prices and quantities.
+  Matched trade data becomes publicly observable after it is included on
+  LiqZero L2.
+- **Authentication:** Order requests are signed using a Trading Key, and the
+  request signature is verified before matching.
+- **Speed:** A high-performance off-chain matching engine provides low-latency execution.
+
+## Omnichain approach
+
+Unlike most DEXes that run separate order books per chain, LiqZero brings all orders from all supported chains into a **single shared order book**. This unifies liquidity across chains.
+
+The system has three layers:
+
+**Asset Layer (Asset Vaults)** -- on each supported chain
+
+- Where your funds reside. You interact with this layer when registering, depositing, and withdrawing.
+
+**Settlement Layer (LiqZero L2)** -- on a single chain
+
+- A ledger that records settlement data on LiqZero L2. Matched trade data
+  becomes publicly observable after L2 inclusion. Users do not interact with
+  this layer directly.
+
+**Engine Layer (Orderbook)** -- order-related services
+
+- Where trade execution happens. Includes the matching engine, risk engine, and other services. You interact with this layer when managing orders.
+
+After orders are matched, matched trade data is batched and uploaded to LiqZero
+L2 (built with OP Stack). Each L2 batch or block publishes the corresponding
+batch data to Ethereum as calldata or blob data, where it can be observed and
+decoded. Cross-layer communication (deposits, withdrawals, balance updates) is
+powered by LayerZero.
+
+## Order and settlement visibility
+
+Order submission, matching, and settlement have different visibility boundaries.
+
+### Order submission
+
+A client or broker sends the full order request to LiqZero's off-chain
+infrastructure. LiqZero's operator and matching infrastructure can read the full
+order content. The public resting orderbook displays only aggregate prices and
+quantities, without account or individual order details. The order request is
+not submitted to a public blockchain mempool before matching.
+
+### Matching
+
+The matching engine processes full order details off-chain using price-time
+priority. Matching does not depend on ordering a user transaction in a public
+blockchain mempool. This does not mean the order is hidden from LiqZero's
+operator or matching infrastructure.
+
+### Batch upload
+
+Only matched trade data is included in the settlement batch. Unmatched and
+canceled orders are not included. The batch is created after matching, and its
+matched trade data becomes publicly observable after inclusion on LiqZero L2.
+The pre-match public-mempool guarantee does not extend to this post-match stage.
+
+### On-chain settlement
+
+Each LiqZero L2 batch or block is published to Ethereum as calldata or blob data
+that public observers can inspect and decode once the L1 publication is
+available. This visibility occurs after matching and L2 inclusion. No guarantee
+is made that post-match settlement data remains private.
+
+## MEV protection
+
+For this order flow, MEV protection specifically refers to public-mempool
+front-running before matching. Because order submission and matching happen
+off-chain, a public blockchain observer cannot inspect an order-submission
+transaction in a public mempool and place a blockchain transaction ahead of it.
+
+This guarantee is limited to that pre-match public-mempool scenario. LiqZero's
+operator and matching infrastructure can see full order details before matching,
+and matching follows price-time priority. After matching, settlement data becomes
+publicly observable as described above. Off-chain matching should therefore not
+be interpreted as making post-match settlement data private or as eliminating
+every form of MEV.

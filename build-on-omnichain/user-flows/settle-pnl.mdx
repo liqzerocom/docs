@@ -1,0 +1,43 @@
+---
+title: "Settle PnL"
+description: "Learn how to settle realized and unrealized PnL into USDC balances via the LiqZero API."
+---
+
+Any realized and unrealized PnL accrued from open or closed positions needs to be "settled" into the USDC balance of the account. PnL settlement can be triggered at any time -- either by other users or by the account owner.
+
+To trigger PnL settlement for your own account:
+
+<Steps>
+  <Step title="Get a Settle PnL nonce">
+    Get a nonce from [Get Settle PnL Nonce](/build-on-omnichain/restful-api/private/get-settle-pnl-nonce).
+  </Step>
+  <Step title="Obtain signature from EIP-712">
+    Sign an EIP-712 message in the following format:
+
+```json
+{
+  "brokerId": "woofi_dex",
+  "chainId": 80001,
+  "settleNonce": 1,
+  "timestamp": 1685973017064
+}
+```
+
+where:
+
+| **Name**    | **Type**  | **Required** | **Description**                                                                                                  |
+| ----------- | --------- | ------------ | ---------------------------------------------------------------------------------------------------------------- |
+| brokerId    | string    | Y            | The unique identifier of the Builder (also known as Broker ID).                                                  |
+| chainId     | int       | Y            | Chain ID of the connected chain where the message was signed                                                     |
+| settleNonce | int       | Y            | Valid settlement nonce from [Get Settle PnL Nonce](/build-on-omnichain/restful-api/private/get-settle-pnl-nonce) |
+| timestamp   | timestamp | Y            | Current timestamp in UNIX milliseconds                                                                           |
+
+  </Step>
+  <Step title="Request PnL settlement">
+    Submit the request through [Request PnL Settlement API](/build-on-omnichain/restful-api/private/request-pnl-settlement).
+  </Step>
+</Steps>
+
+### Example
+
+The example code is very similar to the [LiqZero Key registration](/build-on-omnichain/user-flows/wallet-authentication#full-example), except it uses the EIP-712 [on-chain domain](/build-on-omnichain/user-flows/wallet-authentication#on-chain-domain) and the signed message is different.

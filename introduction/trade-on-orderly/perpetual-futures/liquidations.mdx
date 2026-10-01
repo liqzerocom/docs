@@ -1,0 +1,120 @@
+---
+title: "Liquidations"
+description: "Understand how LiqZero triggers and processes liquidations when margin falls below the threshold."
+---
+
+Liquidation is the process of closing out a trader's positions when their account no longer has enough margin to support them. Think of it as a safety valve: it prevents one trader's losses from growing so large that they affect other users on the platform.
+
+This page explains when liquidation happens, how it works on LiqZero, and what fees are involved.
+
+## When does liquidation happen?
+
+An account is subject to liquidation if its Account Margin Ratio falls below its Maintenance Margin Ratio. In simple terms, if the value backing your positions shrinks too much relative to the size of those positions, the system steps in.
+
+LiqZero uses the [Mark Price](/introduction/trade-on-orderly/perpetual-futures/mark-price-index-price-and-last-price#mark-price) to evaluate positions, not the last traded price. Because the Mark Price is derived from multiple reputable spot exchanges (see [Index Price](/introduction/trade-on-orderly/perpetual-futures/mark-price-index-price-and-last-price#index-price)) and the funding rate, it is more stable than the [Last Price](/introduction/trade-on-orderly/perpetual-futures/mark-price-index-price-and-last-price#last-price). This makes it much harder for bad actors to manipulate the market price just to trigger liquidations.
+
+When an account enters liquidation, two things happen immediately:
+
+1. All open orders on the account are cancelled.
+2. The account's USDC balance is frozen.
+
+## How LiqZero's decentralized liquidations work
+
+On most centralized exchanges (CEXes), liquidations work by force-selling positions directly into the order book. This often causes a chain reaction: the forced selling pushes the price down further, which triggers more liquidations, which pushes the price down even more. This cascading effect hurts traders and creates opportunities for market manipulation.
+
+LiqZero does things differently. Instead of dumping positions onto the order book, LiqZero transfers them to **liquidators** at a discount. Anyone with an LiqZero account can act as a liquidator, as long as they have enough margin to take over the positions. This approach is fully decentralized and avoids the cascading liquidation problem.
+
+Further details on how to claim liquidating positions can be found in the API docs.
+
+## What triggers a liquidation?
+
+## Liquidation Decision Flow
+
+The liquidation process follows a strict hierarchy of steps to ensure system stability.
+
+<Steps>
+  <Step title="Detection">
+    LiqZero's risk engine detects that the **Account Margin Ratio (AMR)** has fallen below the
+    **Maintenance Margin Ratio (MMR)** required for the account.
+  </Step>
+  <Step title="Freeze & Cancel">
+    - All open orders for the account are cancelled immediately. - All account actions (withdrawals,
+    transfers) are frozen.
+  </Step>
+  <Step title="Liquidation Calculation">
+    The system determines how many positions need to be transferred to bring the AMR back to the
+    **Initial Margin Ratio (IMR)**. It groups positions into **Low Tier (BTC/ETH)** or **High Tier
+    (others)** for liquidators to claim.
+  </Step>
+  <Step title="Transfer & Settlement">
+    Liquidators claim the positions at a discount. If the liquidated account still has a positive
+    balance, the fees are split between the liquidator and the **Insurance Fund**.
+  </Step>
+  <Step title="Insurance Fund Coverage (If Bankrupt)">
+    If the account's total value is less than zero (bankrupt), or insufficient to pay the
+    liquidator: - The liquidator is still paid the **Liquidator Fee** from the Insurance Fund. - The
+    Insurance Fund absorbs the remaining debt and takes over any un-liquidated positions.
+  </Step>
+</Steps>
+
+## Liquidation Tiers
+
+Not all trading pairs carry the same risk. LiqZero groups them into two tiers, which affects how liquidators can claim positions:
+
+- **Low Tier Risk:** Liquidators must claim a proportional share of all low-tier positions. They cannot cherry-pick just one symbol.
+- **High Tier Risk:** Liquidators can claim a single symbol at a time.
+
+| Tier | Perp Markets |
+| ---- | ------------ |
+| Low  | BTC ; ETH    |
+| High | Others       |
+
+## How much gets liquidated?
+
+The system calculates how much of a position needs to be liquidated for both low-tier and each high-tier symbol. The goal is to liquidate just enough so that the Account Margin Ratio comes back up to the Initial Margin Ratio. In other words, the system tries to do the minimum necessary rather than wiping out the whole account.
+
+If the account has multiple positions in the low-tier group, each position is partially liquidated in proportion to its size (volume-weighted).
+
+## Liquidation fees
+
+When an account is liquidated, a fee is charged. This fee is split between the LiqZero **Insurance Fund** and the **liquidator** who takes over the positions. The fee rates depend on which market the position is in:
+
+| Perp Market | Liquidation Fee | Liquidator Fee |
+| ----------- | --------------- | -------------- |
+| BTC         | 0.60%           | 0.30%          |
+| ETH         | 0.60%           | 0.30%          |
+| SOL         | 0.60%           | 0.30%          |
+| Others      | 1.20%           | 0.60%          |
+
+Here is how the total fees are calculated:
+
+**Low Tier Liquidation** (multiple symbols liquidated together):
+
+```
+User Liquidation Fee = Sum[Liquidation Fee(Symbol i) * Abs(Notional i)]
+Liquidator Fee = Sum[Liquidator Fee(Asset i) * Abs(Notional i)]
+```
+
+**High Tier Liquidation** (one symbol at a time):
+
+```
+User Liquidation Fee = Liquidation Fee(Symbol i) * Abs(Notional i)
+Liquidator Fee = Sum[Liquidator Fee(Asset i) * Abs(Notional i)]
+```
+
+How the fee is split depends on how much margin the liquidated account has left:
+
+- **Plenty of margin remaining:** If the Account Margin Ratio is higher than the User Liquidation Fee, the fee is split evenly -- the Insurance Fund and the liquidator each receive `0.5 * User Liquidation Fee`.
+
+- **Low margin remaining:** If the Account Margin Ratio is between the User Liquidation Fee and the Liquidator Fee, the liquidator still gets `0.5 * User Liquidation Fee`, and whatever is left goes to the Insurance Fund.
+
+- **Almost no margin remaining:** If the remaining margin cannot even cover the Liquidator Fee, the account's entire balance and positions are transferred to the Insurance Fund. Liquidators can still claim those positions later (see [Insurance Fund & ADL](/introduction/trade-on-orderly/perpetual-futures/insurance-fund-and-adl)).
+
+## Full vs. partial liquidator takeover
+
+Liquidators do not always have to take over the entire position. Whether they can take a partial amount depends on the size of the position:
+
+- **Below the threshold:** For low-tier liquidations under 10,000 USDC notional, the liquidator must take over all positions. For high-tier liquidations under 5,000 USDC notional, the liquidator must claim the entire position for that symbol.
+- **Above the threshold:** The liquidator can choose to take over just a percentage of the positions, as long as the notional they take exceeds the threshold.
+
+Before any transfer happens, LiqZero checks that the liquidator actually has enough margin to absorb the positions, using the same margin checks that apply to new order placements.

@@ -1,0 +1,154 @@
+---
+title: "Exclusive Receiver Address"
+description: "Each account gets a unique deposit address — users can fund their perp account by simply transferring supported tokens, with no wallet connection, gas, or contract interaction required."
+---
+
+> [!TIP]
+> **Deposit Method Selection**:
+> This page explains **Direct Transfer Deposit** (via Exclusive Receiver Address), which is ideal for custodial wallets, centralized exchange (CEX) withdrawals, or automated bots.
+> If your users can connect their Web3 wallets to your DApp and sign transactions, we recommend using the faster [Standard Vault Deposit](/build-on-omnichain/user-flows/withdrawal-deposit) guide.
+
+Each LiqZero account is assigned an **exclusive receiver address** — a unique, deterministic deposit address. Users can fund their perp account by simply sending supported tokens to this address, from a wallet, CEX withdrawal, or any on-chain transfer. No gas tokens, wallet connection, or smart contract interaction is needed on the user's side.
+
+## How It Works
+
+Each user gets a unique receiver address derived via the [CREATE2](https://eips.ethereum.org/EIPS/eip-1014) algorithm. When a supported token lands at that address, LiqZero's backend automatically detects the transfer, deploys a minimal proxy contract (if needed), and deposits the funds into the Vault — all in a single atomic transaction paid for by the platform.
+
+```
+User sends tokens ──► Receiver Address ──► Orderly detects transfer
+                                               │
+                                     Deploy proxy (if first time)
+                                               │
+                                     Deposit into Vault atomically
+                                               │
+                                     Balance credited to account
+```
+
+## Supported Chains & Tokens
+
+Supported chains and tokens are returned dynamically by the [`GET /v1/public/token`](/build-on-omnichain/restful-api/public/get-supported-collateral-info) endpoint. Check the `chain_details` for each token — entries where `exclusive_deposit_supported` is `true` are eligible for deposit via transfer.
+
+| Chain     | Chain ID | Supported Tokens | Minimum Deposit |
+| --------- | -------- | ---------------- | --------------- |
+| Ethereum  | `1`      | USDC             | 5               |
+| BNB Chain | `56`     | USDC, USDT       | 5               |
+| X Layer   | `196`    | USDC, USDG       | --              |
+| ADI       | `36900`  | USDC             | 5               |
+| Arbitrum  | `42161`  | USDC, USDT       | 5               |
+
+Minimum deposit is denominated in the token being transferred. X Layer currently has no minimum configured — always treat the `minimum_deposit` value returned by [Get Receiver Address](/build-on-omnichain/restful-api/private/get-receiver-address) as the source of truth.
+
+<Warning>
+  Only the chain + token combinations listed above are supported. Sending unsupported tokens or
+  transferring on unsupported chains will result in **permanent loss of funds** with no recovery
+  path.
+</Warning>
+
+## Smart Contract Addresses
+
+| Chain              | DepositFactory                               | DepositBeaconImpl                            |
+| ------------------ | -------------------------------------------- | -------------------------------------------- |
+| Ethereum (`1`)     | `0x8dCBDFF1758d9Bd77b37ff78982912C35FDc2F21` | `0x5bcB988b63a36c0B05cB61064d6e6ecE710dC063` |
+| BNB Chain (`56`)   | `0x8dCBDFF1758d9Bd77b37ff78982912C35FDc2F21` | `0xDE5C8345DD0Ce07eb0c7A210F307Ae6DB61584cb` |
+| X Layer (`196`)    | `0x8dCBDFF1758d9Bd77b37ff78982912C35FDc2F21` | `0x5771B915a19f1763274Ef97a475C4525dA7F963F` |
+| ADI (`36900`)      | `0x91DA1846473E6c3345ef3c32D4a3BC2Ebe851519` | `0x5fc83da893e63Dec205e6d634B930e3012674440` |
+| Arbitrum (`42161`) | `0x8dCBDFF1758d9Bd77b37ff78982912C35FDc2F21` | `0x43001EF2e62Ac260FA78D5a0Af8787261e4D82F9` |
+
+The **DepositFactory** acts as a beacon that stores the current implementation address. Each user's receiver address is a lightweight **DepositProxy** that delegates to the **DepositBeaconImpl** for deposit logic. Proxies are deployed on-demand during the first deposit.
+
+## Integration Flow
+
+<Steps>
+  <Step title="Get the user's receiver address">
+    Call [Get Receiver Address](/build-on-omnichain/restful-api/private/get-receiver-address) with the desired `chain_id` and `token` to retrieve the user's unique receiver address. This address is deterministic and will not change.
+
+    The response includes `receiver_address`, `token_address`, and `minimum_deposit` for the requested chain + token combination.
+
+    <Note>
+      This is a private endpoint — all receiver address APIs require standard [LiqZero authentication headers](/build-on-omnichain/api-authentication).
+    </Note>
+
+  </Step>
+
+  <Step title="User transfers tokens to the receiver address">
+    The user sends the requested token (ERC-20 transfer) to the `receiver_address` returned above. This can be done from:
+    - Any EVM wallet (MetaMask, Rabby, etc.)
+    - A CEX withdrawal (Binance, OKX, etc.)
+    - A smart contract or multisig
+
+    No approval or special transaction format is needed — a standard ERC-20 transfer is all it takes.
+
+    <Warning>
+      The transfer amount **must meet or exceed** the `minimum_deposit` value returned by [Get Receiver Address](/build-on-omnichain/restful-api/private/get-receiver-address). Transfers below this threshold are treated as dust — they will **not** be deposited, refunded, or recoverable.
+    </Warning>
+
+  </Step>
+
+  <Step title="Poll for transfer status">
+    After the user transfers, poll [Get Receiver Events](/build-on-omnichain/restful-api/private/get-receiver-events) to track the deposit status. We recommend polling every 10 seconds.
+
+    **Status values:**
+    | Status | Meaning |
+    | ------ | ------- |
+    | `PENDING` | Transfer detected, waiting for processing |
+    | `PROCESSED` | Deposit transaction submitted on-chain |
+    | `COMPLETED` | Funds credited to account |
+    | `FAILED` | Deposit failed (auto-retries in progress) |
+
+    <Note>
+      Only transfers with `amount >= minimum_deposit` are returned.
+    </Note>
+
+  </Step>
+
+  <Step title="Verify the deposit">
+    Once the status is `COMPLETED`, the balance is credited. You can confirm via the [Get Asset History](/build-on-omnichain/restful-api/private/get-asset-history) endpoint with `side=DEPOSIT`.
+  </Step>
+</Steps>
+
+## Eligibility
+
+Not all accounts can use this feature:
+
+| Requirement  | Detail                                                                 |
+| ------------ | ---------------------------------------------------------------------- |
+| Account type | Must be a **regular** account (not sub-accounts or Strategy Providers) |
+| Chain type   | Must be an **EVM** account (Solana accounts are not supported)         |
+
+**Error codes from `GET /v1/client/asset/receiver_address`:**
+
+| Code | Meaning                                 |
+| ---- | --------------------------------------- |
+| 82   | Chain ID does not exist                 |
+| 83   | Chain ID not supported for this feature |
+| 84   | Account type not eligible               |
+| 86   | Solana accounts not supported           |
+
+## Limitations & Edge Cases
+
+<AccordionGroup>
+  <Accordion title="What happens if I send less than the minimum deposit?">
+    Transfers below the minimum deposit threshold are treated as dust and will **not** be deposited
+    or refunded. The funds remain in the receiver contract with no recovery mechanism.
+  </Accordion>
+  <Accordion title="What if I send the wrong token or use the wrong chain?">
+    Only supported chain + token combinations are accepted. Sending any other token or transferring
+    on an unsupported chain will result in **permanent loss** — there is no recovery path. Check
+    `GET /v1/public/token` for currently supported combinations.
+  </Accordion>
+  <Accordion title="Can I send multiple transfers at once?">
+    Yes. Each transfer is tracked and processed independently as a separate deposit record (1:1
+    mapping).
+  </Accordion>
+  <Accordion title="How long does the deposit take?">
+    Most deposits complete within 1–2 minutes. If a deposit remains in `PENDING` for more than 15
+    minutes, contact support.
+  </Accordion>
+  <Accordion title="Are there any fees?">
+    No additional fees are charged for deposits via transfer. The platform absorbs the gas cost.
+  </Accordion>
+  <Accordion title="Does the receiver address ever change?">
+    No. The receiver address is deterministic (derived via CREATE2) and remains the same for the
+    lifetime of the account.
+  </Accordion>
+</AccordionGroup>
