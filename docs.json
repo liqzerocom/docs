@@ -28,8 +28,7 @@
               {
                 "group": "Home",
                 "pages": [
-                  "home",
-                  "snippets/chip"
+                  "home"
                 ]
               }
             ]

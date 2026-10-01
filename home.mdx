@@ -48,67 +48,71 @@ Base facts:
 
 <div
   style={{
-    maxWidth: '72rem',
-    margin: '0 auto',
-    padding: '2.5rem 1.25rem 5rem',
-  }}
+  maxWidth: '72rem',
+  margin: '0 auto',
+  padding: '2.5rem 1.25rem 5rem',
+  '--home-text-muted': 'color-mix(in srgb, currentColor 65%, transparent)',
+  '--home-border': 'color-mix(in srgb, currentColor 15%, transparent)',
+  '--home-hero-bg': 'linear-gradient(135deg, color-mix(in srgb, #aa5cf8 6%, transparent) 0%, color-mix(in srgb, #aa5cf8 14%, transparent) 100%)',
+  '--home-hero-shadow': '0 20px 45px color-mix(in srgb, currentColor 15%, transparent)',
+}}
 >
   <div
     style={{
-      border: '1px solid var(--home-border)',
-      borderRadius: '28px',
-      padding: '2rem',
-      background: 'var(--home-hero-bg)',
-      boxShadow: 'var(--home-hero-shadow)',
-      marginBottom: '2rem',
-    }}
+    border: '1px solid var(--home-border)',
+    borderRadius: '28px',
+    padding: '2rem',
+    background: 'var(--home-hero-bg)',
+    boxShadow: 'var(--home-hero-shadow)',
+    marginBottom: '2rem',
+  }}
   >
     <h1
       style={{
-        margin: '0 0 0.75rem',
-        fontSize: 'clamp(1.875rem, 3vw, 2.5rem)',
-        lineHeight: '1.2',
-        letterSpacing: '-0.02em',
-      }}
+      margin: '0 0 0.75rem',
+      fontSize: 'clamp(1.875rem, 3vw, 2.5rem)',
+      lineHeight: '1.2',
+      letterSpacing: '-0.02em',
+    }}
     >
       Everything you need to build on LiqZero
     </h1>
 
     <p
       style={{
-        margin: '0',
-        fontSize: '1.05rem',
-        lineHeight: '1.7',
-        color: 'var(--home-text-muted)',
-      }}
+      margin: '0',
+      fontSize: '1.05rem',
+      lineHeight: '1.7',
+      color: 'var(--home-text-muted)',
+    }}
     >
       Platform architecture, API references, and SDK guides for builders at every
       stage -- from first integration to production operations.
     </p>
-
   </div>
 
   <div style={{ marginBottom: '3rem' }}>
     <div
       style={{
-        marginBottom: '1.25rem',
-      }}
+      marginBottom: '1.25rem',
+    }}
     >
       <div
         style={{
-          fontSize: '1.45rem',
-          fontWeight: '700',
-          marginBottom: '0.4rem',
-        }}
+        fontSize: '1.45rem',
+        fontWeight: '700',
+        marginBottom: '0.4rem',
+      }}
       >
         Understand the system
       </div>
+
       <p
         style={{
-          margin: '0',
-          color: 'var(--home-text-muted)',
-          lineHeight: '1.6',
-        }}
+        margin: '0',
+        color: 'var(--home-text-muted)',
+        lineHeight: '1.6',
+      }}
       >
         Learn what LiqZero is, how the system is structured, and what the integration path looks like.
       </p>
@@ -118,40 +122,43 @@ Base facts:
       <Card title="What is LiqZero?" icon="book-open" href="/introduction/getting-started/what-is-orderly">
         Understand the product model, shared liquidity layer, and who LiqZero is built for.
       </Card>
+
       <Card title="Building on Omnichain" icon="gear-code" href="/build-on-omnichain/building-on-omnichain">
         See how LiqZero's system layers connect and where your integration plugs in.
       </Card>
+
       <Card title="Integration Checklist" icon="rocket" href="/build-on-omnichain/integration-checklist">
         Follow the step-by-step path from tech stack selection through development to go-live.
       </Card>
+
       <Card title="Live Builders" icon="link-simple" href="/introduction/trade-on-orderly/builders">
         Browse the builders already live on LiqZero and the platforms they've shipped.
       </Card>
     </CardGroup>
-
   </div>
 
   <div style={{ marginBottom: '3rem' }}>
     <div
       style={{
-        marginBottom: '1.25rem',
-      }}
+      marginBottom: '1.25rem',
+    }}
     >
       <div
         style={{
-          fontSize: '1.45rem',
-          fontWeight: '700',
-          marginBottom: '0.4rem',
-        }}
+        fontSize: '1.45rem',
+        fontWeight: '700',
+        marginBottom: '0.4rem',
+      }}
       >
         Implement core flows
       </div>
+
       <p
         style={{
-          margin: '0',
-          color: 'var(--home-text-muted)',
-          lineHeight: '1.6',
-        }}
+        margin: '0',
+        color: 'var(--home-text-muted)',
+        lineHeight: '1.6',
+      }}
       >
         Jump directly into the integration work most teams need first: auth, accounts,
         funding, real-time data, and SDK selection.
@@ -162,46 +169,51 @@ Base facts:
       <Card title="API Authentication" icon="key" href="/build-on-omnichain/api-authentication">
         Generate signatures correctly, manage LiqZero keys, and send authenticated requests.
       </Card>
+
       <Card title="Accounts" icon="user" href="/build-on-omnichain/user-flows/accounts">
         Register user accounts, map wallets to builders, and understand account lifecycle steps.
       </Card>
+
       <Card title="Deposit and Withdrawal" icon="arrows-rotate" href="/build-on-omnichain/user-flows/withdrawal-deposit">
         Implement deposits and withdrawals across supported chains with the right contract calls and API requests.
       </Card>
+
       <Card title="Websocket API" icon="signal-stream" href="/build-on-omnichain/websocket-api/introduction">
         Stream real-time market data, order updates, and account events over persistent connections.
       </Card>
+
       <Card title="SDK Overview" icon="wrench" href="/sdks/overview">
         Choose between React components, hooks, core utilities, or lower-level programmatic access.
       </Card>
+
       <Card title="Builder Marketplace" icon="shop" href="/build-on-omnichain/builder-marketplace/introduction">
         Extend the React components SDK, build customizable plugins, and distribute your UI features.
       </Card>
     </CardGroup>
-
   </div>
 
   <div style={{ marginBottom: '3rem' }}>
     <div
       style={{
-        marginBottom: '1.25rem',
-      }}
+      marginBottom: '1.25rem',
+    }}
     >
       <div
         style={{
-          fontSize: '1.45rem',
-          fontWeight: '700',
-          marginBottom: '0.4rem',
-        }}
+        fontSize: '1.45rem',
+        fontWeight: '700',
+        marginBottom: '0.4rem',
+      }}
       >
         Expand your market offering
       </div>
+
       <p
         style={{
-          margin: '0',
-          color: 'var(--home-text-muted)',
-          lineHeight: '1.6',
-        }}
+        margin: '0',
+        color: 'var(--home-text-muted)',
+        lineHeight: '1.6',
+      }}
       >
         Add builder-controlled market expansion once your core trading integration is already in place.
       </p>
@@ -211,37 +223,38 @@ Base facts:
       <Card title="Perp Anything" icon="chart-network" href="/build-on-omnichain/perp-anything/introduction">
         Learn how builders can bring additional perpetual markets live under an isolated-risk model, and what users need to understand before trading them.
       </Card>
+
       <Card title="Builder Oracle" icon="tower-broadcast" href="/build-on-omnichain/user-flows/builder-oracle">
         Learn how builders can provide private or public price feeds, connect BYOK sources, and use them in Perp Anything markets.
       </Card>
     </CardGroup>
-
   </div>
 
   <div style={{ marginBottom: '3rem' }}>
     <div
       style={{
-        marginBottom: '1.25rem',
-      }}
+      marginBottom: '1.25rem',
+    }}
     >
-<div
-      style={{
-        fontSize: '1.45rem',
-        fontWeight: '700',
-        marginBottom: '0.4rem',
-      }}
-    >
-      Explore strategy vaults
-    </div>
-    <p
-      style={{
-        margin: '0',
-        color: 'var(--home-text-muted)',
-        lineHeight: '1.6',
-      }}
-    >
-      Understand how strategy-based yield products work in the LiqZero ecosystem.
-    </p>
+      <div
+        style={{
+      fontSize: '1.45rem',
+      fontWeight: '700',
+      marginBottom: '0.4rem',
+    }}
+      >
+        Explore strategy vaults
+      </div>
+
+      <p
+        style={{
+      margin: '0',
+      color: 'var(--home-text-muted)',
+      lineHeight: '1.6',
+    }}
+      >
+        Understand how strategy-based yield products work in the LiqZero ecosystem.
+      </p>
     </div>
 
     <CardGroup cols={2}>
@@ -249,30 +262,30 @@ Base facts:
         Learn how OmniVault works and where strategy-based yield products fit into the broader LiqZero ecosystem.
       </Card>
     </CardGroup>
-
   </div>
 
   <div style={{ marginBottom: '2.5rem' }}>
     <div
       style={{
-        marginBottom: '1.25rem',
-      }}
+      marginBottom: '1.25rem',
+    }}
     >
       <div
         style={{
-          fontSize: '1.45rem',
-          fontWeight: '700',
-          marginBottom: '0.4rem',
-        }}
+        fontSize: '1.45rem',
+        fontWeight: '700',
+        marginBottom: '0.4rem',
+      }}
       >
         Operate and troubleshoot
       </div>
+
       <p
         style={{
-          margin: '0',
-          color: 'var(--home-text-muted)',
-          lineHeight: '1.6',
-        }}
+        margin: '0',
+        color: 'var(--home-text-muted)',
+        lineHeight: '1.6',
+      }}
       >
         Use these pages when something is broken, behavior looks off, or you need production
         support context fast.
@@ -283,27 +296,29 @@ Base facts:
       <Card title="Troubleshooting" icon="magnifying-glass" href="/troubleshooting/introduction">
         Start with the common diagnostic path for account, transaction, and trading issues.
       </Card>
+
       <Card title="Error Codes" icon="triangle-exclamation" href="/build-on-omnichain/error-codes">
         Look up API and platform error codes to quickly identify what went wrong.
       </Card>
+
       <Card title="Partner Support" icon="handshake" href="/build-on-omnichain/partner-support">
         Access developer support, marketing resources, grants, and partnership programs for your integration.
       </Card>
+
       <Card title="Example DEX" icon="github" iconType="brands" href="https://github.com/OrderlyNetwork/example-dex">
         Inspect a concrete integration example when you need implementation patterns, not just docs.
       </Card>
     </CardGroup>
-
   </div>
 
   <div
     style={{
-      borderTop: '1px solid var(--home-border)',
-      paddingTop: '1rem',
-      color: 'var(--home-text-muted)',
-      fontSize: '0.95rem',
-      lineHeight: '1.8',
-    }}
+    borderTop: '1px solid var(--home-border)',
+    paddingTop: '1rem',
+    color: 'var(--home-text-muted)',
+    fontSize: '0.95rem',
+    lineHeight: '1.8',
+  }}
   >
     Quick links: [Release Notes](/release-notes/omnichain) ·{' '}
     [Contract Overview](/build-on-omnichain/overview) ·{' '}
