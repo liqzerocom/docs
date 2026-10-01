@@ -18,91 +18,551 @@
     }
   },
   "navigation": {
-    "tabs": [
+    "versions": [
       {
-        "tab": "Documentation",
-        "groups": [
+        "version": "latest",
+        "tabs": [
           {
-            "group": "Get Started",
-            "pages": [
-              "introduction/getting-started/what-is-liqzero",
-              "introduction/getting-started/building-on-omnichain",
-              "introduction/getting-started/integration-checklist"
+            "tab": "Home",
+            "groups": [
+              {
+                "group": "Home",
+                "pages": [
+                  "home"
+                ]
+              }
             ]
           },
           {
-            "group": "Core Concepts",
-            "pages": [
-              "introduction/concepts/system-architecture",
-              "introduction/concepts/supported-chains",
-              "introduction/concepts/omnivault"
+            "tab": "Introduction",
+            "groups": [
+              {
+                "group": "Getting started",
+                "pages": []
+              },
+              {
+                "group": "$ORDER tokenomics",
+                "pages": [
+                  {
+                    "group": "$ORDER staking",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Markets & trading",
+                "pages": [
+                  {
+                    "group": "Trading basics",
+                    "pages": []
+                  },
+                  {
+                    "group": "Perpetual futures basics",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Affiliate program",
+                "pages": []
+              },
+              {
+                "group": "Builder programs",
+                "pages": []
+              },
+              {
+                "group": "Security, legal & FAQ",
+                "pages": []
+              }
             ]
           },
           {
-            "group": "User Flows",
-            "pages": [
-              "guides/user-flows/accounts",
-              "guides/user-flows/wallet-authentication",
-              "guides/user-flows/deposit-withdrawal",
-              "guides/user-flows/order-management",
-              "guides/user-flows/isolated-margin",
-              "guides/user-flows/settle-pnl",
-              "guides/user-flows/internal-transfer"
+            "tab": "Build on Omnichain",
+            "groups": [
+              {
+                "group": "Builder quickstart",
+                "pages": []
+              },
+              {
+                "group": "Partner onboarding & support",
+                "pages": []
+              },
+              {
+                "group": "Core integration flows",
+                "pages": []
+              },
+              {
+                "group": "Perp Anything",
+                "pages": []
+              },
+              {
+                "group": "Builders Marketplace",
+                "pages": [
+                  {
+                    "group": "Plugin Developer Handbook",
+                    "pages": [
+                      {
+                        "group": "Tutorials",
+                        "pages": []
+                      },
+                      {
+                        "group": "How-to guides",
+                        "pages": []
+                      },
+                      {
+                        "group": "Reference",
+                        "pages": []
+                      },
+                      {
+                        "group": "Recipes",
+                        "pages": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "API fundamentals",
+                "pages": []
+              },
+              {
+                "group": "Public Info API",
+                "pages": [
+                  {
+                    "group": "Market data",
+                    "pages": []
+                  },
+                  {
+                    "group": "Account data",
+                    "pages": []
+                  },
+                  {
+                    "group": "Platform data",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "General API",
+                "pages": [
+                  {
+                    "group": "Builder info",
+                    "pages": []
+                  },
+                  {
+                    "group": "System info",
+                    "pages": []
+                  },
+                  {
+                    "group": "USDC faucet",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "User API",
+                "pages": [
+                  {
+                    "group": "Registration",
+                    "pages": []
+                  },
+                  {
+                    "group": "Key management",
+                    "pages": []
+                  },
+                  {
+                    "group": "Account/user info",
+                    "pages": []
+                  },
+                  {
+                    "group": "Account notifications",
+                    "pages": []
+                  },
+                  {
+                    "group": "Account config",
+                    "pages": []
+                  },
+                  {
+                    "group": "Delegate signer",
+                    "pages": []
+                  },
+                  {
+                    "group": "Sub-account",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Trading API",
+                "pages": [
+                  {
+                    "group": "Order management",
+                    "pages": []
+                  },
+                  {
+                    "group": "Liquidations",
+                    "pages": []
+                  },
+                  {
+                    "group": "Assets/withdraw/settle PnL",
+                    "pages": []
+                  },
+                  {
+                    "group": "Positions",
+                    "pages": []
+                  },
+                  {
+                    "group": "Funding",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Strategy vault API",
+                "pages": [
+                  {
+                    "group": "Account",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Staking & VALOR API",
+                "pages": [
+                  {
+                    "group": "Staking",
+                    "pages": []
+                  },
+                  {
+                    "group": "VALOR",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Builder API",
+                "pages": [
+                  {
+                    "group": "Blogpost",
+                    "pages": []
+                  },
+                  {
+                    "group": "User data",
+                    "pages": []
+                  },
+                  {
+                    "group": "Trading campaigns",
+                    "pages": []
+                  },
+                  {
+                    "group": "Referral program",
+                    "pages": [
+                      {
+                        "group": "Referral code management (legacy)",
+                        "pages": []
+                      },
+                      {
+                        "group": "User statistics (legacy)",
+                        "pages": []
+                      },
+                      {
+                        "group": "Referral admin (legacy)",
+                        "pages": []
+                      },
+                      {
+                        "group": "Multilevel referral",
+                        "pages": []
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Builder admin",
+                    "pages": [
+                      {
+                        "group": "Builder info",
+                        "pages": []
+                      },
+                      {
+                        "group": "User data",
+                        "pages": []
+                      },
+                      {
+                        "group": "Multilevel referral admin",
+                        "pages": []
+                      },
+                      {
+                        "group": "Fee settings",
+                        "pages": []
+                      },
+                      {
+                        "group": "Order tag admin",
+                        "pages": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Points module",
+                "pages": [
+                  {
+                    "group": "Public API",
+                    "pages": []
+                  },
+                  {
+                    "group": "Admin API",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Market data API",
+                "pages": [
+                  {
+                    "group": "Tradingview",
+                    "pages": []
+                  },
+                  {
+                    "group": "Funding rates",
+                    "pages": []
+                  },
+                  {
+                    "group": "Market info",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Websocket API",
+                "pages": [
+                  {
+                    "group": "Public market data",
+                    "pages": []
+                  },
+                  {
+                    "group": "Private user data",
+                    "pages": []
+                  }
+                ]
+              }
             ]
           },
           {
-            "group": "SDKs",
-            "pages": [
-              "sdks/overview",
-              "sdks/react-sdk",
-              "sdks/hooks-sdk",
-              "sdks/core-sdk"
+            "tab": "SDKs"
+          },
+          {
+            "tab": "SDKs",
+            "groups": [
+              {
+                "group": "Software development kits",
+                "pages": []
+              },
+              {
+                "group": "[evm] react components SDK",
+                "pages": [
+                  {
+                    "group": "Framework guides",
+                    "pages": []
+                  },
+                  {
+                    "group": "Page components",
+                    "pages": []
+                  },
+                  {
+                    "group": "Block components",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "[evm] react hooks SDK",
+                "pages": [
+                  {
+                    "group": "API requests",
+                    "pages": []
+                  },
+                  {
+                    "group": "Utility",
+                    "pages": []
+                  },
+                  {
+                    "group": "Account",
+                    "pages": []
+                  },
+                  {
+                    "group": "Assets",
+                    "pages": []
+                  },
+                  {
+                    "group": "Market data",
+                    "pages": []
+                  },
+                  {
+                    "group": "Orders",
+                    "pages": []
+                  },
+                  {
+                    "group": "Positions",
+                    "pages": []
+                  },
+                  {
+                    "group": "Funding",
+                    "pages": []
+                  },
+                  {
+                    "group": "Referral",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "[evm] core SDK",
+                "pages": []
+              },
+              {
+                "group": "[evm] perp SDK",
+                "pages": []
+              },
+              {
+                "group": "Autogenerated technical reference",
+                "pages": [
+                  {
+                    "group": "Modules",
+                    "pages": []
+                  },
+                  {
+                    "group": "Interfaces",
+                    "pages": []
+                  },
+                  {
+                    "group": "Enums",
+                    "pages": []
+                  },
+                  {
+                    "group": "Classes",
+                    "pages": []
+                  }
+                ]
+              }
             ]
           },
           {
-            "group": "Support",
-            "pages": [
-              "support/troubleshooting",
-              "support/transaction-issues",
-              "support/withdrawal-issues",
-              "support/partner-support"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API Reference",
-        "groups": [
-          {
-            "group": "API Fundamentals",
-            "pages": [
-              "api-reference/introduction",
-              "api-reference/authentication",
-              "api-reference/error-codes"
+            "tab": "Strategy vault",
+            "groups": [
+              {
+                "group": "Overview & FAQ",
+                "pages": []
+              },
+              {
+                "group": "Vault API",
+                "pages": [
+                  {
+                    "group": "Vault details",
+                    "pages": []
+                  },
+                  {
+                    "group": "Vault statistics",
+                    "pages": []
+                  },
+                  {
+                    "group": "Order management",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Liquidity provider",
+                "pages": [
+                  {
+                    "group": "Liquidity provider details",
+                    "pages": []
+                  },
+                  {
+                    "group": "Liquidity provider statistics",
+                    "pages": []
+                  },
+                  {
+                    "group": "Deposit/withdrawal",
+                    "pages": []
+                  },
+                  {
+                    "group": "Fees",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Strategy provider",
+                "pages": [
+                  {
+                    "group": "Key management",
+                    "pages": []
+                  },
+                  {
+                    "group": "Settle PnL",
+                    "pages": []
+                  },
+                  {
+                    "group": "Strategy provider details",
+                    "pages": []
+                  },
+                  {
+                    "group": "Deposit/withdrawal",
+                    "pages": []
+                  },
+                  {
+                    "group": "Fees",
+                    "pages": []
+                  },
+                  {
+                    "group": "Period obligations",
+                    "pages": []
+                  }
+                ]
+              },
+              {
+                "group": "Strategy fund",
+                "pages": [
+                  {
+                    "group": "Strategy fund details",
+                    "pages": []
+                  },
+                  {
+                    "group": "Period details",
+                    "pages": []
+                  },
+                  {
+                    "group": "Fund transactions",
+                    "pages": []
+                  }
+                ]
+              }
             ]
           },
           {
-            "group": "REST API",
-            "pages": [
-              "api-reference/rest/orders",
-              "api-reference/rest/accounts",
-              "api-reference/rest/assets",
-              "api-reference/rest/market-data"
+            "tab": "Release notes",
+            "groups": [
+              {
+                "group": "Updates by area",
+                "pages": []
+              },
+              {
+                "group": "Classification",
+                "pages": []
+              }
             ]
           },
           {
-            "group": "WebSocket API",
-            "pages": [
-              "api-reference/websocket/introduction",
-              "api-reference/websocket/public-streams",
-              "api-reference/websocket/private-streams"
-            ]
-          },
-          {
-            "group": "Smart Contracts",
-            "pages": [
-              "api-reference/contracts/overview",
-              "api-reference/contracts/addresses"
+            "tab": "Troubleshooting",
+            "groups": [
+              {
+                "group": "Introduction",
+                "pages": []
+              },
+              {
+                "group": "User issues",
+                "pages": []
+              }
             ]
           }
         ]
