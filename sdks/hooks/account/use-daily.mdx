@@ -1,0 +1,17 @@
+---
+title: "useDaily"
+description: "Hook to retrieve daily trading volume for the current account over a date range."
+---
+
+Get daily user volume
+
+- [Tech docs](/sdks/tech-doc/modules/orderly_network_hooks#usedaily)
+
+### Example
+
+```ts
+const { data } = useDaily({
+  startDate: new Date(Date.now() - 86400000 * 40), // 40 days ago
+  endDate: new Date() // today
+});
+```

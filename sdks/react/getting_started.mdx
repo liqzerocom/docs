@@ -1,0 +1,139 @@
+---
+title: "Getting started"
+description: "Quickly install and configure the LiqZero React SDK to build professional trading interfaces."
+---
+
+Follow the steps below to integrate the LiqZero SDK into your project:
+
+## Add Basic Dependencies
+
+### Install the Base Component Libraries
+
+```
+npm install @orderly.network/ui @orderly.network/react-app
+```
+
+### Add Styles to Your Project
+
+Reference the style file by adding the following code to your project:
+
+```ts
+import "@orderly.network/ui/dist/styles.css";
+```
+
+### Add a Global Configuration Provider
+
+Wrap your application with the `OrderlyAppProvider` component to set global configurations:
+
+```tsx
+import React, { FC, ReactNode } from "react";
+import { OrderlyAppProvider } from "@orderly.network/react-app";
+
+const App: FC<{ children: ReactNode }> = (props) => {
+  return (
+    <OrderlyAppProvider
+      brokerId="orderly"
+      brokerName="Orderly"
+      networkId="testnet"
+      appIcons={"/logo.svg"} // Path to your app icons
+    >
+      {props.children}
+    </OrderlyAppProvider>
+  );
+};
+```
+
+### Add Wallet Connection
+
+LiqZero SDK provides a built-in wallet connection component supporting both EVM and Solana. Here's how to integrate it:
+
+#### Install Wallet Connector Dependencies
+
+```
+npm install @orderly.network/wallet-connector
+```
+
+#### Add the WalletConnectorProvider Component
+
+Wrap your application with the `WalletConnectorProvider` for wallet connection functionality:
+
+```tsx
+import { WalletConnectorProvider } from "@orderly.network/wallet-connector";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+
+const App: FC<{ children: ReactNode }> = (props) => {
+  return (
+    <WalletConnectorProvider solanaInitial={{ network: WalletAdapterNetwork.Mainnet }}>
+      <OrderlyAppProvider
+        brokerId="orderly"
+        brokerName="Orderly"
+        networkId="testnet"
+        appIcons={"/logo.svg"} // Path to your app icons
+      >
+        {props.children}
+      </OrderlyAppProvider>
+    </WalletConnectorProvider>
+  );
+};
+```
+
+Alternatively, you can integrate third-party wallet libraries by implementing the `WalletConnectorContextState`
+interface from `@orderly.network/hooks`.
+
+## Add Pages
+
+### Page Layout
+
+If you want to use the SDK's built-in top navigation, side navigation, and other layout features, install the layout library:
+
+```
+npm install @orderly.network/ui-scaffold
+```
+
+### Add the Scaffold component to your application:
+
+```tsx
+import Scaffold from "@orderly.network/ui-scaffold";
+
+<Scaffold
+  mainNavProps={
+    {
+      // Please refer to the example code and configure as needed.
+    }
+  }
+  footerProps={{}}
+  routerAdapter={{
+    onRouteChange, //Handle user click events on the navigation menu.
+    currentPath: "/"
+  }}
+>
+  {/* page component */}
+  {children}
+</Scaffold>;
+```
+
+For certain page components, the SDK also provides ready-made layout components. For example, you can directly import the layout for `@orderly.network/portfolio`.
+
+### Page Components
+
+The SDK includes the following page components:
+
+Trading - `@orderly.network/trading`
+
+Portfolio - `@orderly.network/portfolio`
+
+Referral - `@orderly.network/referral`
+
+Markets - `@orderly.network/markets`
+
+Trading Rewards - `@orderly.network/trading-rewards`
+
+Affiliate - `@orderly.network/affiliate`
+
+You can integrate these with your preferred React routing framework. Here are examples for popular frameworks:
+
+- [Next.js](https://github.com/OrderlyNetwork/orderly-js-sdk-nextjs-template)
+
+- [CRA](https://github.com/OrderlyNetwork/orderly-js-sdk-cra-template)
+
+For detailed usage, refer to the [LiqZero Storybook](https://storybook.orderly.network/).

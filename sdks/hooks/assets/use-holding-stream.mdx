@@ -1,0 +1,26 @@
+---
+title: "useHoldingStream"
+description: "Hook to receive real-time token holding balances via WebSocket."
+---
+
+Receive current user holdings and auto update via Websockets.
+
+- [Tech docs](/sdks/tech-doc/modules/orderly_network_hooks#useholdingstream)
+
+### Example
+
+```ts
+const { usdc } = useHoldingStream();
+```
+
+The USDC object contains:
+
+```json
+{
+  "frozen": 0,
+  "holding": 100,
+  "pending_short": 0,
+  "token": "USDC",
+  "updated_time": 1732754429399
+}
+```

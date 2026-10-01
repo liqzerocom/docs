@@ -1,0 +1,59 @@
+---
+title: "useLocalStorage"
+description: "Hook to read and write values in browser localStorage with React state binding."
+---
+
+Utility hook to store values in browser's local storage.
+
+- [Tech docs](/sdks/tech-doc/modules/orderly_network_hooks#uselocalstorage)
+
+### Example
+
+```tsx
+const [needConfirm, setNeedConfirm] = useLocalStorage("CONFIRM_ORDER", true);
+
+return (
+  <>
+    {/* ... */}
+    <label>
+      Confirm Order
+      <input
+        type="checkbox"
+        checked={needConfirm}
+        onChange={() => {
+          setNeedConfirm(!needConfirm);
+        }}
+      />
+    </label>
+  </>
+);
+```
+
+### Using with different data types
+
+```tsx
+type ChartConfig = {
+  timeframe: string;
+  indicators: string[];
+  theme: "light" | "dark";
+};
+
+const [chartConfig, setChartConfig] = useLocalStorage<ChartConfig>("CHART_CONFIG", {
+  timeframe: "1h",
+  indicators: ["MA", "RSI"],
+  theme: "light"
+});
+
+const toggleTheme = () => {
+  setChartConfig((prev) => ({
+    ...prev,
+    theme: prev.theme === "light" ? "dark" : "light"
+  }));
+};
+
+return (
+  <button onClick={toggleTheme}>
+    Switch to {chartConfig.theme === "light" ? "dark" : "light"} theme
+  </button>
+);
+```

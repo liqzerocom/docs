@@ -1,0 +1,20 @@
+---
+title: "useWsStatus"
+description: "Hook to monitor the current WebSocket connection status."
+---
+
+Receive WebSocket client status.
+
+## Example
+
+```ts
+import { useWsStatus } from "@orderly.network/hooks";
+
+const status = useWsStatus();
+
+useEffect(() => {
+  if (status === WsNetworkStatus.Connected) {
+    // do something
+  }
+}, [status]);
+```
